@@ -1,0 +1,130 @@
+{
+  "url": "https://linear.app",
+  "title": "Linear – The system for product development",
+  "fetchedAt": "2026-06-04T03:51:08.807Z",
+  "colors": {
+    "background": "#08090a",
+    "text": "#f7f8f8",
+    "primary": "#ffdf9f",
+    "palette": [
+      {
+        "hex": "#f7f8f8",
+        "count": 1395
+      },
+      {
+        "hex": "#62666d",
+        "count": 368
+      },
+      {
+        "hex": "#d0d6e0",
+        "count": 170
+      },
+      {
+        "hex": "#8a8f98",
+        "count": 130
+      },
+      {
+        "hex": "#e2e4e7",
+        "count": 120
+      },
+      {
+        "hex": "#ffffff",
+        "count": 110
+      },
+      {
+        "hex": "#f79ce0",
+        "count": 41
+      },
+      {
+        "hex": "#f7bf8b",
+        "count": 22
+      },
+      {
+        "hex": "#08090a",
+        "count": 16
+      },
+      {
+        "hex": "#ffdf9f",
+        "count": 10
+      },
+      {
+        "hex": "#83dcdc",
+        "count": 9
+      },
+      {
+        "hex": "#8fa6ff",
+        "count": 8
+      },
+      {
+        "hex": "#000000",
+        "count": 6
+      },
+      {
+        "hex": "#0f1011",
+        "count": 6
+      },
+      {
+        "hex": "#6366f1",
+        "count": 5
+      },
+      {
+        "hex": "#23252a",
+        "count": 4
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "Inter Variable",
+      "Berkeley Mono"
+    ],
+    "sizeScalePx": [
+      10,
+      11,
+      12,
+      13,
+      13.3333,
+      14,
+      15,
+      16,
+      18,
+      24,
+      32,
+      48
+    ],
+    "weights": [
+      300,
+      400,
+      510,
+      590
+    ]
+  },
+  "spacingScalePx": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    11,
+    12
+  ],
+  "radiusScalePx": [
+    1,
+    2,
+    4,
+    6,
+    7,
+    8,
+    12,
+    16
+  ],
+  "shadows": [
+    "rgba(0, 0, 0, 0.03) 0px 1.2px 0px 0px",
+    "rgba(0, 0, 0, 0.4) 0px 2px 4px 0px",
+    "rgba(0, 0, 0, 0.2) 0px 0px 12px 0px inset",
+    "rgb(35, 37, 42) 0px 0px 0px 1px inset"
+  ]
+}

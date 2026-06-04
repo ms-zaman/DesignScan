@@ -1,0 +1,25 @@
+{
+  "name": "@designscan/extractor",
+  "version": "0.1.0",
+  "description": "URL -> design tokens -> DESIGN.md. The extraction engine.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "extract": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:designmd": "for f in out/*.DESIGN.md; do echo \"→ $f\"; design.md lint \"$f\"; done"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "playwright": "^1.48.0"
+  },
+  "devDependencies": {
+    "@google/design.md": "^0.2.0",
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.0"
+  }
+}

@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build / generated output (regenerable via `npm run extract`)
+dist/
+out/
+coverage/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+*.log
+
+# Claude Code — personal/local settings only (a shared settings.json stays tracked)
+.claude/settings.local.json

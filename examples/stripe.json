@@ -1,0 +1,126 @@
+{
+  "url": "https://stripe.com",
+  "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
+  "fetchedAt": "2026-06-04T03:50:22.918Z",
+  "colors": {
+    "background": "#ffffff",
+    "text": "#000000",
+    "primary": "#533afd",
+    "palette": [
+      {
+        "hex": "#000000",
+        "count": 866
+      },
+      {
+        "hex": "#533afd",
+        "count": 375
+      },
+      {
+        "hex": "#50617a",
+        "count": 162
+      },
+      {
+        "hex": "#061b31",
+        "count": 134
+      },
+      {
+        "hex": "#ffffff",
+        "count": 85
+      },
+      {
+        "hex": "#64748d",
+        "count": 68
+      },
+      {
+        "hex": "#0000ee",
+        "count": 34
+      },
+      {
+        "hex": "#3c4f69",
+        "count": 18
+      },
+      {
+        "hex": "#273951",
+        "count": 16
+      },
+      {
+        "hex": "#e5edf5",
+        "count": 15
+      },
+      {
+        "hex": "#1a2c44",
+        "count": 14
+      },
+      {
+        "hex": "#ff6118",
+        "count": 14
+      },
+      {
+        "hex": "#7389ff",
+        "count": 12
+      },
+      {
+        "hex": "#f8fafd",
+        "count": 9
+      },
+      {
+        "hex": "#7d8ba4",
+        "count": 7
+      },
+      {
+        "hex": "#839bc8",
+        "count": 4
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "sohne-var"
+    ],
+    "sizeScalePx": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      14,
+      16,
+      18,
+      22,
+      26,
+      32,
+      48
+    ],
+    "weights": [
+      300,
+      400
+    ]
+  },
+  "spacingScalePx": [
+    2,
+    4,
+    5.5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "radiusScalePx": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    16
+  ],
+  "shadows": [
+    "rgba(50, 50, 93, 0.12) 0px 16px 32px 0px",
+    "rgba(0, 0, 0, 0.1) 0px 30px 60px -50px, rgba(50, 50, 93, 0.25) 0px 30px 60px -10px",
+    "rgba(23, 23, 23, 0.08) 0px 15px 35px 0px",
+    "rgba(23, 23, 23, 0.06) 0px 3px 6px 0px"
+  ]
+}

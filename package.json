@@ -1,0 +1,16 @@
+{
+  "name": "designscan",
+  "version": "0.0.0",
+  "description": "URL → design tokens → DESIGN.md. Monorepo for the DesignScan product.",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "extract": "npm run extract -w @designscan/extractor --",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint:designmd": "npm run lint:designmd -w @designscan/extractor --"
+  }
+}
