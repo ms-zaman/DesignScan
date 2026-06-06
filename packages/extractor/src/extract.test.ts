@@ -160,4 +160,39 @@ describe("extract (integration)", () => {
     },
     TEST_TIMEOUT,
   );
+
+  it(
+    "counts text colors only on text-painting elements, weighted by area",
+    async () => {
+      // A wrapper div carries a color but paints no text; a large heading and a
+      // tiny caption each paint text in their own colors.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Text gating</title></head>
+  <body style="margin: 0">
+    <div style="color: rgb(9, 9, 9)">
+      <h1 style="color: rgb(20, 20, 20); font-size: 48px; width: 900px; height: 300px; margin: 0">
+        Big heading covering lots of area
+      </h1>
+      <span style="color: rgb(120, 120, 120); font-size: 10px">x</span>
+    </div>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      // The wrapper paints no direct text -> its color is never counted.
+      expect(raw.colorCount).not.toHaveProperty("rgb(9, 9, 9)");
+      // Both text-painting elements are counted.
+      expect(raw.colorCount).toHaveProperty("rgb(20, 20, 20)");
+      expect(raw.colorCount).toHaveProperty("rgb(120, 120, 120)");
+
+      // Area-weighting: the big heading outweighs the tiny caption, even though
+      // each is a single element (raw counts would tie at 1).
+      expect(raw.textColorArea?.["rgb(20, 20, 20)"]).toBeGreaterThan(
+        raw.textColorArea?.["rgb(120, 120, 120)"] ?? 0,
+      );
+      expect(raw.textColorArea).not.toHaveProperty("rgb(9, 9, 9)");
+    },
+    TEST_TIMEOUT,
+  );
 });

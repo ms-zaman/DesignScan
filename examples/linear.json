@@ -2,7 +2,7 @@
   "schemaVersion": "1.1",
   "url": "https://linear.app",
   "title": "Linear – The system for product development",
-  "fetchedAt": "2026-06-06T10:31:46.369Z",
+  "fetchedAt": "2026-06-06T11:15:06.380Z",
   "theme": "light",
   "colors": {
     "background": "#08090a",
@@ -15,7 +15,7 @@
       },
       {
         "hex": "#8a8f98",
-        "count": 127
+        "count": 125
       },
       {
         "hex": "#d0d6e0",

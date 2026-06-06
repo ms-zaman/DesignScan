@@ -11,6 +11,7 @@
       "!**/*-lock.yaml",
       "!**/package-lock.json",
       "!examples",
+      "!**/__fixtures__",
       "!**/out"
     ]
   },

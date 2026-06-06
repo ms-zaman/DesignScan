@@ -171,6 +171,24 @@ describe("generate – colors", () => {
     );
     expect(fm).toContain('on-primary: "#111111"');
   });
+
+  it("picks near-black on a mid-tone surface (AA-correct, not a 0.5 cutoff)", () => {
+    // #8a8f98 has luminance ~0.27: a flat <0.5 rule would pick white at 3.25:1
+    // (fails AA); near-black gives ~6.4:1.
+    const fm = frontMatter(
+      generate(
+        profile({
+          colors: {
+            background: "#fff",
+            text: "#000",
+            primary: "#8a8f98",
+            palette: [],
+          },
+        }),
+      ),
+    );
+    expect(fm).toContain('on-primary: "#111111"');
+  });
 });
 
 describe("generate – scales & references", () => {

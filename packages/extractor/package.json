@@ -17,7 +17,8 @@
     "extract": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "capture:fixtures": "tsx src/__fixtures__/capture.ts"
   },
   "dependencies": {
     "commander": "^12.1.0",

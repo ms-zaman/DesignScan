@@ -10,10 +10,20 @@ import type { DesignProfile } from "./types.js";
 
 const q = (s: string) => `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
-// Readable foreground for a given surface color.
+// Readable foreground (near-black or white) for a given surface color. We pick
+// whichever has the higher *actual* WCAG contrast — a flat luminance<0.5 cutoff
+// mishandles mid-tones (a mid-grey would get white text at ~3:1 when near-black
+// would clear AA). The real crossover sits near luminance 0.18, not 0.5.
+const DARK_FG = "#111111";
+const LIGHT_FG = "#ffffff";
+const DARK_FG_LUM = luminance({ r: 17, g: 17, b: 17, a: 1 });
 function onColor(hex: string): string {
   const c = parseColor(hex);
-  return c && luminance(c) < 0.5 ? "#ffffff" : "#111111";
+  if (!c) return DARK_FG;
+  const bgLum = luminance(c);
+  const lightContrast = (1 + 0.05) / (bgLum + 0.05);
+  const darkContrast = (bgLum + 0.05) / (DARK_FG_LUM + 0.05);
+  return lightContrast >= darkContrast ? LIGHT_FG : DARK_FG;
 }
 
 interface TypeLevel {

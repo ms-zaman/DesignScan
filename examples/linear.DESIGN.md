@@ -9,7 +9,7 @@ colors:
   text: "#d0d6e0"
   accent-1: "#62666d"
   accent-2: "#8a8f98"
-  on-accent-2: "#ffffff"
+  on-accent-2: "#111111"
 typography:
   display:
     fontFamily: "Inter Variable"
@@ -108,7 +108,7 @@ Auto-extracted from https://linear.app by DesignScan on 2026-06-06. These tokens
 - **text (#d0d6e0):** the primary foreground / body-text color.
 - **accent-1 (#62666d):** a supporting accent (used for links).
 - **accent-2 (#8a8f98):** a secondary accent (used for badges/tags).
-- **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
+- **on-accent-2 (#111111):** the readable foreground on the secondary accent.
 
 ## Typography
 
