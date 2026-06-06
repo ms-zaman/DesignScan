@@ -4,8 +4,8 @@ URL → design tokens → (next) `DESIGN.md`. This is **step 1** of the roadmap:
 the extraction engine. It runs locally, needs **no API key**, and is the only
 "real software" part of the whole business.
 
-> Lives at `packages/extractor` in the DesignScan monorepo. Run workspace
-> commands from the repo root (`npm run extract -- stripe.com`) or locally from
+> Lives at `packages/extractor` in the DesignScan (pnpm) monorepo. Run workspace
+> commands from the repo root (`pnpm extract stripe.com`) or locally from
 > this directory.
 
 ## What it does today
@@ -23,28 +23,29 @@ URL
 ## Setup
 
 ```bash
-cd packages/extractor
-npm install
-npx playwright install chromium   # one-time browser download (~150MB)
+pnpm install                      # from the repo root
+pnpm --filter @designscan/extractor exec playwright install chromium  # one-time
 ```
 
 ## Usage
 
+Run from the repo root (no `--` needed — pnpm forwards flags straight through):
+
 ```bash
 # print JSON to stdout + a summary to stderr
-npm run extract -- stripe.com
+pnpm extract stripe.com
 
 # save the profile
-npm run extract -- linear.app --out out/linear.json
+pnpm extract linear.app --out out/linear.json
 
 # emit a Google-format DESIGN.md instead of profile JSON
-npm run extract -- stripe.com --md --out out/stripe.DESIGN.md
+pnpm extract stripe.com --md --out out/stripe.DESIGN.md
 
 # extract the dark theme (prefers-color-scheme: dark)
-npm run extract -- linear.app --dark --md --out out/linear.dark.DESIGN.md
+pnpm extract linear.app --dark --md --out out/linear.dark.DESIGN.md
 
 # watch the browser work
-npm run extract -- vercel.com --headful
+pnpm extract vercel.com --headful
 ```
 
 ## Files
@@ -64,7 +65,7 @@ npm run extract -- vercel.com --headful
 - [~] **Step 2 — Generator**: `DesignProfile` → `DESIGN.md` (Google spec: YAML
       front-matter + prose) via `--md`. Token mapping + heuristic prose done;
       passes the official `@google/design.md` linter with **0 errors**
-      (`npm run lint:designmd -- <file>`). Dark theme via `--dark`. Parked:
+      (`pnpm lint:designmd`). Dark theme via `--dark`. Parked:
       LLM-refined prose/rationale, and merging light+dark into one file.
 - [ ] **Step 3 — HTML preview** renderer (light/dark token sheets)
 - [ ] **Step 4 — Seed 30–40 brand files + public repo** (distribution wedge)

@@ -6,7 +6,13 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/package-lock.json", "!examples", "!**/out"]
+    "includes": [
+      "**",
+      "!**/*-lock.yaml",
+      "!**/package-lock.json",
+      "!examples",
+      "!**/out"
+    ]
   },
   "formatter": {
     "enabled": true,

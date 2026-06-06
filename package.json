@@ -5,22 +5,26 @@
   "private": true,
   "license": "MIT",
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=18"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "extract": "npm run extract -w @designscan/extractor --",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "extract": "pnpm --filter @designscan/extractor exec tsx src/cli.ts",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
     "check": "biome check .",
     "format": "biome format --write .",
     "lint": "biome lint .",
     "lint:designmd": "for f in examples/*.DESIGN.md; do echo \"→ $f\"; design.md lint \"$f\"; done"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.16"
+    "@biomejs/biome": "^2.4.16",
+    "@google/design.md": "^0.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

@@ -9,16 +9,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
-      # A macOS-generated lockfile makes npm skip the Linux-native rollup binary
-      # (npm/cli#4828), breaking vitest. Per npm's own guidance, drop the lockfile
-      # and install fresh so the runner resolves its own platform's binaries.
-      - run: rm -f package-lock.json && npm install --no-audit --no-fund
-      - run: npm run check         # Biome: format + lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run lint:designmd  # validate the committed example DESIGN.md files
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check         # Biome: format + lint
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run lint:designmd  # validate the committed example DESIGN.md files
