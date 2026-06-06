@@ -14,7 +14,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      # `npm install`, not `npm ci`: npm ci can skip a package's platform-specific
+      # optional dep (the native rollup binary) on Linux — npm/cli#4828 — which
+      # then breaks vitest. install resolves the current platform's binary.
+      - run: npm install --no-audit --no-fund
       - run: npm run check         # Biome: format + lint
       - run: npm run typecheck
       - run: npm test
