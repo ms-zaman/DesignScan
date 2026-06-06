@@ -121,7 +121,7 @@ export async function extract(
           const ls = cs.letterSpacing;
           let em: number | null = null;
           if (ls === "normal") em = 0;
-          else if (ls && ls.endsWith("px")) em = parseFloat(ls) / fpx;
+          else if (ls?.endsWith("px")) em = parseFloat(ls) / fpx;
           if (em !== null && em >= -0.2 && em <= 0.5) {
             bump(lsTarget, em.toFixed(3));
           }
@@ -133,7 +133,8 @@ export async function extract(
         if (cs.borderTopWidth && cs.borderTopWidth !== "0px") {
           bump(borderWidths, cs.borderTopWidth);
         }
-        if (cs.boxShadow && cs.boxShadow !== "none") bump(shadows, cs.boxShadow);
+        if (cs.boxShadow && cs.boxShadow !== "none")
+          bump(shadows, cs.boxShadow);
 
         for (const p of [cs.paddingTop, cs.paddingLeft, cs.marginTop, cs.gap]) {
           if (p && p !== "0px") bump(spacings, p);

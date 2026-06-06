@@ -3,9 +3,9 @@ import {
   isNeutral,
   luminance,
   parseColor,
+  type RGBA,
   saturation,
   toHex,
-  type RGBA,
 } from "./color.js";
 
 describe("parseColor", () => {
@@ -20,19 +20,39 @@ describe("parseColor", () => {
   });
 
   it("parses rgb() with an implicit alpha of 1", () => {
-    expect(parseColor("rgb(255, 128, 0)")).toEqual({ r: 255, g: 128, b: 0, a: 1 });
+    expect(parseColor("rgb(255, 128, 0)")).toEqual({
+      r: 255,
+      g: 128,
+      b: 0,
+      a: 1,
+    });
   });
 
   it("parses rgba() with an explicit alpha", () => {
-    expect(parseColor("rgba(10, 20, 30, 0.5)")).toEqual({ r: 10, g: 20, b: 30, a: 0.5 });
+    expect(parseColor("rgba(10, 20, 30, 0.5)")).toEqual({
+      r: 10,
+      g: 20,
+      b: 30,
+      a: 0.5,
+    });
   });
 
   it("parses the modern space/slash rgb() syntax", () => {
-    expect(parseColor("rgb(10 20 30 / 0.4)")).toEqual({ r: 10, g: 20, b: 30, a: 0.4 });
+    expect(parseColor("rgb(10 20 30 / 0.4)")).toEqual({
+      r: 10,
+      g: 20,
+      b: 30,
+      a: 0.4,
+    });
   });
 
   it("rounds fractional channel values", () => {
-    expect(parseColor("rgb(0.6, 1.4, 2.5)")).toEqual({ r: 1, g: 1, b: 3, a: 1 });
+    expect(parseColor("rgb(0.6, 1.4, 2.5)")).toEqual({
+      r: 1,
+      g: 1,
+      b: 3,
+      a: 1,
+    });
   });
 
   it("is case-insensitive and trims surrounding whitespace", () => {
@@ -48,7 +68,12 @@ describe("parseColor", () => {
   });
 
   it("falls back to alpha 1 when alpha is unparseable", () => {
-    expect(parseColor("rgba(1, 2, 3, abc)")).toEqual({ r: 1, g: 2, b: 3, a: 1 });
+    expect(parseColor("rgba(1, 2, 3, abc)")).toEqual({
+      r: 1,
+      g: 2,
+      b: 3,
+      a: 1,
+    });
   });
 
   it("expands a 3-digit hex", () => {
@@ -127,7 +152,10 @@ describe("parseColor – modern formats", () => {
     near(parseColor("color-mix(in srgb, #ffffff, #000000)"), 128, 128, 128, 2);
     near(
       parseColor("color-mix(in srgb, rgb(255, 0, 0) 75%, rgb(0, 0, 255) 25%)"),
-      191, 0, 64, 4,
+      191,
+      0,
+      64,
+      4,
     );
   });
 });

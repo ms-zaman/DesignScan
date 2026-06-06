@@ -42,19 +42,26 @@ function typographyLevels(profile: DesignProfile): TypeLevel[] {
   const headingWeight =
     t.weightHeading ?? (t.weights.length ? Math.max(...t.weights) : 600);
   const bodyWeight =
-    t.weightBody ?? (t.weights.includes(400) ? 400 : t.weights[0] ?? 400);
+    t.weightBody ?? (t.weights.includes(400) ? 400 : (t.weights[0] ?? 400));
   const lhHeading = t.lineHeightHeading ?? 1.2;
   const lhBody = t.lineHeightBody ?? 1.5;
 
   const bucket = (px: number) =>
-    px >= 40 ? "display"
-    : px >= 32 ? "headline-lg"
-    : px >= 26 ? "headline-md"
-    : px >= 22 ? "headline-sm"
-    : px >= 18 ? "title"
-    : px >= 16 ? "body-lg"
-    : px >= 14 ? "body"
-    : "label";
+    px >= 40
+      ? "display"
+      : px >= 32
+        ? "headline-lg"
+        : px >= 26
+          ? "headline-md"
+          : px >= 22
+            ? "headline-sm"
+            : px >= 18
+              ? "title"
+              : px >= 16
+                ? "body-lg"
+                : px >= 14
+                  ? "body"
+                  : "label";
   const isHeading = (px: number) => px >= 18;
 
   const used = new Set<string>();
@@ -103,7 +110,9 @@ function buildColorsAndComponents(
   const background = profile.colors.background;
   const text = profile.colors.text;
 
-  const taken = new Set([primary, background, text].filter(Boolean) as string[]);
+  const taken = new Set(
+    [primary, background, text].filter(Boolean) as string[],
+  );
   const extras = profile.colors.palette
     .map((p) => p.hex)
     .filter((h) => !taken.has(h));
@@ -185,9 +194,10 @@ function buildColorsAndComponents(
     ["accent-2", accent2],
     ["on-accent-2", onAccent2],
   ];
-  const colors = candidates.filter(
-    ([name, hex]) => hex && used.has(name),
-  ) as [string, string][];
+  const colors = candidates.filter(([name, hex]) => hex && used.has(name)) as [
+    string,
+    string,
+  ][];
 
   return { colors, componentLines: lines, roundedMd };
 }
@@ -333,13 +343,17 @@ export function generate(profile: DesignProfile): string {
       ".",
   );
   if (cmap.background && cmap.text) {
-    body.push("- **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.");
+    body.push(
+      "- **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.",
+    );
   }
   if (cmap["accent-1"]) {
     body.push("- **Link:** `{colors.accent-1}` text for inline links.");
   }
   if (cmap["accent-2"]) {
-    body.push("- **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.");
+    body.push(
+      "- **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.",
+    );
   }
 
   body.push("");

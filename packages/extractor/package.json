@@ -4,12 +4,21 @@
   "description": "URL -> design tokens -> DESIGN.md. The extraction engine.",
   "type": "module",
   "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "extract": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint:designmd": "for f in out/*.DESIGN.md; do echo \"→ $f\"; design.md lint \"$f\"; done"
+    "lint:designmd": "design.md lint"
   },
   "dependencies": {
     "commander": "^12.1.0",

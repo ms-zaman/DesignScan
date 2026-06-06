@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "./normalize.js";
-import { PROFILE_SCHEMA_VERSION } from "./types.js";
 import type { ButtonSample, RawObservations } from "./types.js";
+import { PROFILE_SCHEMA_VERSION } from "./types.js";
 
 // A minimal, empty observation set. Each test overrides only the fields it
 // cares about, keeping the intent of every case obvious.
@@ -145,7 +145,10 @@ describe("normalize – colors", () => {
   });
 
   it("returns null primary when nothing qualifies", () => {
-    const profile = normalize("u", raw({ colorCount: { "rgb(128,128,128)": 9 } }));
+    const profile = normalize(
+      "u",
+      raw({ colorCount: { "rgb(128,128,128)": 9 } }),
+    );
     expect(profile.colors.primary).toBeNull();
   });
 });
@@ -189,7 +192,7 @@ describe("normalize – typography", () => {
   it("dedupes and sorts numeric font weights", () => {
     const profile = normalize(
       "u",
-      raw({ fontWeights: { "700": 2, "400": 5, "bold": 1 } }),
+      raw({ fontWeights: { "700": 2, "400": 5, bold: 1 } }),
     );
     expect(profile.typography.weights).toEqual([400, 700]);
   });

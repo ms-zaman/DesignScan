@@ -50,7 +50,16 @@ describe("generate – structure", () => {
 
   it("orders the prose sections per the spec", () => {
     const md = generate(profile());
-    const order = ["Overview", "Colors", "Typography", "Layout", "Elevation & Depth", "Shapes", "Components", "Do's and Don'ts"];
+    const order = [
+      "Overview",
+      "Colors",
+      "Typography",
+      "Layout",
+      "Elevation & Depth",
+      "Shapes",
+      "Components",
+      "Do's and Don'ts",
+    ];
     const positions = order.map((s) => md.indexOf(`## ${s}`));
     expect(positions.every((p) => p >= 0)).toBe(true);
     const sorted = [...positions].sort((a, b) => a - b);
@@ -66,18 +75,49 @@ describe("generate – colors", () => {
 
   it("falls back to the top palette color when primary is null", () => {
     const fm = frontMatter(
-      generate(profile({ colors: { background: null, text: null, primary: null, palette: [{ hex: "#abcdef", count: 3 }] } })),
+      generate(
+        profile({
+          colors: {
+            background: null,
+            text: null,
+            primary: null,
+            palette: [{ hex: "#abcdef", count: 3 }],
+          },
+        }),
+      ),
     );
     expect(fm).toMatch(/^\s{2}primary: "#abcdef"$/m);
   });
 
   it("derives a contrast-safe on-primary (white on a dark primary)", () => {
-    const fm = frontMatter(generate(profile({ colors: { background: "#fff", text: "#000", primary: "#10131a", palette: [] } })));
+    const fm = frontMatter(
+      generate(
+        profile({
+          colors: {
+            background: "#fff",
+            text: "#000",
+            primary: "#10131a",
+            palette: [],
+          },
+        }),
+      ),
+    );
     expect(fm).toContain('on-primary: "#ffffff"');
   });
 
   it("uses near-black on-primary for a light primary", () => {
-    const fm = frontMatter(generate(profile({ colors: { background: "#000", text: "#fff", primary: "#f5f5f5", palette: [] } })));
+    const fm = frontMatter(
+      generate(
+        profile({
+          colors: {
+            background: "#000",
+            text: "#fff",
+            primary: "#f5f5f5",
+            palette: [],
+          },
+        }),
+      ),
+    );
     expect(fm).toContain('on-primary: "#111111"');
   });
 });
@@ -85,7 +125,9 @@ describe("generate – colors", () => {
 describe("generate – scales & references", () => {
   it("maps the radius scale to named levels plus a full alias", () => {
     const fm = frontMatter(generate(profile()));
-    expect(fm).toMatch(/rounded:\n\s{2}xs: 4px\n\s{2}sm: 8px\n\s{2}full: 9999px/);
+    expect(fm).toMatch(
+      /rounded:\n\s{2}xs: 4px\n\s{2}sm: 8px\n\s{2}full: 9999px/,
+    );
   });
 
   it("only emits component token references that resolve in the tree", () => {
@@ -100,7 +142,9 @@ describe("generate – scales & references", () => {
   });
 
   it("omits the typography block when no sizes were found", () => {
-    const md = generate(profile({ typography: { families: [], sizeScalePx: [], weights: [] } }));
+    const md = generate(
+      profile({ typography: { families: [], sizeScalePx: [], weights: [] } }),
+    );
     expect(md).not.toContain("typography:");
     expect(md).not.toContain("## Typography");
   });
@@ -109,7 +153,13 @@ describe("generate – scales & references", () => {
 describe("generate – typography fidelity", () => {
   it("drops sub-12px sizes as noise", () => {
     const md = generate(
-      profile({ typography: { families: ["Inter"], sizeScalePx: [9, 10, 12, 16, 40], weights: [400] } }),
+      profile({
+        typography: {
+          families: ["Inter"],
+          sizeScalePx: [9, 10, 12, 16, 40],
+          weights: [400],
+        },
+      }),
     );
     expect(md).not.toContain("fontSize: 9px");
     expect(md).not.toContain("fontSize: 10px");
@@ -153,7 +203,9 @@ describe("generate – typography fidelity", () => {
     expect(withLs).toContain('letterSpacing: "-0.02em"');
 
     const withoutLs = generate(
-      profile({ typography: { families: ["Inter"], sizeScalePx: [40], weights: [700] } }),
+      profile({
+        typography: { families: ["Inter"], sizeScalePx: [40], weights: [700] },
+      }),
     );
     expect(withoutLs).not.toContain("letterSpacing:");
   });

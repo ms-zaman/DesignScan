@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "description": "URL → design tokens → DESIGN.md. Monorepo for the DesignScan product.",
   "private": true,
+  "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "workspaces": [
     "packages/*"
   ],
@@ -11,6 +15,12 @@
     "extract": "npm run extract -w @designscan/extractor --",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "lint:designmd": "npm run lint:designmd -w @designscan/extractor --"
+    "check": "biome check .",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "lint:designmd": "for f in examples/*.DESIGN.md; do echo \"→ $f\"; design.md lint \"$f\"; done"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16"
   }
 }

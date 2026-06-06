@@ -29,10 +29,15 @@ npm run extract -- stripe.com --md --out out/stripe.DESIGN.md
 
 | Script | Does |
 |--------|------|
-| `npm run extract -- <url> [--md] [--out f]` | Extract tokens / generate `DESIGN.md` |
+| `npm run extract -- <url> [--md] [--dark] [--out f]` | Extract tokens / generate `DESIGN.md` |
 | `npm run typecheck` | Type-check all packages |
 | `npm test` | Run the test suite (vitest) |
-| `npm run lint:designmd` | Validate generated `out/*.DESIGN.md` against the spec |
+| `npm run check` | Biome — format + lint (use `npm run format` to auto-fix) |
+| `npm run lint:designmd` | Validate `examples/*.DESIGN.md` against the official spec |
+
+All of these run on every push/PR via [GitHub Actions](.github/workflows/ci.yml).
+The engine is consumable as a library through its public API
+([`packages/extractor/src/index.ts`](packages/extractor/src/index.ts)).
 
 ## Status
 

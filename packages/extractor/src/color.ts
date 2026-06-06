@@ -15,9 +15,9 @@ const to255 = (x: number) => Math.round(clamp01(x) * 255);
 
 // sRGB transfer functions (linear <-> gamma-encoded).
 const gammaEncode = (x: number) =>
-  x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+  x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055;
 const gammaDecode = (x: number) =>
-  x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
 
 type RGB = { r: number; g: number; b: number }; // linear or 0..1 helpers
 const linearToRgb = (r: number, g: number, b: number): RGB => ({
@@ -46,19 +46,25 @@ function splitTopLevel(s: string, sep: string): string[] {
 }
 
 // Pull "fn(...)" content and split off a "/ alpha" tail (modern syntax).
-function fnArgs(s: string, name: string): { parts: string[]; alpha: number } | null {
-  const m = s.match(new RegExp(`^${name}\\(([^]*)\\)$`));
+function fnArgs(
+  s: string,
+  name: string,
+): { parts: string[]; alpha: number } | null {
+  const m = s.match(new RegExp(`^${name}\\(([\\s\\S]*)\\)$`));
   if (!m) return null;
   const inner = m[1].trim();
   const slash = splitTopLevel(inner, "/");
   const main = slash[0].trim();
   let alpha = slash.length > 1 ? parseAlpha(slash[1].trim()) : 1;
-  const commas = splitTopLevel(main, ",").map((p) => p.trim()).filter(Boolean);
+  const commas = splitTopLevel(main, ",")
+    .map((p) => p.trim())
+    .filter(Boolean);
   let parts: string[];
   if (commas.length > 1) {
     // legacy comma form: "a, b, c[, alpha]" — only here can a 4th value be alpha.
     parts = commas;
-    if (slash.length === 1 && parts.length === 4) alpha = parseAlpha(parts.pop()!);
+    if (slash.length === 1 && parts.length === 4)
+      alpha = parseAlpha(parts.pop()!);
   } else {
     parts = main.split(/\s+/).filter(Boolean);
   }
@@ -88,7 +94,9 @@ function hslToRgb(h: number, s: number, l: number): RGB {
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;
-  let r = 0, g = 0, b = 0;
+  let r = 0,
+    g = 0,
+    b = 0;
   if (h < 60) [r, g, b] = [c, x, 0];
   else if (h < 120) [r, g, b] = [x, c, 0];
   else if (h < 180) [r, g, b] = [0, c, x];
@@ -112,7 +120,9 @@ function oklabToRgb(L: number, a: number, b: number): RGB {
   const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
   const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
   const s_ = L - 0.0894841775 * a - 1.291485548 * b;
-  const l = l_ ** 3, m = m_ ** 3, s = s_ ** 3;
+  const l = l_ ** 3,
+    m = m_ ** 3,
+    s = s_ ** 3;
   return linearToRgb(
     4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
     -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
@@ -122,7 +132,9 @@ function oklabToRgb(L: number, a: number, b: number): RGB {
 
 // CIE Lab (D50) -> linear sRGB (D65, Bradford-adapted) -> sRGB.
 function labToRgb(L: number, a: number, b: number): RGB {
-  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+  const fy = (L + 16) / 116,
+    fx = fy + a / 500,
+    fz = fy - b / 200;
   const d = 6 / 29;
   const f3 = (t: number) => (t > d ? t ** 3 : 3 * d * d * (t - 4 / 29));
   const X = 0.9642956764 * f3(fx);
@@ -141,7 +153,9 @@ function colorFn(space: string, c: number[]): RGB | null {
   if (space === "srgb") return { r: to255(r), g: to255(g), b: to255(b) };
   if (space === "srgb-linear") return linearToRgb(r, g, b);
   if (space === "display-p3") {
-    const lr = gammaDecode(r), lg = gammaDecode(g), lb = gammaDecode(b);
+    const lr = gammaDecode(r),
+      lg = gammaDecode(g),
+      lb = gammaDecode(b);
     return linearToRgb(
       1.2249401762 * lr - 0.2249404696 * lg + 0.0 * lb,
       -0.0420569547 * lr + 1.0420571718 * lg + 0.0 * lb,
@@ -162,7 +176,10 @@ export function parseColor(input: string | undefined | null): RGBA | null {
   if (hex) {
     let h = hex[1];
     if (h.length === 3 || h.length === 4)
-      h = h.split("").map((c) => c + c).join("");
+      h = h
+        .split("")
+        .map((c) => c + c)
+        .join("");
     const r = parseInt(h.slice(0, 2), 16);
     const g = parseInt(h.slice(2, 4), 16);
     const b = parseInt(h.slice(4, 6), 16);
@@ -183,7 +200,9 @@ export function parseColor(input: string | undefined | null): RGBA | null {
   const hsl = fnArgs(s, "hsla?");
   if (hsl && hsl.parts.length >= 3) {
     const { r, g, b } = hslToRgb(
-      parseHue(hsl.parts[0]), numPct(hsl.parts[1]), numPct(hsl.parts[2]),
+      parseHue(hsl.parts[0]),
+      numPct(hsl.parts[1]),
+      numPct(hsl.parts[2]),
     );
     return { r, g, b, a: hsl.alpha };
   }
@@ -191,7 +210,9 @@ export function parseColor(input: string | undefined | null): RGBA | null {
   const hwb = fnArgs(s, "hwb");
   if (hwb && hwb.parts.length >= 3) {
     const { r, g, b } = hwbToRgb(
-      parseHue(hwb.parts[0]), numPct(hwb.parts[1]), numPct(hwb.parts[2]),
+      parseHue(hwb.parts[0]),
+      numPct(hwb.parts[1]),
+      numPct(hwb.parts[2]),
     );
     return { r, g, b, a: hwb.alpha };
   }
@@ -200,7 +221,9 @@ export function parseColor(input: string | undefined | null): RGBA | null {
   const oklab = fnArgs(s, "oklab");
   if (oklab && oklab.parts.length >= 3) {
     const { r, g, b } = oklabToRgb(
-      numPct(oklab.parts[0]), numPct(oklab.parts[1], 250), numPct(oklab.parts[2], 250),
+      numPct(oklab.parts[0]),
+      numPct(oklab.parts[1], 250),
+      numPct(oklab.parts[2], 250),
     );
     return { r, g, b, a: oklab.alpha };
   }
@@ -221,7 +244,9 @@ export function parseColor(input: string | undefined | null): RGBA | null {
   const lab = fnArgs(s, "lab");
   if (lab && lab.parts.length >= 3) {
     const { r, g, b } = labToRgb(
-      numPct(lab.parts[0], 1), numPct(lab.parts[1], 0.8), numPct(lab.parts[2], 0.8),
+      numPct(lab.parts[0], 1),
+      numPct(lab.parts[1], 0.8),
+      numPct(lab.parts[2], 0.8),
     );
     return { r, g, b, a: lab.alpha };
   }
@@ -241,9 +266,9 @@ export function parseColor(input: string | undefined | null): RGBA | null {
   const color = fnArgs(s, "color");
   if (color && color.parts.length >= 4) {
     const space = color.parts[0];
-    const channels = color.parts.slice(1).map((p) =>
-      p.endsWith("%") ? parseFloat(p) / 100 : parseFloat(p),
-    );
+    const channels = color.parts
+      .slice(1)
+      .map((p) => (p.endsWith("%") ? parseFloat(p) / 100 : parseFloat(p)));
     const rgb = colorFn(space, channels);
     return rgb ? { ...rgb, a: color.alpha } : null;
   }
@@ -256,7 +281,7 @@ export function parseColor(input: string | undefined | null): RGBA | null {
 // color-mix(in <space>, C1 [p%], C2 [p%]) — mixed in sRGB (a close approximation
 // regardless of the named interpolation space; browsers usually pre-resolve this).
 function parseColorMix(s: string): RGBA | null {
-  const m = s.match(/^color-mix\(([^]*)\)$/);
+  const m = s.match(/^color-mix\(([\s\S]*)\)$/);
   if (!m) return null;
   const args = splitTopLevel(m[1], ",").map((p) => p.trim());
   if (args.length < 3) return null; // expect: "in <space>", c1, c2
@@ -271,9 +296,12 @@ function parseColorMix(s: string): RGBA | null {
   const b = read(args[2]);
   if (!a || !b) return null;
 
-  let pa = a.pct, pb = b.pct;
-  if (pa == null && pb == null) (pa = 50), (pb = 50);
-  else if (pa == null) pa = 100 - (pb as number);
+  let pa = a.pct,
+    pb = b.pct;
+  if (pa == null && pb == null) {
+    pa = 50;
+    pb = 50;
+  } else if (pa == null) pa = 100 - (pb as number);
   else if (pb == null) pb = 100 - pa;
   const sum = (pa as number) + (pb as number) || 100;
   const wa = (pa as number) / sum;
@@ -299,7 +327,9 @@ export function luminance({ r, g, b }: RGBA): number {
 
 // HSL saturation, 0..1. High saturation => likely a brand/accent color.
 export function saturation({ r, g, b }: RGBA): number {
-  const rr = r / 255, gg = g / 255, bb = b / 255;
+  const rr = r / 255,
+    gg = g / 255,
+    bb = b / 255;
   const max = Math.max(rr, gg, bb);
   const min = Math.min(rr, gg, bb);
   if (max === min) return 0;

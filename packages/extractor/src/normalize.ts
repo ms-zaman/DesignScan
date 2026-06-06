@@ -1,6 +1,12 @@
-import { isNeutral, luminance, parseColor, saturation, toHex } from "./color.js";
-import { PROFILE_SCHEMA_VERSION } from "./types.js";
+import {
+  isNeutral,
+  luminance,
+  parseColor,
+  saturation,
+  toHex,
+} from "./color.js";
 import type { DesignProfile, RawObservations } from "./types.js";
+import { PROFILE_SCHEMA_VERSION } from "./types.js";
 
 const px = (s: string): number | null => {
   const m = s.match(/^(-?\d*\.?\d+)px$/);
@@ -113,7 +119,10 @@ function modeKey(map?: Record<string, number>): string | undefined {
   return best;
 }
 
-const numMode = (map?: Record<string, number>, round = 2): number | undefined => {
+const numMode = (
+  map?: Record<string, number>,
+  round = 2,
+): number | undefined => {
   const k = modeKey(map);
   if (k === undefined) return undefined;
   const n = parseFloat(k);
@@ -162,7 +171,9 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       letterSpacingHeadingEm: numMode(raw.lsHeading, 3),
       letterSpacingBodyEm: numMode(raw.lsBody, 3),
     },
-    spacingScalePx: snapScale(numericScale(raw.spacings, { minCount: 3, max: 10 })),
+    spacingScalePx: snapScale(
+      numericScale(raw.spacings, { minCount: 3, max: 10 }),
+    ),
     radiusScalePx: numericScale(raw.radii, { minCount: 1, max: 8 }),
     shadows: Object.entries(raw.shadows)
       .sort((a, b) => b[1] - a[1])

@@ -12,8 +12,16 @@ program
   .description("Extract a website's design tokens (step 1: URL -> tokens)")
   .argument("<url>", "URL to analyze")
   .option("-o, --out <file>", "write the output to a file instead of stdout")
-  .option("--md", "emit a DESIGN.md (Google format) instead of profile JSON", false)
-  .option("--dark", "extract the dark theme (emulates prefers-color-scheme: dark)", false)
+  .option(
+    "--md",
+    "emit a DESIGN.md (Google format) instead of profile JSON",
+    false,
+  )
+  .option(
+    "--dark",
+    "extract the dark theme (emulates prefers-color-scheme: dark)",
+    false,
+  )
   .option("--headful", "run the browser with a visible window", false)
   .option("--quiet", "suppress the human-readable summary", false)
   .action(async (url: string, opts) => {
@@ -26,7 +34,9 @@ program
       colorScheme: scheme,
     });
     const profile = normalize(target, raw);
-    const output = opts.md ? generate(profile) : JSON.stringify(profile, null, 2);
+    const output = opts.md
+      ? generate(profile)
+      : JSON.stringify(profile, null, 2);
 
     if (opts.out) {
       await mkdir(dirname(opts.out), { recursive: true });
@@ -45,7 +55,10 @@ program
           `  background  ${c.background ?? "?"}`,
           `  text        ${c.text ?? "?"}`,
           `  primary     ${c.primary ?? "?"}`,
-          `  palette     ${c.palette.slice(0, 6).map((p) => p.hex).join(" ")}`,
+          `  palette     ${c.palette
+            .slice(0, 6)
+            .map((p) => p.hex)
+            .join(" ")}`,
           `  fonts       ${profile.typography.families.join(", ") || "?"}`,
           `  sizes(px)   ${profile.typography.sizeScalePx.join(" ")}`,
           `  spacing(px) ${profile.spacingScalePx.join(" ")}`,
