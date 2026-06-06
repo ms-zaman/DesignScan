@@ -219,18 +219,18 @@ describe("normalize – typography", () => {
 });
 
 describe("normalize – spacing, radius, shadows", () => {
-  it("requires a value to appear at least 3 times to enter the spacing scale", () => {
+  it("snaps spacing to a 4px grid and keeps the most common steps", () => {
     const profile = normalize(
       "u",
       raw({
         spacings: {
           "8px": 5,
           "16px": 3,
-          "13px": 2, // below minCount 3 -> dropped
+          "13px": 2, // snaps to the nearest 4px step (12)
         },
       }),
     );
-    expect(profile.spacingScalePx).toEqual([8, 16]);
+    expect(profile.spacingScalePx).toEqual([8, 12, 16]);
   });
 
   it("skips non-positive and non-px values in numeric scales", () => {
@@ -263,7 +263,7 @@ describe("normalize – spacing, radius, shadows", () => {
     expect(profile.shadows).toEqual(["a", "b", "c", "d"]);
   });
 
-  it("snaps a noisy spacing scale into a clean ramp", () => {
+  it("folds a noisy spacing scale onto the 4px grid by frequency", () => {
     const profile = normalize(
       "u",
       raw({
@@ -278,8 +278,8 @@ describe("normalize – spacing, radius, shadows", () => {
         },
       }),
     );
-    // 5.5 rounds to 6; 6/7 and 9 collapse against the 2px minimum gap.
-    expect(profile.spacingScalePx).toEqual([2, 4, 6, 8]);
+    // 2, 4, 5.5 snap to 4; 6, 7, 8, 9 snap to 8.
+    expect(profile.spacingScalePx).toEqual([4, 8]);
   });
 });
 

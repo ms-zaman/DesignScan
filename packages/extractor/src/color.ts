@@ -339,5 +339,10 @@ export function saturation({ r, g, b }: RGBA): number {
 }
 
 export function isNeutral(c: RGBA): boolean {
-  return saturation(c) < 0.12;
+  // HSL saturation blows up near white/black (its denominator -> 0), so an
+  // almost-white cream like #faf9f5 reports a high "saturation" despite being
+  // perceptually neutral. Guard with a raw chroma floor: tiny RGB spread is grey
+  // regardless of what the HSL math says.
+  const chroma = (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) / 255;
+  return chroma < 0.06 || saturation(c) < 0.12;
 }

@@ -2,47 +2,39 @@
   "schemaVersion": "1.1",
   "url": "https://stripe.com",
   "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
-  "fetchedAt": "2026-06-06T09:55:40.463Z",
+  "fetchedAt": "2026-06-06T10:30:51.483Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
-    "text": "#000000",
+    "text": "#64748d",
     "primary": "#533afd",
     "palette": [
       {
-        "hex": "#000000",
-        "count": 866
-      },
-      {
-        "hex": "#533afd",
-        "count": 375
-      },
-      {
         "hex": "#50617a",
-        "count": 162
+        "count": 156
       },
       {
         "hex": "#061b31",
-        "count": 134
-      },
-      {
-        "hex": "#ffffff",
-        "count": 85
+        "count": 114
       },
       {
         "hex": "#64748d",
-        "count": 68
+        "count": 51
       },
       {
-        "hex": "#0000ee",
-        "count": 34
+        "hex": "#ffffff",
+        "count": 49
       },
       {
-        "hex": "#3c4f69",
-        "count": 18
+        "hex": "#533afd",
+        "count": 48
       },
       {
         "hex": "#273951",
+        "count": 16
+      },
+      {
+        "hex": "#3c4f69",
         "count": 16
       },
       {
@@ -51,19 +43,15 @@
       },
       {
         "hex": "#1a2c44",
-        "count": 14
-      },
-      {
-        "hex": "#ff6118",
-        "count": 14
-      },
-      {
-        "hex": "#7389ff",
-        "count": 12
+        "count": 10
       },
       {
         "hex": "#f8fafd",
         "count": 9
+      },
+      {
+        "hex": "#ff6118",
+        "count": 8
       },
       {
         "hex": "#7d8ba4",
@@ -72,6 +60,18 @@
       {
         "hex": "#839bc8",
         "count": 4
+      },
+      {
+        "hex": "#e2e4ff",
+        "count": 3
+      },
+      {
+        "hex": "#e8e9ff",
+        "count": 3
+      },
+      {
+        "hex": "#e3ecf7",
+        "count": 3
       }
     ]
   },
@@ -81,13 +81,10 @@
     ],
     "sizeScalePx": [
       8,
-      9,
       10,
-      11,
       12,
       14,
       16,
-      18,
       22,
       26,
       32,
@@ -105,18 +102,18 @@
     "letterSpacingBodyEm": 0
   },
   "spacingScalePx": [
-    2,
     4,
-    6,
     8,
-    10,
-    12
+    12,
+    16,
+    20,
+    24,
+    32,
+    64
   ],
   "radiusScalePx": [
     2,
-    3,
     4,
-    5,
     6,
     8,
     16

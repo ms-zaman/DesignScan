@@ -42,40 +42,65 @@ const contrastRatio = (l1: number, l2: number): number =>
   (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 
 function pickText(
-  colorCount: Record<string, number>,
+  weights: Record<string, number>,
   background: string | null,
 ): string | null {
-  // Most frequent foreground color is usually body text — but require readable
-  // contrast against the chosen background so we never return white-on-white
-  // (the most common color on a light page is often white, from chrome/buttons).
+  // The body-text color is the one covering the most painted text (area-weighted
+  // when available; element counts otherwise). We require readable contrast
+  // against the background so we never return e.g. white-on-white, and so we
+  // skip muted secondary text in favour of the primary foreground.
   const bg = background ? parseColor(background) : null;
   const bgLum = bg ? luminance(bg) : null;
-  let best: { hex: string; count: number } | null = null;
-  let fallback: { hex: string; count: number } | null = null;
-  for (const [raw, count] of Object.entries(colorCount)) {
+  let best: { hex: string; weight: number } | null = null;
+  let fallback: { hex: string; weight: number } | null = null;
+  for (const [raw, weight] of Object.entries(weights)) {
     const c = parseColor(raw);
     if (!c || c.a < 0.5) continue;
     const hex = toHex(c);
-    if (!fallback || count > fallback.count) fallback = { hex, count };
+    if (!fallback || weight > fallback.weight) fallback = { hex, weight };
     if (bgLum !== null && contrastRatio(luminance(c), bgLum) < 3) continue;
-    if (!best || count > best.count) best = { hex, count };
+    if (!best || weight > best.weight) best = { hex, weight };
   }
   return (best ?? fallback)?.hex ?? null;
 }
 
-function pickPrimary(raw: RawObservations): string | null {
-  // 1) Most common solid, non-neutral button background = brand color.
-  const btnBg = new Map<string, number>();
+function pickPrimary(
+  raw: RawObservations,
+  background: string | null,
+): string | null {
+  // 1) Solid (opaque) button backgrounds are the clearest signal of the primary
+  //    action. Tally them and prefer the most common *non-neutral* (brand) color.
+  const solid = new Map<string, number>();
   for (const b of raw.buttons) {
     const c = parseColor(b.bg);
-    if (!c || c.a < 0.5 || isNeutral(c)) continue;
+    if (!c || c.a < 0.9) continue;
     const hex = toHex(c);
-    btnBg.set(hex, (btnBg.get(hex) || 0) + 1);
+    solid.set(hex, (solid.get(hex) || 0) + 1);
   }
-  const topBtn = [...btnBg.entries()].sort((a, b) => b[1] - a[1])[0];
-  if (topBtn) return topBtn[0];
+  if (solid.size) {
+    const colored = [...solid.entries()]
+      .filter(([hex]) => !isNeutral(parseColor(hex)!))
+      .sort((a, b) => b[1] - a[1]);
+    if (colored.length) return colored[0][0];
 
-  // 2) Fallback: the most saturated reasonably-frequent color overall.
+    // 2) Monochrome brand (black/white buttons): the primary is the *filled*
+    //    button — the neutral that contrasts most with the page background. Only
+    //    accept it if that contrast is real (>=3); a near-background "button"
+    //    (e.g. a white card button on a white page) isn't the primary action, so
+    //    we fall through to the saturated-accent heuristic instead.
+    const bg = background ? parseColor(background) : null;
+    const bgLum = bg ? luminance(bg) : 1;
+    const best = [...solid.entries()].sort((a, b) => {
+      const ca = contrastRatio(luminance(parseColor(a[0])!), bgLum);
+      const cb = contrastRatio(luminance(parseColor(b[0])!), bgLum);
+      return cb - ca || b[1] - a[1];
+    })[0];
+    if (best && contrastRatio(luminance(parseColor(best[0])!), bgLum) >= 3) {
+      return best[0];
+    }
+  }
+
+  // 3) Fallback: the most saturated reasonably-frequent color overall.
   const candidates = buildPalette(raw.colorCount)
     .map((p) => ({ ...p, c: parseColor(p.hex)! }))
     .filter((p) => p.c && !isNeutral(p.c) && p.count >= 2)
@@ -83,22 +108,95 @@ function pickPrimary(raw: RawObservations): string | null {
   return candidates[0]?.hex ?? null;
 }
 
-// Turn a frequency map of "12px"-style values into a sorted, de-noised scale.
-function numericScale(
-  map: Record<string, number>,
-  { minCount = 1, max = 12 }: { minCount?: number; max?: number } = {},
-): number[] {
-  const vals = new Map<number, number>();
+// Round a "12px"-style frequency map into integer buckets, summing counts and
+// dropping anything non-px or <= 0. Rounding folds fractional noise (13.3333px,
+// 19.2031px) into the nearest whole pixel.
+function pxBuckets(map: Record<string, number>): Map<number, number> {
+  const out = new Map<number, number>();
   for (const [raw, count] of Object.entries(map)) {
     const n = px(raw);
-    if (n === null || n <= 0) continue;
-    vals.set(n, (vals.get(n) || 0) + count);
+    if (n === null) continue;
+    const r = Math.round(n);
+    if (r <= 0) continue;
+    out.set(r, (out.get(r) || 0) + count);
   }
-  return [...vals.entries()]
-    .filter(([, count]) => count >= minCount)
-    .map(([n]) => n)
-    .sort((a, b) => a - b)
-    .slice(0, max);
+  return out;
+}
+
+// Frequency-greedy clustering. Process values most-frequent first; each value
+// either joins the nearest existing representative (within tolerance) or becomes
+// a new one. This keeps the *dominant* value of each cluster — the fix for the
+// old ascending-sort, which kept the smallest (usually-noisiest) value instead.
+function clusterByFrequency(
+  buckets: Map<number, number>,
+  { absTol, relTol }: { absTol: number; relTol: number },
+): { value: number; count: number }[] {
+  const reps: { value: number; count: number }[] = [];
+  for (const [value, count] of [...buckets.entries()].sort(
+    (a, b) => b[1] - a[1],
+  )) {
+    const near = reps.find(
+      (r) => Math.abs(r.value - value) <= Math.max(absTol, r.value * relTol),
+    );
+    if (near) near.count += count;
+    else reps.push({ value, count });
+  }
+  return reps;
+}
+
+const byFreqThenValue = (rs: { value: number; count: number }[], max: number) =>
+  rs
+    .sort((a, b) => b.count - a.count)
+    .slice(0, max)
+    .map((r) => r.value)
+    .sort((a, b) => a - b);
+
+// Spacing follows a base grid. Snap observed paddings/margins/gaps to the
+// de-facto 4px unit, tally by snapped bucket, then keep the most-used steps.
+// Turns noise (2,3,6,7,11,14.5,19.2…) into a clean ramp (4,8,12,16,24,32…).
+const SPACING_GRID = 4;
+function buildSpacingScale(map: Record<string, number>, max = 8): number[] {
+  const snapped = new Map<number, number>();
+  for (const [v, count] of pxBuckets(map)) {
+    const s = Math.round(v / SPACING_GRID) * SPACING_GRID;
+    if (s <= 0) continue;
+    snapped.set(s, (snapped.get(s) || 0) + count);
+  }
+  return [...snapped.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, max)
+    .map(([v]) => v)
+    .sort((a, b) => a - b);
+}
+
+// Radii don't sit on a 4px grid (2/6/10 are common), so cluster by frequency
+// instead. Drop sub-2px hairlines (borders) and >=64px pills (those become the
+// `full` token downstream).
+function buildRadiusScale(map: Record<string, number>, max = 7): number[] {
+  const buckets = new Map<number, number>();
+  for (const [v, count] of pxBuckets(map)) {
+    if (v < 2 || v >= 64) continue;
+    buckets.set(v, count);
+  }
+  return byFreqThenValue(
+    clusterByFrequency(buckets, { absTol: 1.5, relTol: 0.2 }),
+    max,
+  );
+}
+
+// Type scales are modular (ratio-based), so cluster with a relative tolerance to
+// fold near-identical sizes (13 / 13.33 / 14) into one representative. One-off
+// sizes (count < 2) are dropped as noise; the generator maps the rest to roles.
+function buildSizeScale(map: Record<string, number>, max = 9): number[] {
+  const buckets = new Map<number, number>();
+  for (const [v, count] of pxBuckets(map)) {
+    if (count < 2) continue;
+    buckets.set(v, count);
+  }
+  return byFreqThenValue(
+    clusterByFrequency(buckets, { absTol: 1, relTol: 0.08 }),
+    max,
+  );
 }
 
 function cleanFamilies(map: Record<string, number>): string[] {
@@ -153,16 +251,6 @@ const intMode = (map?: Record<string, number>): number | undefined => {
   return Number.isNaN(n) ? undefined : n;
 };
 
-// Collapse a noisy observed scale (e.g. 2,4,5.5,6,7,8,9) into a clean ramp by
-// rounding and dropping values closer than `minGap` to the previous kept one.
-function snapScale(values: number[], minGap = 2): number[] {
-  const out: number[] = [];
-  for (const v of values.map((n) => Math.round(n))) {
-    if (out.length === 0 || v - out[out.length - 1] >= minGap) out.push(v);
-  }
-  return out;
-}
-
 export function normalize(url: string, raw: RawObservations): DesignProfile {
   const background = pickBackground(raw.bgArea);
   return {
@@ -173,13 +261,13 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
     theme: raw.colorScheme ?? "light",
     colors: {
       background,
-      text: pickText(raw.colorCount, background),
-      primary: pickPrimary(raw),
+      text: pickText(raw.textColorArea ?? raw.colorCount, background),
+      primary: pickPrimary(raw, background),
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },
     typography: {
       families: cleanFamilies(raw.fontFamilies),
-      sizeScalePx: numericScale(raw.fontSizes, { minCount: 2 }),
+      sizeScalePx: buildSizeScale(raw.fontSizes),
       weights: topWeights(raw.fontWeights),
       lineHeightHeading: numMode(raw.lhHeading),
       lineHeightBody: numMode(raw.lhBody),
@@ -188,10 +276,8 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       letterSpacingHeadingEm: numMode(raw.lsHeading, 3),
       letterSpacingBodyEm: numMode(raw.lsBody, 3),
     },
-    spacingScalePx: snapScale(
-      numericScale(raw.spacings, { minCount: 3, max: 10 }),
-    ),
-    radiusScalePx: numericScale(raw.radii, { minCount: 1, max: 8 }),
+    spacingScalePx: buildSpacingScale(raw.spacings),
+    radiusScalePx: buildRadiusScale(raw.radii),
     shadows: Object.entries(raw.shadows)
       .sort((a, b) => b[1] - a[1])
       .map(([s]) => s)

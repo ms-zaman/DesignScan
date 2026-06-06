@@ -48,6 +48,7 @@ export async function extract(
 
     const raw = await page.evaluate((limit: number) => {
       const colorCount: Record<string, number> = {};
+      const textColorArea: Record<string, number> = {};
       const bgArea: Record<string, number> = {};
       const fontFamilies: Record<string, number> = {};
       const fontSizes: Record<string, number> = {};
@@ -72,6 +73,18 @@ export async function extract(
         o[k] = (o[k] || 0) + n;
       };
 
+      // True only when the element paints its own (non-whitespace) text. Counting
+      // `color` on every element inflates the page default (usually black/inherited)
+      // from wrappers, icons and SVG containers that render no text, which then
+      // wins the "body text" vote. Gating on a direct text node fixes that.
+      const paintsText = (el: Element) => {
+        for (const node of el.childNodes) {
+          if (node.nodeType === 3 && (node.textContent ?? "").trim())
+            return true;
+        }
+        return false;
+      };
+
       const all = Array.from(document.querySelectorAll("*")).slice(0, limit);
       for (const el of all) {
         const cs = getComputedStyle(el);
@@ -79,7 +92,14 @@ export async function extract(
         if (rect.width === 0 || rect.height === 0) continue;
         const area = rect.width * rect.height;
 
-        bump(colorCount, cs.color);
+        if (paintsText(el)) {
+          bump(colorCount, cs.color);
+          // Area-weighted tally: the primary text color is the one covering the
+          // most painted text (headings + body), not the one on the most small
+          // captions. Pure element counts favour muted secondary text.
+          if (cs.color)
+            textColorArea[cs.color] = (textColorArea[cs.color] || 0) + area;
+        }
         const bg = cs.backgroundColor;
         if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
           bump(colorCount, bg);
@@ -165,6 +185,7 @@ export async function extract(
       return {
         title: document.title,
         colorCount,
+        textColorArea,
         bgArea,
         fontFamilies,
         fontSizes,

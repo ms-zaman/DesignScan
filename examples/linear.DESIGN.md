@@ -3,15 +3,21 @@ version: alpha
 name: "Linear – The system for product development"
 description: "Auto-extracted from https://linear.app by DesignScan."
 colors:
-  primary: "#ffdf9f"
+  primary: "#e5e5e6"
   on-primary: "#111111"
   background: "#08090a"
-  text: "#f7f8f8"
+  text: "#d0d6e0"
   accent-1: "#62666d"
-  accent-2: "#d0d6e0"
-  on-accent-2: "#111111"
+  accent-2: "#8a8f98"
+  on-accent-2: "#ffffff"
 typography:
   display:
+    fontFamily: "Inter Variable"
+    fontSize: 64px
+    fontWeight: "400"
+    lineHeight: 1.6
+    letterSpacing: "-0.022em"
+  display-48:
     fontFamily: "Inter Variable"
     fontSize: 48px
     fontWeight: "400"
@@ -40,41 +46,28 @@ typography:
     fontSize: 16px
     fontWeight: "400"
     lineHeight: 1.5
-  body:
-    fontFamily: "Inter Variable"
-    fontSize: 15px
-    fontWeight: "400"
-    lineHeight: 1.5
-  body-14:
-    fontFamily: "Inter Variable"
-    fontSize: 14px
-    fontWeight: "400"
-    lineHeight: 1.5
   label:
-    fontFamily: "Inter Variable"
-    fontSize: 13.3333px
-    fontWeight: "400"
-    lineHeight: 1.5
-  label-13:
     fontFamily: "Inter Variable"
     fontSize: 13px
     fontWeight: "400"
     lineHeight: 1.5
 rounded:
-  xs: 1px
-  sm: 2px
-  md: 4px
-  lg: 6px
-  xl: 7px
-  2xl: 8px
-  3xl: 12px
+  xs: 2px
+  sm: 4px
+  md: 6px
+  lg: 8px
+  xl: 12px
+  2xl: 16px
+  3xl: 22px
   full: 9999px
 spacing:
-  xs: 1px
-  sm: 3px
-  md: 5px
-  lg: 7px
-  xl: 11px
+  xs: 4px
+  sm: 8px
+  md: 12px
+  lg: 16px
+  xl: 20px
+  2xl: 24px
+  3xl: 28px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -93,10 +86,10 @@ components:
     padding: "{spacing.sm}"
   body-text:
     textColor: "{colors.text}"
-    typography: "{typography.body}"
+    typography: "{typography.title}"
   link:
     textColor: "{colors.accent-1}"
-    typography: "{typography.body}"
+    typography: "{typography.title}"
   badge:
     backgroundColor: "{colors.accent-2}"
     textColor: "{colors.on-accent-2}"
@@ -109,21 +102,21 @@ Auto-extracted from https://linear.app by DesignScan on 2026-06-06. These tokens
 
 ## Colors
 
-- **primary (#ffdf9f):** the dominant brand/accent color, used for primary actions.
+- **primary (#e5e5e6):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#111111):** the readable foreground used on primary surfaces.
 - **background (#08090a):** the base surface color behind most content.
-- **text (#f7f8f8):** the primary foreground / body-text color.
+- **text (#d0d6e0):** the primary foreground / body-text color.
 - **accent-1 (#62666d):** a supporting accent (used for links).
-- **accent-2 (#d0d6e0):** a secondary accent (used for badges/tags).
-- **on-accent-2 (#111111):** the readable foreground on the secondary accent.
+- **accent-2 (#8a8f98):** a secondary accent (used for badges/tags).
+- **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
 
 ## Typography
 
-Primary typeface: **Inter Variable**, with Berkeley Mono. Sizes range 13px–48px across 9 level(s); weights observed: 300, 400, 510, 590.
+Primary typeface: **Inter Variable**, with Berkeley Mono. Sizes range 13px–64px across 7 level(s); weights observed: 300, 400, 510, 590.
 
 ## Layout
 
-Spacing follows an observed scale of 1px, 3px, 5px, 7px, 11px — usable for padding, gaps, and margins.
+Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 28px — usable for padding, gaps, and margins.
 
 ## Elevation & Depth
 
@@ -131,7 +124,7 @@ Depth is conveyed with 4 shadow level(s) observed on the page.
 
 ## Shapes
 
-Corner radii observed: 1px, 2px, 4px, 6px, 7px, 8px, 12px. Use the smaller values for inputs and chips, larger for cards and surfaces.
+Corner radii observed: 2px, 4px, 6px, 8px, 12px, 16px, 22px. Use the smaller values for inputs and chips, larger for cards and surfaces.
 
 ## Components
 

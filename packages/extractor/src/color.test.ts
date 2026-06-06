@@ -229,4 +229,11 @@ describe("isNeutral", () => {
     // ...and a clearly saturated color does not.
     expect(isNeutral({ r: 200, g: 100, b: 100, a: 1 })).toBe(false);
   });
+
+  it("treats near-white/near-black tints as neutral despite high HSL saturation", () => {
+    // #faf9f5: tiny chroma, but HSL saturation reads ~0.32 near white.
+    expect(isNeutral({ r: 250, g: 249, b: 245, a: 1 })).toBe(true);
+    // A genuine pale-yellow accent (#ffdf9f) keeps real chroma -> not neutral.
+    expect(isNeutral({ r: 255, g: 223, b: 159, a: 1 })).toBe(false);
+  });
 });

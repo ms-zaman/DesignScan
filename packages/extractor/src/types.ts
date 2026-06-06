@@ -2,6 +2,9 @@
 export interface RawObservations {
   title: string;
   colorCount: Record<string, number>;
+  // text color -> total painted px^2 area (area-weighted body-text vote).
+  // Optional: older recorded fixtures may omit it (pickText falls back to count).
+  textColorArea?: Record<string, number>;
   bgArea: Record<string, number>; // backgroundColor -> total px^2 area
   fontFamilies: Record<string, number>;
   fontSizes: Record<string, number>;
