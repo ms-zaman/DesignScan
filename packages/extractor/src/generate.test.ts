@@ -73,6 +73,51 @@ describe("generate – structure", () => {
   });
 });
 
+describe("generate – dual (light + dark)", () => {
+  const dark = (over: Partial<DesignProfile["colors"]> = {}) =>
+    profile({
+      theme: "dark",
+      colors: {
+        background: "#000000",
+        text: "#eeeeee",
+        primary: "#8ab4f8",
+        palette: [{ hex: "#8ab4f8", count: 9 }],
+        ...over,
+      },
+    });
+
+  it("merges a distinct dark theme as parallel *-dark tokens and variants", () => {
+    const md = generate(profile(), dark());
+    const fm = frontMatter(md);
+    expect(fm).toMatch(/^\s{2}background-dark: "#000000"$/m);
+    expect(fm).toMatch(/^\s{2}primary-dark: "#8ab4f8"$/m);
+    expect(fm).toContain("button-primary-dark:");
+    expect(fm).toContain("surface-dark:");
+    expect(md).toContain("(light + dark themes)");
+    expect(md).toContain("**Dark theme.**");
+    // still one Colors section (spec forbids duplicates)
+    expect(md.match(/## Colors/g)?.length).toBe(1);
+  });
+
+  it("references every *-dark token it defines (no orphans)", () => {
+    const fm = frontMatter(generate(profile(), dark()));
+    for (const m of fm.matchAll(/^\s{2}([a-z0-9-]+-dark): "/gm)) {
+      expect(fm).toContain(`{colors.${m[1]}}`);
+    }
+  });
+
+  it("skips the dark block when the dark pass is identical to light", () => {
+    // Same background/text/primary -> site doesn't honour prefers-color-scheme.
+    const md = generate(
+      profile(),
+      dark({ background: "#ffffff", text: "#222222", primary: "#1a73e8" }),
+    );
+    expect(md).not.toContain("-dark:");
+    expect(md).not.toContain("(light + dark themes)");
+    expect(md).toContain("No distinct dark theme");
+  });
+});
+
 describe("generate – colors", () => {
   it("always emits a primary token (spec requires it)", () => {
     const fm = frontMatter(generate(profile()));

@@ -41,8 +41,11 @@ pnpm extract linear.app --out out/linear.json
 # emit a Google-format DESIGN.md instead of profile JSON
 pnpm extract stripe.com --md --out out/stripe.DESIGN.md
 
-# extract the dark theme (prefers-color-scheme: dark)
-pnpm extract linear.app --dark --md --out out/linear.dark.DESIGN.md
+# pick a theme: light (default) | dark | both
+pnpm extract linear.app --theme dark --md --out out/linear.dark.DESIGN.md
+
+# both = merge light + dark into one DESIGN.md (parallel *-dark tokens)
+pnpm extract vercel.com --theme both --md --out out/vercel.DESIGN.md
 
 # watch the browser work
 pnpm extract vercel.com --headful
@@ -65,8 +68,9 @@ pnpm extract vercel.com --headful
 - [~] **Step 2 — Generator**: `DesignProfile` → `DESIGN.md` (Google spec: YAML
       front-matter + prose) via `--md`. Token mapping + heuristic prose done;
       passes the official `@google/design.md` linter with **0 errors**
-      (`pnpm lint:designmd`). Dark theme via `--dark`. Parked:
-      LLM-refined prose/rationale, and merging light+dark into one file.
+      (`pnpm lint:designmd`). Theme selection via `--theme light|dark|both`;
+      `both` merges light + dark into one spec-valid file (parallel `*-dark`
+      tokens + variants). Parked: LLM-refined prose/rationale.
 - [ ] **Step 3 — HTML preview** renderer (light/dark token sheets)
 - [ ] **Step 4 — Seed 30–40 brand files + public repo** (distribution wedge)
 - [ ] **Step 5 — `npx ... add <brand>` CLI** + per-brand SEO pages
@@ -76,9 +80,10 @@ pnpm extract vercel.com --headful
 ## Known limitations
 
 - Single page only (no crawl of pricing/docs yet).
-- One theme per run via `--dark` (emulates `prefers-color-scheme`); not yet
-  merged into a single light+dark `DESIGN.md`. Sites that gate theme on a
-  class/localStorage toggle (not the media query) won't switch from `--dark`.
+- Dark theme is emulated via `prefers-color-scheme`. Sites that gate theme on a
+  class/localStorage toggle (not the media query) won't switch, so `--theme
+  dark`/`both` returns the light palette; `both` detects this and emits a
+  light-only file with an honest note rather than fabricating a dark theme.
 - Role heuristics (primary/text/background) are frequency/area based — good
   enough to inspect, not yet LLM-refined.
 

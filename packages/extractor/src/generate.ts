@@ -95,12 +95,20 @@ function scaleTokens(values: number[]): [string, string][] {
 // Build the colors map AND the components that reference them together, so we
 // only ever emit a color token that some component actually uses (keeps the
 // linter's "defined but never referenced" warnings at zero).
+//
+// `suffix` lets us emit a parallel theme (e.g. "-dark"): color tokens and
+// component keys are suffixed, while the shared rounded/spacing scales are
+// referenced unsuffixed. This keeps both themes inside one spec-valid file
+// (the spec forbids duplicate `## Colors` headings but accepts extra tokens).
 function buildColorsAndComponents(
   profile: DesignProfile,
   rounded: [string, string][],
   spacing: [string, string][],
   bodyLevel: string | undefined,
+  suffix = "",
 ) {
+  const cn = (base: string) => `${base}${suffix}`; // suffixed color-token name
+  const ref = (base: string) => `{colors.${base}${suffix}}`;
   const primary =
     profile.colors.primary ||
     profile.colors.palette[0]?.hex ||
@@ -135,51 +143,51 @@ function buildColorsAndComponents(
   const lines: string[] = [];
 
   // Primary button — always present (spec requires a `primary` color).
-  lines.push("  button-primary:");
-  lines.push(`    backgroundColor: "{colors.primary}"`);
+  lines.push(`  ${cn("button-primary")}:`);
+  lines.push(`    backgroundColor: "${ref("primary")}"`);
   use("primary");
-  lines.push(`    textColor: "{colors.on-primary}"`);
+  lines.push(`    textColor: "${ref("on-primary")}"`);
   use("on-primary");
   if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
   if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
 
   if (background && text) {
-    lines.push("  surface:");
-    lines.push(`    backgroundColor: "{colors.background}"`);
-    lines.push(`    textColor: "{colors.text}"`);
+    lines.push(`  ${cn("surface")}:`);
+    lines.push(`    backgroundColor: "${ref("background")}"`);
+    lines.push(`    textColor: "${ref("text")}"`);
     use("background");
     use("text");
     if (roundedLg) lines.push(`    rounded: "{rounded.${roundedLg}}"`);
     if (spacingLg) lines.push(`    padding: "{spacing.${spacingLg}}"`);
 
-    lines.push("  input:");
-    lines.push(`    backgroundColor: "{colors.background}"`);
-    lines.push(`    textColor: "{colors.text}"`);
+    lines.push(`  ${cn("input")}:`);
+    lines.push(`    backgroundColor: "${ref("background")}"`);
+    lines.push(`    textColor: "${ref("text")}"`);
     if (roundedSm) lines.push(`    rounded: "{rounded.${roundedSm}}"`);
     if (spacingSm) lines.push(`    padding: "{spacing.${spacingSm}}"`);
   }
 
   if (text && bodyLevel) {
-    lines.push("  body-text:");
-    lines.push(`    textColor: "{colors.text}"`);
+    lines.push(`  ${cn("body-text")}:`);
+    lines.push(`    textColor: "${ref("text")}"`);
     use("text");
     lines.push(`    typography: "{typography.${bodyLevel}}"`);
   }
 
   // Link — gives accent-1 a home so it isn't an orphan token.
   if (accent1) {
-    lines.push("  link:");
-    lines.push(`    textColor: "{colors.accent-1}"`);
+    lines.push(`  ${cn("link")}:`);
+    lines.push(`    textColor: "${ref("accent-1")}"`);
     use("accent-1");
     if (bodyLevel) lines.push(`    typography: "{typography.${bodyLevel}}"`);
   }
 
   // Badge / tag — consumes accent-2 (+ its readable foreground).
   if (accent2 && onAccent2) {
-    lines.push("  badge:");
-    lines.push(`    backgroundColor: "{colors.accent-2}"`);
+    lines.push(`  ${cn("badge")}:`);
+    lines.push(`    backgroundColor: "${ref("accent-2")}"`);
     use("accent-2");
-    lines.push(`    textColor: "{colors.on-accent-2}"`);
+    lines.push(`    textColor: "${ref("on-accent-2")}"`);
     use("on-accent-2");
     if (roundedFull) lines.push(`    rounded: "{rounded.${roundedFull}}"`);
     else if (roundedSm) lines.push(`    rounded: "{rounded.${roundedSm}}"`);
@@ -194,10 +202,9 @@ function buildColorsAndComponents(
     ["accent-2", accent2],
     ["on-accent-2", onAccent2],
   ];
-  const colors = candidates.filter(([name, hex]) => hex && used.has(name)) as [
-    string,
-    string,
-  ][];
+  const colors = candidates
+    .filter(([name, hex]) => hex && used.has(name))
+    .map(([name, hex]) => [cn(name), hex] as [string, string]);
 
   return { colors, componentLines: lines, roundedMd };
 }
@@ -212,7 +219,11 @@ const COLOR_LABEL: Record<string, string> = {
   "on-accent-2": "the readable foreground on the secondary accent",
 };
 
-export function generate(profile: DesignProfile): string {
+// `dark`, when supplied, is a second profile captured under
+// `prefers-color-scheme: dark`. Both themes are merged into ONE spec-valid file:
+// shared typography/spacing/rounded scales, light colors + `*-dark` colors, and
+// `*-dark` component variants — all under the single required section headings.
+export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   const levels = typographyLevels(profile);
   const rounded = scaleTokens(profile.radiusScalePx);
   const spacing = scaleTokens(profile.spacingScalePx);
@@ -227,8 +238,31 @@ export function generate(profile: DesignProfile): string {
     spacing,
     bodyLevel,
   );
+  // Many sites don't honour `prefers-color-scheme` (they gate dark mode on a
+  // class/localStorage toggle), so the "dark" pass re-extracts the light theme.
+  // Only emit a dark block when it's actually distinct — otherwise we'd bloat the
+  // file with duplicate tokens and imply a dark theme that doesn't exist.
+  const eq = (a?: string | null, b?: string | null) =>
+    (a ?? "").toLowerCase() === (b ?? "").toLowerCase();
+  const distinctDark =
+    !!dark &&
+    !(
+      eq(dark.colors.background, profile.colors.background) &&
+      eq(dark.colors.text, profile.colors.text) &&
+      eq(dark.colors.primary, profile.colors.primary)
+    );
+  // The dark theme reuses the shared scales, so it only contributes colors and
+  // component variants (suffixed "-dark").
+  const darkBlock =
+    dark && distinctDark
+      ? buildColorsAndComponents(dark, rounded, spacing, bodyLevel, "-dark")
+      : null;
   const cmap = Object.fromEntries(colors);
-  const themeNote = profile.theme === "dark" ? " (dark theme)" : "";
+  const themeNote = darkBlock
+    ? " (light + dark themes)"
+    : profile.theme === "dark"
+      ? " (dark theme)"
+      : "";
 
   // ---- YAML front matter ---------------------------------------------------
   const fm: string[] = [];
@@ -240,6 +274,8 @@ export function generate(profile: DesignProfile): string {
 
   fm.push("colors:");
   for (const [k, v] of colors) fm.push(`  ${k}: ${q(v)}`);
+  if (darkBlock)
+    for (const [k, v] of darkBlock.colors) fm.push(`  ${k}: ${q(v)}`);
 
   if (levels.length) {
     fm.push("typography:");
@@ -268,6 +304,7 @@ export function generate(profile: DesignProfile): string {
 
   fm.push("components:");
   fm.push(...componentLines);
+  if (darkBlock) fm.push(...darkBlock.componentLines);
 
   // ---- Markdown body (spec section order) ----------------------------------
   const body: string[] = [];
@@ -286,6 +323,26 @@ export function generate(profile: DesignProfile): string {
   for (const [name, hex] of colors) {
     const label = COLOR_LABEL[name] ?? "a supporting palette color";
     body.push(`- **${name} (${hex}):** ${label}.`);
+  }
+  if (darkBlock) {
+    body.push("");
+    body.push(
+      "**Dark theme.** The same roles captured under " +
+        "`prefers-color-scheme: dark`, exposed as parallel `*-dark` tokens (with " +
+        "matching `*-dark` component variants):",
+    );
+    for (const [name, hex] of darkBlock.colors) {
+      const label =
+        COLOR_LABEL[name.replace(/-dark$/, "")] ?? "a supporting palette color";
+      body.push(`- **${name} (${hex}):** ${label}.`);
+    }
+  } else if (dark) {
+    body.push("");
+    body.push(
+      "_No distinct dark theme was detected — the site renders the same palette " +
+        "under `prefers-color-scheme: dark` (its dark mode, if any, is likely " +
+        "gated on a class or stored preference rather than the OS setting)._",
+    );
   }
 
   if (levels.length) {
@@ -354,6 +411,12 @@ export function generate(profile: DesignProfile): string {
   if (cmap["accent-2"]) {
     body.push(
       "- **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.",
+    );
+  }
+  if (darkBlock) {
+    body.push(
+      "- **Dark variants:** every component above has a `*-dark` counterpart " +
+        "(e.g. `button-primary-dark`, `surface-dark`) wired to the `*-dark` colors.",
     );
   }
 

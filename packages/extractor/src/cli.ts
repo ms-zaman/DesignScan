@@ -18,25 +18,46 @@ program
     false,
   )
   .option(
-    "--dark",
-    "extract the dark theme (emulates prefers-color-scheme: dark)",
-    false,
+    "--theme <mode>",
+    "which theme(s) to capture: light | dark | both " +
+      "(both = merge into one file; dark is emulated via prefers-color-scheme)",
+    "light",
   )
   .option("--headful", "run the browser with a visible window", false)
   .option("--quiet", "suppress the human-readable summary", false)
   .action(async (url: string, opts) => {
     const target = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-    const scheme = opts.dark ? "dark" : "light";
-    process.stderr.write(`→ analyzing ${target} (${scheme})\n`);
 
-    const raw = await extract(target, {
-      headful: opts.headful,
-      colorScheme: scheme,
-    });
-    const profile = normalize(target, raw);
-    const output = opts.md
-      ? generate(profile)
-      : JSON.stringify(profile, null, 2);
+    const theme = String(opts.theme).toLowerCase();
+    if (theme !== "light" && theme !== "dark" && theme !== "both") {
+      throw new Error(
+        `invalid --theme "${opts.theme}" (expected: light | dark | both)`,
+      );
+    }
+
+    const run = async (scheme: "light" | "dark") => {
+      process.stderr.write(`→ analyzing ${target} (${scheme})\n`);
+      const raw = await extract(target, {
+        headful: opts.headful,
+        colorScheme: scheme,
+      });
+      return normalize(target, raw);
+    };
+
+    let profile: ReturnType<typeof normalize>;
+    let output: string;
+    if (theme === "both") {
+      // Light is the base document; dark is folded in as parallel tokens.
+      const light = await run("light");
+      const dark = await run("dark");
+      profile = light;
+      output = opts.md
+        ? generate(light, dark)
+        : JSON.stringify({ light, dark }, null, 2);
+    } else {
+      profile = await run(theme);
+      output = opts.md ? generate(profile) : JSON.stringify(profile, null, 2);
+    }
 
     if (opts.out) {
       await mkdir(dirname(opts.out), { recursive: true });

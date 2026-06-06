@@ -23,15 +23,21 @@ pnpm --filter @designscan/extractor exec playwright install chromium  # one-time
 # token profile (JSON) for any URL
 pnpm extract stripe.com
 
-# generate a DESIGN.md
+# generate a DESIGN.md (light theme by default)
 pnpm extract stripe.com --md --out out/stripe.DESIGN.md
+
+# pick a theme: light (default) | dark | both
+pnpm extract vercel.com --md --theme dark --out out/vercel.dark.DESIGN.md
+
+# both = bundle light + dark into one file (parallel *-dark tokens)
+pnpm extract vercel.com --md --theme both --out out/vercel.DESIGN.md
 ```
 
 ## Scripts (root)
 
 | Script | Does |
 |--------|------|
-| `pnpm extract <url> [--md] [--dark] [--out f]` | Extract tokens / generate `DESIGN.md` |
+| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file) |
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm test` | Run the test suite (vitest) |
 | `pnpm check` | Biome — format + lint (use `pnpm format` to auto-fix) |
