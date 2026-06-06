@@ -4,10 +4,11 @@ import type { DesignProfile } from "./types.js";
 
 function profile(overrides: Partial<DesignProfile> = {}): DesignProfile {
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "1.1",
     url: "https://example.com",
     title: "Example",
     fetchedAt: "2026-06-04T12:00:00.000Z",
+    theme: "light",
     colors: {
       background: "#ffffff",
       text: "#222222",
@@ -46,6 +47,11 @@ describe("generate – structure", () => {
     const fm = frontMatter(generate(profile({ title: "Acme" })));
     expect(fm).toContain("version: alpha");
     expect(fm).toContain('name: "Acme"');
+  });
+
+  it("notes the dark theme in the description, and omits it for light", () => {
+    expect(generate(profile({ theme: "dark" }))).toContain("(dark theme)");
+    expect(generate(profile({ theme: "light" }))).not.toContain("(dark theme)");
   });
 
   it("orders the prose sections per the spec", () => {

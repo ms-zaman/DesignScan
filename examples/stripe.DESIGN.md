@@ -102,7 +102,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://stripe.com by DesignScan on 2026-06-04. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://stripe.com by DesignScan on 2026-06-06. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 

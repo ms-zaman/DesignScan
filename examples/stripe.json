@@ -1,7 +1,9 @@
 {
+  "schemaVersion": "1.1",
   "url": "https://stripe.com",
   "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
-  "fetchedAt": "2026-06-04T03:50:22.918Z",
+  "fetchedAt": "2026-06-06T09:55:40.463Z",
+  "theme": "light",
   "colors": {
     "background": "#ffffff",
     "text": "#000000",
@@ -94,18 +96,20 @@
     "weights": [
       300,
       400
-    ]
+    ],
+    "lineHeightHeading": 1.1,
+    "lineHeightBody": 1.4,
+    "weightHeading": 300,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": -0.01,
+    "letterSpacingBodyEm": 0
   },
   "spacingScalePx": [
     2,
     4,
-    5.5,
     6,
-    7,
     8,
-    9,
     10,
-    11,
     12
   ],
   "radiusScalePx": [

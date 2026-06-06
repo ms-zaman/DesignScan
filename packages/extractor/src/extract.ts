@@ -186,6 +186,7 @@ export async function extract(
       } as RawObservations;
     }, maxElements);
 
+    raw.colorScheme = colorScheme;
     return raw;
   } finally {
     await browser.close();

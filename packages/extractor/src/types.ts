@@ -22,6 +22,8 @@ export interface RawObservations {
   weightBody?: Record<string, number>;
   lsHeading?: Record<string, number>; // letter-spacing in em -> count
   lsBody?: Record<string, number>;
+  // Which prefers-color-scheme this page was captured under.
+  colorScheme?: "light" | "dark";
 }
 
 export interface ButtonSample {
@@ -36,7 +38,7 @@ export interface ButtonSample {
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.0";
+export const PROFILE_SCHEMA_VERSION = "1.1";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -45,6 +47,9 @@ export interface DesignProfile {
   url: string;
   title: string;
   fetchedAt: string;
+  // The color scheme this profile represents (matters once light+dark are
+  // bundled together).
+  theme: "light" | "dark";
   colors: {
     background: string | null;
     text: string | null;

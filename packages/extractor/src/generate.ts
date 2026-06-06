@@ -228,13 +228,14 @@ export function generate(profile: DesignProfile): string {
     bodyLevel,
   );
   const cmap = Object.fromEntries(colors);
+  const themeNote = profile.theme === "dark" ? " (dark theme)" : "";
 
   // ---- YAML front matter ---------------------------------------------------
   const fm: string[] = [];
   fm.push("version: alpha");
   fm.push(`name: ${q(profile.title || profile.url)}`);
   fm.push(
-    `description: ${q(`Auto-extracted from ${profile.url} by DesignScan.`)}`,
+    `description: ${q(`Auto-extracted from ${profile.url} by DesignScan${themeNote}.`)}`,
   );
 
   fm.push("colors:");
@@ -274,7 +275,7 @@ export function generate(profile: DesignProfile): string {
   body.push("## Overview");
   body.push("");
   body.push(
-    `Auto-extracted from ${profile.url} by DesignScan on ${profile.fetchedAt.slice(0, 10)}. ` +
+    `Auto-extracted from ${profile.url} by DesignScan on ${profile.fetchedAt.slice(0, 10)}${themeNote}. ` +
       "These tokens reflect the computed styles observed on the live page — a " +
       "high-fidelity starting point. Refine the rationale below before shipping.",
   );

@@ -37,15 +37,30 @@ function pickBackground(bgArea: Record<string, number>): string | null {
   return best?.hex ?? null;
 }
 
-function pickText(colorCount: Record<string, number>): string | null {
-  // Most frequent foreground color wins; that's almost always body text.
+// WCAG contrast ratio from two relative luminances.
+const contrastRatio = (l1: number, l2: number): number =>
+  (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+
+function pickText(
+  colorCount: Record<string, number>,
+  background: string | null,
+): string | null {
+  // Most frequent foreground color is usually body text — but require readable
+  // contrast against the chosen background so we never return white-on-white
+  // (the most common color on a light page is often white, from chrome/buttons).
+  const bg = background ? parseColor(background) : null;
+  const bgLum = bg ? luminance(bg) : null;
   let best: { hex: string; count: number } | null = null;
+  let fallback: { hex: string; count: number } | null = null;
   for (const [raw, count] of Object.entries(colorCount)) {
     const c = parseColor(raw);
     if (!c || c.a < 0.5) continue;
-    if (!best || count > best.count) best = { hex: toHex(c), count };
+    const hex = toHex(c);
+    if (!fallback || count > fallback.count) fallback = { hex, count };
+    if (bgLum !== null && contrastRatio(luminance(c), bgLum) < 3) continue;
+    if (!best || count > best.count) best = { hex, count };
   }
-  return best?.hex ?? null;
+  return (best ?? fallback)?.hex ?? null;
 }
 
 function pickPrimary(raw: RawObservations): string | null {
@@ -149,14 +164,16 @@ function snapScale(values: number[], minGap = 2): number[] {
 }
 
 export function normalize(url: string, raw: RawObservations): DesignProfile {
+  const background = pickBackground(raw.bgArea);
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
     title: raw.title,
     fetchedAt: new Date().toISOString(),
+    theme: raw.colorScheme ?? "light",
     colors: {
-      background: pickBackground(raw.bgArea),
-      text: pickText(raw.colorCount),
+      background,
+      text: pickText(raw.colorCount, background),
       primary: pickPrimary(raw),
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },

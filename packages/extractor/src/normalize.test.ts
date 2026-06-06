@@ -46,6 +46,11 @@ describe("normalize – metadata", () => {
     expect(profile.fetchedAt).toBe(new Date(profile.fetchedAt).toISOString());
   });
 
+  it("defaults theme to light and records the captured color scheme", () => {
+    expect(normalize("u", raw()).theme).toBe("light");
+    expect(normalize("u", raw({ colorScheme: "dark" })).theme).toBe("dark");
+  });
+
   it("stamps the current profile schema version", () => {
     const profile = normalize("u", raw());
     expect(profile.schemaVersion).toBe(PROFILE_SCHEMA_VERSION);
@@ -90,6 +95,21 @@ describe("normalize – colors", () => {
       }),
     );
     expect(profile.colors.text).toBe("#222222");
+  });
+
+  it("skips a no-contrast foreground against the background (no white-on-white)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 5000 }, // white background
+        colorCount: {
+          "rgb(255, 255, 255)": 50, // most frequent, but invisible on white
+          "rgb(0, 0, 0)": 12, // readable -> should win
+        },
+      }),
+    );
+    expect(profile.colors.background).toBe("#ffffff");
+    expect(profile.colors.text).toBe("#000000");
   });
 
   it("merges near-duplicate colors that share a hex and ranks by count", () => {
