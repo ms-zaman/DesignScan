@@ -22,6 +22,26 @@ export function onColor(hex: string): string {
   return lightContrast >= darkContrast ? LIGHT_FG : DARK_FG;
 }
 
+// WCAG contrast ratio between two hex colors (1–21). Unparseable input -> 1
+// (treated as no contrast) so callers reject it.
+function contrast(a: string, b: string): number {
+  const ca = parseColor(a);
+  const cb = parseColor(b);
+  if (!ca || !cb) return 1;
+  const la = luminance(ca);
+  const lb = luminance(cb);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+// Minimum contrast an accent must have against the background to be usable.
+// accent-1 is link text (body-sized) on the background, so it needs real
+// readability (AA-ish). accent-2 is a badge *background* — its own text is
+// contrast-picked separately, so the pill only has to be visibly distinct from
+// the surface behind it (a low bar that still rejects e.g. a white badge on a
+// near-white page).
+const ACCENT1_MIN_CONTRAST = 3; // readable link text
+const ACCENT2_MIN_CONTRAST = 1.4; // visible chip vs surface
+
 export interface TypeLevel {
   name: string;
   family: string;
@@ -131,8 +151,19 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
   const extras = profile.colors.palette
     .map((p) => p.hex)
     .filter((h) => !taken.has(h));
-  const accent1 = extras[0] ?? null;
-  const accent2 = extras[1] ?? null;
+
+  // Pick accents that are actually *visible* against the background, in palette
+  // order. Without this, the frequency-ranked palette can hand us a structural
+  // color that's invisible in its role — e.g. a near-black link on a dark page,
+  // or a white badge on a near-white surface. With no background to test
+  // against we fall back to raw palette order. accent-2 is taken from what's
+  // left so the two roles don't collapse onto the same hex.
+  const usable = (minContrast: number) => (hex: string) =>
+    !background || contrast(hex, background) >= minContrast;
+  const accent1 = extras.find(usable(ACCENT1_MIN_CONTRAST)) ?? null;
+  const accent2 =
+    extras.filter((h) => h !== accent1).find(usable(ACCENT2_MIN_CONTRAST)) ??
+    null;
 
   return {
     primary,
