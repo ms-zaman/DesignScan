@@ -195,4 +195,30 @@ describe("extract (integration)", () => {
     },
     TEST_TIMEOUT,
   );
+
+  it(
+    "size-weights the heading weight so the largest text wins over abundant medium text",
+    async () => {
+      // One large bold display (1x) vs two smaller heading-bucket elements at the
+      // body weight (2x). A plain count would pick 400 (the mode); size-weighting
+      // by px lets the 60px/800 display win — the real heading-weight intent.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Heading weight</title></head>
+  <body style="margin: 0">
+    <h1 style="font-size: 60px; font-weight: 800; margin: 0; width: 900px; height: 120px">Big bold display</h1>
+    <h2 style="font-size: 20px; font-weight: 400; margin: 0">Lighter subheading one</h2>
+    <h2 style="font-size: 20px; font-weight: 400; margin: 0">Lighter subheading two</h2>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      // Plain element counts: 400 appears twice, 800 once -> 400 would be the
+      // mode. Size-weighting flips it: 800 carries 60, 400 carries 2x20=40.
+      const w800 = raw.weightHeading?.["800"] ?? 0;
+      const w400 = raw.weightHeading?.["400"] ?? 0;
+      expect(w800).toBeGreaterThan(w400);
+    },
+    TEST_TIMEOUT,
+  );
 });

@@ -212,6 +212,49 @@ function cleanFamilies(map: Record<string, number>): string[] {
     .slice(0, 5);
 }
 
+// CSS generic font families — a valid stack should end in one so the browser
+// always has something to fall back to.
+const GENERIC_FAMILIES = new Set([
+  "serif",
+  "sans-serif",
+  "monospace",
+  "cursive",
+  "fantasy",
+  "system-ui",
+  "ui-serif",
+  "ui-sans-serif",
+  "ui-monospace",
+  "ui-rounded",
+  "math",
+]);
+
+// The dominant text element already declares a real fallback chain
+// (`sohne-var, "SF Pro Display", sans-serif`); cleanFamilies discards it by
+// keeping only the first name. Preserve it here as a paste-ready CSS stack: drop
+// emoji/symbol fonts (UI noise, never a design choice), re-quote multi-word
+// names, and guarantee a trailing generic so the value is safe to use verbatim.
+function buildFontStack(map: Record<string, number>): string | undefined {
+  const dominant = modeKey(map);
+  if (!dominant) return undefined;
+  const parts = dominant
+    .split(",")
+    .map((p) => p.replace(/["']/g, "").trim())
+    .filter((p) => p && !/emoji|symbol/i.test(p));
+  if (!parts.length) return undefined;
+  const last = parts[parts.length - 1].toLowerCase();
+  if (!GENERIC_FAMILIES.has(last)) {
+    // Infer the generic from the declared one if present anywhere, else assume
+    // sans-serif (the overwhelming default for product/marketing sites).
+    const declaredGeneric = parts.find((p) =>
+      GENERIC_FAMILIES.has(p.toLowerCase()),
+    );
+    parts.push(declaredGeneric ?? "sans-serif");
+  }
+  const quote = (p: string) =>
+    GENERIC_FAMILIES.has(p.toLowerCase()) || !/\s/.test(p) ? p : `"${p}"`;
+  return [...new Set(parts)].map(quote).join(", ");
+}
+
 function topWeights(map: Record<string, number>): number[] {
   return [...new Set(Object.keys(map).map((w) => parseInt(w, 10)))]
     .filter((n) => !Number.isNaN(n))
@@ -267,6 +310,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
     },
     typography: {
       families: cleanFamilies(raw.fontFamilies),
+      fontStack: buildFontStack(raw.fontFamilies),
       sizeScalePx: buildSizeScale(raw.fontSizes),
       weights: topWeights(raw.fontWeights),
       lineHeightHeading: numMode(raw.lhHeading),

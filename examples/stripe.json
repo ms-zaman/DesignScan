@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.2",
   "url": "https://stripe.com",
   "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
   "fetchedAt": "2026-06-06T11:14:17.292Z",
@@ -79,6 +79,7 @@
     "families": [
       "sohne-var"
     ],
+    "fontStack": "sohne-var, \"SF Pro Display\", sans-serif",
     "sizeScalePx": [
       8,
       10,

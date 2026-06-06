@@ -187,6 +187,33 @@ describe("normalize – typography", () => {
     expect(profile.typography.families).toEqual(["Inter", "Georgia"]);
   });
 
+  it("preserves the dominant family's declared stack as a paste-ready fontStack", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        fontFamilies: {
+          '"Inter", Arial, sans-serif': 10,
+          "Georgia, serif": 4,
+        },
+      }),
+    );
+    // Dominant declaration kept (single-word names unquoted, generic kept).
+    expect(profile.typography.fontStack).toBe("Inter, Arial, sans-serif");
+  });
+
+  it("drops emoji/symbol fonts and guarantees a trailing generic in fontStack", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        fontFamilies: {
+          'Geist, Arial, "Apple Color Emoji", "Segoe UI Symbol"': 9,
+        },
+      }),
+    );
+    // emoji/symbol noise removed; no declared generic, so sans-serif appended.
+    expect(profile.typography.fontStack).toBe("Geist, Arial, sans-serif");
+  });
+
   it("limits families to the top 5 by frequency", () => {
     const fontFamilies: Record<string, number> = {};
     for (let i = 0; i < 8; i++) fontFamilies[`Font${i}`] = i;

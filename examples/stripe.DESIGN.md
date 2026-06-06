@@ -12,41 +12,41 @@ colors:
   on-accent-2: "#ffffff"
 typography:
   display:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 48px
     fontWeight: "300"
     lineHeight: 1.1
     letterSpacing: "-0.01em"
   headline-lg:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 32px
     fontWeight: "300"
     lineHeight: 1.1
     letterSpacing: "-0.01em"
   headline-md:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 26px
     fontWeight: "300"
     lineHeight: 1.1
     letterSpacing: "-0.01em"
   headline-sm:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 22px
     fontWeight: "300"
     lineHeight: 1.1
     letterSpacing: "-0.01em"
   body-lg:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 16px
     fontWeight: "400"
     lineHeight: 1.4
   body:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 14px
     fontWeight: "400"
     lineHeight: 1.4
   label:
-    fontFamily: "sohne-var"
+    fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 12px
     fontWeight: "400"
     lineHeight: 1.4

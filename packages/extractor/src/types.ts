@@ -41,7 +41,7 @@ export interface ButtonSample {
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.1";
+export const PROFILE_SCHEMA_VERSION = "1.2";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -61,6 +61,12 @@ export interface DesignProfile {
   };
   typography: {
     families: string[];
+    // The dominant text element's full declared font-family, cleaned into a
+    // paste-ready CSS stack (primary + the site's own fallbacks + a generic),
+    // e.g. `sohne-var, "SF Pro Display", sans-serif`. Lets consumers drop the
+    // value straight into CSS even when the brand font isn't installed. Optional
+    // for back-compat with profiles captured before schema 1.2.
+    fontStack?: string;
     sizeScalePx: number[];
     weights: number[];
     lineHeightHeading?: number;

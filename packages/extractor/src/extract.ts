@@ -135,8 +135,14 @@ export async function extract(
             bump(lhTarget, ratio.toFixed(2));
           }
 
+          // Size-weight the heading vote by font-size: a page often has lots of
+          // ~18px text at the body weight (feature copy, nav) that would outvote
+          // the few true display/H1 elements under a plain count, collapsing the
+          // heading weight to 400. Weighting by px lets the largest — most
+          // heading-like — text decide. Body stays a plain count (its weight is
+          // already robust and size differences there are immaterial).
           const w = parseInt(cs.fontWeight, 10);
-          if (!Number.isNaN(w)) bump(wTarget, String(w));
+          if (!Number.isNaN(w)) bump(wTarget, String(w), isHeading ? fpx : 1);
 
           const ls = cs.letterSpacing;
           let em: number | null = null;

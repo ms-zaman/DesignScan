@@ -31,13 +31,19 @@ pnpm extract vercel.com --md --theme dark --out out/vercel.dark.DESIGN.md
 
 # both = bundle light + dark into one file (parallel *-dark tokens)
 pnpm extract vercel.com --md --theme both --out out/vercel.DESIGN.md
+
+# --preview = also write a self-contained HTML proof sheet beside the file,
+# rendering every token (swatches, type specimens, scales, components) so you
+# can eyeball the extraction before trusting it (--theme both adds a Light/Dark toggle)
+pnpm extract stripe.com --md --preview --out out/stripe.DESIGN.md
+# → out/stripe.DESIGN.md  +  out/stripe.preview.html
 ```
 
 ## Scripts (root)
 
 | Script | Does |
 |--------|------|
-| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file) |
+| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--preview] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it) |
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm test` | Run the test suite (vitest) |
 | `pnpm check` | Biome — format + lint (use `pnpm format` to auto-fix) |
@@ -51,8 +57,9 @@ The engine is consumable as a library through its public API
 
 - [x] **Step 1 — Extraction engine** (Playwright → clean token profile)
 - [x] **Step 2 — Generator** (token profile → spec-valid `DESIGN.md`, lint-clean)
-- [ ] **Step 3** — LLM-refined prose & color-role assignment
-- [ ] **Step 4** — HTML preview, brand-seed library, `npx ... add`, checkout
+- [x] **Step 3 — HTML preview** (`--preview` → self-contained token proof sheet, light/dark toggle)
+- [ ] **Step 4** — LLM-refined prose & color-role assignment
+- [ ] **Step 5** — brand-seed library, `npx ... add`, checkout
 
 See [`packages/extractor/README.md`](packages/extractor/README.md) for the full
 roadmap and engine details.

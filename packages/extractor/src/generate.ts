@@ -5,102 +5,15 @@
 // lint-clean (every defined token is referenced), but the prose is meant to be
 // refined (eventually LLM-assisted).
 
-import { luminance, parseColor } from "./color.js";
+import {
+  isDistinctDark,
+  resolveColorRoles,
+  scaleTokens,
+  typographyLevels,
+} from "./resolve.js";
 import type { DesignProfile } from "./types.js";
 
 const q = (s: string) => `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-
-// Readable foreground (near-black or white) for a given surface color. We pick
-// whichever has the higher *actual* WCAG contrast — a flat luminance<0.5 cutoff
-// mishandles mid-tones (a mid-grey would get white text at ~3:1 when near-black
-// would clear AA). The real crossover sits near luminance 0.18, not 0.5.
-const DARK_FG = "#111111";
-const LIGHT_FG = "#ffffff";
-const DARK_FG_LUM = luminance({ r: 17, g: 17, b: 17, a: 1 });
-function onColor(hex: string): string {
-  const c = parseColor(hex);
-  if (!c) return DARK_FG;
-  const bgLum = luminance(c);
-  const lightContrast = (1 + 0.05) / (bgLum + 0.05);
-  const darkContrast = (bgLum + 0.05) / (DARK_FG_LUM + 0.05);
-  return lightContrast >= darkContrast ? LIGHT_FG : DARK_FG;
-}
-
-interface TypeLevel {
-  name: string;
-  family: string;
-  size: number;
-  weight: number;
-  lineHeight: number; // unitless multiplier
-  letterSpacingEm?: number;
-}
-
-// Map a flat px size scale onto semantic typography levels, largest first.
-// Tiny sizes (<12px) are dropped as icon/badge/legal noise, and the scale is
-// capped so we don't emit a dozen near-identical levels.
-function typographyLevels(profile: DesignProfile): TypeLevel[] {
-  const MIN_PX = 12;
-  const MAX_LEVELS = 9;
-  const sizes = [...profile.typography.sizeScalePx]
-    .filter((s) => s >= MIN_PX)
-    .sort((a, b) => b - a)
-    .slice(0, MAX_LEVELS);
-  if (sizes.length === 0) return [];
-
-  const t = profile.typography;
-  const family = t.families[0] || "sans-serif";
-  const headingWeight =
-    t.weightHeading ?? (t.weights.length ? Math.max(...t.weights) : 600);
-  const bodyWeight =
-    t.weightBody ?? (t.weights.includes(400) ? 400 : (t.weights[0] ?? 400));
-  const lhHeading = t.lineHeightHeading ?? 1.2;
-  const lhBody = t.lineHeightBody ?? 1.5;
-
-  const bucket = (px: number) =>
-    px >= 40
-      ? "display"
-      : px >= 32
-        ? "headline-lg"
-        : px >= 26
-          ? "headline-md"
-          : px >= 22
-            ? "headline-sm"
-            : px >= 18
-              ? "title"
-              : px >= 16
-                ? "body-lg"
-                : px >= 14
-                  ? "body"
-                  : "label";
-  const isHeading = (px: number) => px >= 18;
-
-  const used = new Set<string>();
-  return sizes.map((size) => {
-    let name = bucket(size);
-    if (used.has(name)) name = `${name}-${size}`; // rare collision guard
-    used.add(name);
-    return {
-      name,
-      family,
-      size,
-      weight: isHeading(size) ? headingWeight : bodyWeight,
-      lineHeight: isHeading(size) ? lhHeading : lhBody,
-      letterSpacingEm: isHeading(size)
-        ? t.letterSpacingHeadingEm
-        : t.letterSpacingBodyEm,
-    };
-  });
-}
-
-// Ordered scale names for radius / spacing maps.
-const SCALE = ["xs", "sm", "md", "lg", "xl", "2xl", "3xl"];
-
-function scaleTokens(values: number[]): [string, string][] {
-  return values
-    .filter((n) => n < 9999)
-    .slice(0, SCALE.length)
-    .map((n, idx) => [SCALE[idx], `${n}px`] as [string, string]);
-}
 
 // Build the colors map AND the components that reference them together, so we
 // only ever emit a color token that some component actually uses (keeps the
@@ -119,24 +32,8 @@ function buildColorsAndComponents(
 ) {
   const cn = (base: string) => `${base}${suffix}`; // suffixed color-token name
   const ref = (base: string) => `{colors.${base}${suffix}}`;
-  const primary =
-    profile.colors.primary ||
-    profile.colors.palette[0]?.hex ||
-    profile.colors.text ||
-    "#000000";
-  const onPrimary = onColor(primary);
-  const background = profile.colors.background;
-  const text = profile.colors.text;
-
-  const taken = new Set(
-    [primary, background, text].filter(Boolean) as string[],
-  );
-  const extras = profile.colors.palette
-    .map((p) => p.hex)
-    .filter((h) => !taken.has(h));
-  const accent1 = extras[0] ?? null;
-  const accent2 = extras[1] ?? null;
-  const onAccent2 = accent2 ? onColor(accent2) : null;
+  const { primary, onPrimary, background, text, accent1, accent2, onAccent2 } =
+    resolveColorRoles(profile);
 
   const pick = (entries: [string, string][], preferred: string, idx: number) =>
     entries.find(([k]) => k === preferred)?.[0] ?? entries[idx]?.[0];
@@ -248,25 +145,15 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     spacing,
     bodyLevel,
   );
-  // Many sites don't honour `prefers-color-scheme` (they gate dark mode on a
-  // class/localStorage toggle), so the "dark" pass re-extracts the light theme.
-  // Only emit a dark block when it's actually distinct — otherwise we'd bloat the
-  // file with duplicate tokens and imply a dark theme that doesn't exist.
-  const eq = (a?: string | null, b?: string | null) =>
-    (a ?? "").toLowerCase() === (b ?? "").toLowerCase();
-  const distinctDark =
-    !!dark &&
-    !(
-      eq(dark.colors.background, profile.colors.background) &&
-      eq(dark.colors.text, profile.colors.text) &&
-      eq(dark.colors.primary, profile.colors.primary)
-    );
-  // The dark theme reuses the shared scales, so it only contributes colors and
-  // component variants (suffixed "-dark").
-  const darkBlock =
-    dark && distinctDark
-      ? buildColorsAndComponents(dark, rounded, spacing, bodyLevel, "-dark")
-      : null;
+  // Only emit a dark block when the dark pass is genuinely distinct (see
+  // isDistinctDark) — otherwise we'd bloat the file with duplicate tokens and
+  // imply a dark theme that doesn't exist. The dark theme reuses the shared
+  // scales, so it only contributes colors and component variants (suffixed
+  // "-dark").
+  const distinctDark = isDistinctDark(profile, dark);
+  const darkBlock = distinctDark
+    ? buildColorsAndComponents(dark, rounded, spacing, bodyLevel, "-dark")
+    : null;
   const cmap = Object.fromEntries(colors);
   const themeNote = darkBlock
     ? " (light + dark themes)"

@@ -13,6 +13,7 @@ export type { ExtractOptions } from "./extract.js";
 export { extract } from "./extract.js";
 export { generate } from "./generate.js";
 export { normalize } from "./normalize.js";
+export { preview } from "./preview.js";
 export type {
   ButtonSample,
   DesignProfile,

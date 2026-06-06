@@ -4,6 +4,19 @@ import { Command } from "commander";
 import { extract } from "./extract.js";
 import { generate } from "./generate.js";
 import { normalize } from "./normalize.js";
+import { preview } from "./preview.js";
+
+// Where the preview .html lands relative to the run. With --out we sit beside
+// the spec file (out/stripe.DESIGN.md -> out/stripe.preview.html); without it we
+// fall back to a slug of the hostname in the cwd.
+function previewPath(out: string | undefined, target: string): string {
+  if (out) return `${out.replace(/\.(DESIGN\.md|md|json)$/i, "")}.preview.html`;
+  let host = target;
+  try {
+    host = new URL(target).hostname;
+  } catch {}
+  return `${host.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "design"}.preview.html`;
+}
 
 const program = new Command();
 
@@ -22,6 +35,12 @@ program
     "which theme(s) to capture: light | dark | both " +
       "(both = merge into one file; dark is emulated via prefers-color-scheme)",
     "light",
+  )
+  .option(
+    "--preview",
+    "also write a self-contained HTML proof sheet rendering the tokens " +
+      "(<out>.preview.html, or <host>.preview.html without --out)",
+    false,
   )
   .option("--headful", "run the browser with a visible window", false)
   .option("--quiet", "suppress the human-readable summary", false)
@@ -45,11 +64,12 @@ program
     };
 
     let profile: ReturnType<typeof normalize>;
+    let dark: ReturnType<typeof normalize> | undefined;
     let output: string;
     if (theme === "both") {
       // Light is the base document; dark is folded in as parallel tokens.
       const light = await run("light");
-      const dark = await run("dark");
+      dark = await run("dark");
       profile = light;
       output = opts.md
         ? generate(light, dark)
@@ -65,6 +85,14 @@ program
       process.stderr.write(`✓ wrote ${opts.out}\n`);
     } else {
       process.stdout.write(output + (opts.md ? "" : "\n"));
+    }
+
+    if (opts.preview) {
+      const html = preview(profile, dark);
+      const htmlPath = previewPath(opts.out, target);
+      await mkdir(dirname(htmlPath), { recursive: true });
+      await writeFile(htmlPath, html, "utf8");
+      process.stderr.write(`✓ wrote ${htmlPath}\n`);
     }
 
     if (!opts.quiet) {

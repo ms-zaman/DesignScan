@@ -35,6 +35,10 @@ describe("golden – normalize on real captured observations", () => {
     expect(p.typography.sizeScalePx).toEqual([
       8, 10, 12, 14, 16, 22, 26, 32, 48,
     ]);
+    // The declared stack is preserved paste-ready (not collapsed to "sohne-var").
+    expect(p.typography.fontStack).toBe(
+      'sohne-var, "SF Pro Display", sans-serif',
+    );
   });
 
   it("vercel.com (light): monochrome black primary via the contrast guard", () => {

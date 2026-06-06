@@ -47,6 +47,10 @@ pnpm extract linear.app --theme dark --md --out out/linear.dark.DESIGN.md
 # both = merge light + dark into one DESIGN.md (parallel *-dark tokens)
 pnpm extract vercel.com --theme both --md --out out/vercel.DESIGN.md
 
+# --preview = also emit a self-contained HTML proof sheet beside the file
+# (out/vercel.preview.html) rendering every token; --theme both adds a toggle
+pnpm extract vercel.com --theme both --md --preview --out out/vercel.DESIGN.md
+
 # watch the browser work
 pnpm extract vercel.com --headful
 ```
@@ -57,7 +61,9 @@ pnpm extract vercel.com --headful
 |------|------|
 | `src/extract.ts`   | Playwright launch + in-page computed-style collection |
 | `src/normalize.ts` | Clusters raw values into token scales + role heuristics |
+| `src/resolve.ts`   | Shared role/level/scale resolution (one source of truth for generate + preview) |
 | `src/generate.ts`  | `DesignProfile` → Google-format `DESIGN.md` (YAML + prose) |
+| `src/preview.ts`   | `DesignProfile` → self-contained HTML proof sheet (`--preview`) |
 | `src/color.ts`     | rgb/hex parsing, luminance, saturation, neutral test |
 | `src/types.ts`     | `RawObservations` and `DesignProfile` shapes |
 | `src/cli.ts`       | `designscan <url>` command |
@@ -65,17 +71,23 @@ pnpm extract vercel.com --headful
 ## Roadmap (what's next)
 
 - [x] **Step 1 — Extraction engine** (this) → `DesignProfile` JSON
-- [~] **Step 2 — Generator**: `DesignProfile` → `DESIGN.md` (Google spec: YAML
+- [x] **Step 2 — Generator**: `DesignProfile` → `DESIGN.md` (Google spec: YAML
       front-matter + prose) via `--md`. Token mapping + heuristic prose done;
       passes the official `@google/design.md` linter with **0 errors**
       (`pnpm lint:designmd`). Theme selection via `--theme light|dark|both`;
       `both` merges light + dark into one spec-valid file (parallel `*-dark`
-      tokens + variants). Parked: LLM-refined prose/rationale.
-- [ ] **Step 3 — HTML preview** renderer (light/dark token sheets)
-- [ ] **Step 4 — Seed 30–40 brand files + public repo** (distribution wedge)
-- [ ] **Step 5 — `npx ... add <brand>` CLI** + per-brand SEO pages
-- [ ] **Step 6 — Checkout + email delivery** (paid private path)
-- [ ] **Step 7 — One native editor integration** (Cursor/Claude Code)
+      tokens + variants). (LLM-refined prose/rationale moved to Step 4.)
+- [x] **Step 3 — HTML preview** renderer (`--preview`): a self-contained,
+      offline proof sheet that paints every resolved token — color swatches,
+      type specimens at real px/weight, spacing/radius/shadow samples, and the
+      six components — inside neutral chrome, with a Light/Dark toggle when a
+      distinct dark theme exists. Resolves the same roles/levels/scales as the
+      generator (via `resolve.ts`), so it can't drift from the `DESIGN.md`.
+- [ ] **Step 4 — LLM-refined prose & color-role assignment** (semantic intent)
+- [ ] **Step 5 — Seed 30–40 brand files + public repo** (distribution wedge)
+- [ ] **Step 6 — `npx ... add <brand>` CLI** + per-brand SEO pages
+- [ ] **Step 7 — Checkout + email delivery** (paid private path)
+- [ ] **Step 8 — One native editor integration** (Cursor/Claude Code)
 
 ## Known limitations
 
