@@ -4,6 +4,7 @@ import type { DesignProfile } from "./types.js";
 
 function profile(overrides: Partial<DesignProfile> = {}): DesignProfile {
   return {
+    schemaVersion: "1.0",
     url: "https://example.com",
     title: "Example",
     fetchedAt: "2026-06-04T12:00:00.000Z",

@@ -1,4 +1,5 @@
 import { isNeutral, luminance, parseColor, saturation, toHex } from "./color.js";
+import { PROFILE_SCHEMA_VERSION } from "./types.js";
 import type { DesignProfile, RawObservations } from "./types.js";
 
 const px = (s: string): number | null => {
@@ -140,6 +141,7 @@ function snapScale(values: number[], minGap = 2): number[] {
 
 export function normalize(url: string, raw: RawObservations): DesignProfile {
   return {
+    schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
     title: raw.title,
     fetchedAt: new Date().toISOString(),

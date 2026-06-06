@@ -40,6 +40,9 @@ npm run extract -- linear.app --out out/linear.json
 # emit a Google-format DESIGN.md instead of profile JSON
 npm run extract -- stripe.com --md --out out/stripe.DESIGN.md
 
+# extract the dark theme (prefers-color-scheme: dark)
+npm run extract -- linear.app --dark --md --out out/linear.dark.DESIGN.md
+
 # watch the browser work
 npm run extract -- vercel.com --headful
 ```
@@ -61,8 +64,8 @@ npm run extract -- vercel.com --headful
 - [~] **Step 2 — Generator**: `DesignProfile` → `DESIGN.md` (Google spec: YAML
       front-matter + prose) via `--md`. Token mapping + heuristic prose done;
       passes the official `@google/design.md` linter with **0 errors**
-      (`npm run lint:designmd -- <file>`). TODO: LLM-refined prose/rationale and
-      a dark-mode pass.
+      (`npm run lint:designmd -- <file>`). Dark theme via `--dark`. Parked:
+      LLM-refined prose/rationale, and merging light+dark into one file.
 - [ ] **Step 3 — HTML preview** renderer (light/dark token sheets)
 - [ ] **Step 4 — Seed 30–40 brand files + public repo** (distribution wedge)
 - [ ] **Step 5 — `npx ... add <brand>` CLI** + per-brand SEO pages
@@ -72,6 +75,11 @@ npm run extract -- vercel.com --headful
 ## Known limitations
 
 - Single page only (no crawl of pricing/docs yet).
-- Skips exotic computed-color formats (`oklch`, `color()`); handles rgb/hex.
+- One theme per run via `--dark` (emulates `prefers-color-scheme`); not yet
+  merged into a single light+dark `DESIGN.md`. Sites that gate theme on a
+  class/localStorage toggle (not the media query) won't switch from `--dark`.
 - Role heuristics (primary/text/background) are frequency/area based — good
   enough to inspect, not yet LLM-refined.
+
+Color parsing now handles the full modern range — `rgb`/`hex`/`hsl`/`hwb`/
+`oklab`/`oklch`/`lab`/`lch`/`color()`/`color-mix()` — all converted to sRGB.

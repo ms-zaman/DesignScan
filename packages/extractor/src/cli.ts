@@ -13,13 +13,18 @@ program
   .argument("<url>", "URL to analyze")
   .option("-o, --out <file>", "write the output to a file instead of stdout")
   .option("--md", "emit a DESIGN.md (Google format) instead of profile JSON", false)
+  .option("--dark", "extract the dark theme (emulates prefers-color-scheme: dark)", false)
   .option("--headful", "run the browser with a visible window", false)
   .option("--quiet", "suppress the human-readable summary", false)
   .action(async (url: string, opts) => {
     const target = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-    process.stderr.write(`→ analyzing ${target}\n`);
+    const scheme = opts.dark ? "dark" : "light";
+    process.stderr.write(`→ analyzing ${target} (${scheme})\n`);
 
-    const raw = await extract(target, { headful: opts.headful });
+    const raw = await extract(target, {
+      headful: opts.headful,
+      colorScheme: scheme,
+    });
     const profile = normalize(target, raw);
     const output = opts.md ? generate(profile) : JSON.stringify(profile, null, 2);
 

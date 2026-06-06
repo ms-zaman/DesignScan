@@ -6,18 +6,28 @@ export interface ExtractOptions {
   // Hydration waits, mirroring how dembrandt handles SPAs.
   settleMs?: number;
   maxElements?: number;
+  // Emulates `prefers-color-scheme`. Sites that honour the media query render
+  // their dark palette under "dark"; ones that gate theme on a class/localStorage
+  // toggle won't switch from this alone (a known limitation).
+  colorScheme?: "light" | "dark";
 }
 
 export async function extract(
   url: string,
   opts: ExtractOptions = {},
 ): Promise<RawObservations> {
-  const { headful = false, settleMs = 3500, maxElements = 5000 } = opts;
+  const {
+    headful = false,
+    settleMs = 3500,
+    maxElements = 5000,
+    colorScheme = "light",
+  } = opts;
 
   const browser = await chromium.launch({ headless: !headful });
   try {
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
+      colorScheme,
       userAgent:
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
         "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",

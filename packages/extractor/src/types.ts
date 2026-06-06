@@ -33,8 +33,15 @@ export interface ButtonSample {
   padding: string;
 }
 
+// Bump when the DesignProfile shape changes in a way downstream consumers
+// (generator, persisted JSON, public files) must notice. Semver-ish: major for
+// breaking, minor for additive. Keep in sync with the README.
+export const PROFILE_SCHEMA_VERSION = "1.0";
+
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
+  // Version of this JSON shape; see PROFILE_SCHEMA_VERSION.
+  schemaVersion: string;
   url: string;
   title: string;
   fetchedAt: string;

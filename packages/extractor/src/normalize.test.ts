@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "./normalize.js";
+import { PROFILE_SCHEMA_VERSION } from "./types.js";
 import type { ButtonSample, RawObservations } from "./types.js";
 
 // A minimal, empty observation set. Each test overrides only the fields it
@@ -43,6 +44,11 @@ describe("normalize – metadata", () => {
     expect(profile.title).toBe("Hi");
     expect(() => new Date(profile.fetchedAt).toISOString()).not.toThrow();
     expect(profile.fetchedAt).toBe(new Date(profile.fetchedAt).toISOString());
+  });
+
+  it("stamps the current profile schema version", () => {
+    const profile = normalize("u", raw());
+    expect(profile.schemaVersion).toBe(PROFILE_SCHEMA_VERSION);
   });
 });
 

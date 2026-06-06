@@ -71,9 +71,64 @@ describe("parseColor", () => {
     expect(c.a).toBeCloseTo(128 / 255, 5);
   });
 
-  it("returns null for unsupported formats like oklch", () => {
-    expect(parseColor("oklch(0.7 0.1 200)")).toBeNull();
-    expect(parseColor("hsl(200, 50%, 50%)")).toBeNull();
+  it("returns null only for genuinely unparseable input", () => {
+    expect(parseColor("not-a-color")).toBeNull();
+    expect(parseColor("rebeccapurple")).toBeNull(); // named colors (besides transparent) unsupported
+    expect(parseColor("color(rec2020 0.5 0.5 0.5)")).toBeNull(); // unknown color() space
+  });
+});
+
+describe("parseColor – modern formats", () => {
+  const near = (got: RGBA | null, r: number, g: number, b: number, tol = 3) => {
+    expect(got).not.toBeNull();
+    expect(Math.abs(got!.r - r)).toBeLessThanOrEqual(tol);
+    expect(Math.abs(got!.g - g)).toBeLessThanOrEqual(tol);
+    expect(Math.abs(got!.b - b)).toBeLessThanOrEqual(tol);
+  };
+
+  it("parses hsl() (comma and modern syntax) and hsla alpha", () => {
+    near(parseColor("hsl(0, 100%, 50%)"), 255, 0, 0);
+    near(parseColor("hsl(120 100% 50%)"), 0, 255, 0);
+    expect(parseColor("hsla(0, 100%, 50%, 0.4)")!.a).toBeCloseTo(0.4, 5);
+  });
+
+  it("parses hwb()", () => {
+    near(parseColor("hwb(0 0% 0%)"), 255, 0, 0);
+    near(parseColor("hwb(0 100% 0%)"), 255, 255, 255);
+  });
+
+  it("parses oklch() — white, black, and a vivid hue", () => {
+    near(parseColor("oklch(1 0 0)"), 255, 255, 255);
+    near(parseColor("oklch(0 0 0)"), 0, 0, 0);
+    // oklch(0.628 0.2577 29.23) ~= sRGB red
+    near(parseColor("oklch(0.628 0.2577 29.23)"), 255, 0, 0, 6);
+  });
+
+  it("parses oklab() and a percentage lightness", () => {
+    near(parseColor("oklab(1 0 0)"), 255, 255, 255);
+    near(parseColor("oklab(100% 0 0)"), 255, 255, 255);
+  });
+
+  it("parses lab() and lch() neutrals", () => {
+    near(parseColor("lab(100% 0 0)"), 255, 255, 255);
+    near(parseColor("lab(0% 0 0)"), 0, 0, 0);
+    near(parseColor("lch(100% 0 0)"), 255, 255, 255);
+  });
+
+  it("parses color(srgb ...) and color(display-p3 ...)", () => {
+    near(parseColor("color(srgb 1 0 0)"), 255, 0, 0);
+    near(parseColor("color(srgb 0 0 0 / 0.5)"), 0, 0, 0);
+    expect(parseColor("color(srgb 0 0 0 / 0.5)")!.a).toBeCloseTo(0.5, 5);
+    // p3 pure green maps to roughly sRGB green (clamped)
+    near(parseColor("color(display-p3 0 1 0)"), 0, 255, 0, 12);
+  });
+
+  it("parses color-mix(in srgb, ...) at the default 50/50 and weighted", () => {
+    near(parseColor("color-mix(in srgb, #ffffff, #000000)"), 128, 128, 128, 2);
+    near(
+      parseColor("color-mix(in srgb, rgb(255, 0, 0) 75%, rgb(0, 0, 255) 25%)"),
+      191, 0, 64, 4,
+    );
   });
 });
 
