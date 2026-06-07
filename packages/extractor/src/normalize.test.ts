@@ -171,6 +171,35 @@ describe("normalize – colors", () => {
     );
     expect(profile.colors.primary).toBeNull();
   });
+
+  it("uses a saturated link color when buttons are monochrome (airbnb case)", () => {
+    // airbnb's CTA buttons are grey (#f2f2f2) and the brand pink #ff385c lives
+    // only in a link — the link fallback recovers it.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        buttons: [button({ bg: "rgb(242, 242, 242)" })], // neutral CTA
+        links: [
+          { color: "rgb(34, 34, 34)" }, // neutral, ignored
+          { color: "rgb(255, 56, 92)" }, // #ff385c brand pink
+        ],
+      }),
+    );
+    expect(profile.colors.primary).toBe("#ff385c");
+  });
+
+  it("does not let a link color override a real colored button", () => {
+    // The button is the stronger signal; the link must not win.
+    const profile = normalize(
+      "u",
+      raw({
+        buttons: [button({ bg: "rgb(83, 58, 253)" })], // #533afd CTA
+        links: [{ color: "rgb(255, 56, 92)" }], // saturated link
+      }),
+    );
+    expect(profile.colors.primary).toBe("#533afd");
+  });
 });
 
 describe("normalize – surfaces (border & muted-surface)", () => {

@@ -172,7 +172,22 @@ function pickPrimary(
     }
   }
 
-  // 3) Fallback: the most saturated reasonably-frequent color overall.
+  // 3) Links often carry the brand/accent color even when the CTA is a gradient
+  //    or a monochrome button (airbnb's pink #ff385c lives only in a link, never
+  //    a solid button bg). Use the most common *saturated* link color before the
+  //    palette guess. This is fallback-only — sites with a real colored button
+  //    already returned above — so it can't override a correct primary.
+  const linkCount = new Map<string, number>();
+  for (const l of raw.links) {
+    const c = parseColor(l.color);
+    if (!c || c.a < 0.9 || isNeutral(c) || saturation(c) < 0.4) continue;
+    const hex = toHex(c);
+    linkCount.set(hex, (linkCount.get(hex) ?? 0) + 1);
+  }
+  const topLink = [...linkCount.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (topLink) return topLink[0];
+
+  // 4) Last resort: the most saturated reasonably-frequent color overall.
   const candidates = buildPalette(raw.colorCount)
     .map((p) => ({ ...p, c: parseColor(p.hex)! }))
     .filter((p) => p.c && !isNeutral(p.c) && p.count >= 2)
