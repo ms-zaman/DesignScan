@@ -18,6 +18,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check         # Biome: format + lint
       - run: pnpm run typecheck
+      - run: pnpm run build         # tsc -> dist (verifies the publishable build)
       # extract.test.ts drives a real headless Chromium (data: URLs, no network).
       - run: pnpm --filter @designscan/extractor exec playwright install --with-deps chromium
       - run: pnpm run test

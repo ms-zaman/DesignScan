@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Command } from "commander";
@@ -42,6 +43,11 @@ program
       "(<out>.preview.html, or <host>.preview.html without --out)",
     false,
   )
+  .option(
+    "--timeout <ms>",
+    "per-navigation timeout in milliseconds (raise it for slow sites)",
+    "45000",
+  )
   .option("--headful", "run the browser with a visible window", false)
   .option("--quiet", "suppress the human-readable summary", false)
   .action(async (url: string, opts) => {
@@ -54,11 +60,17 @@ program
       );
     }
 
+    const timeoutMs = Number(opts.timeout);
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw new Error(`invalid --timeout "${opts.timeout}" (expected ms > 0)`);
+    }
+
     const run = async (scheme: "light" | "dark") => {
       process.stderr.write(`→ analyzing ${target} (${scheme})\n`);
       const raw = await extract(target, {
         headful: opts.headful,
         colorScheme: scheme,
+        timeoutMs,
       });
       return normalize(target, raw);
     };

@@ -6,10 +6,26 @@ export interface ExtractOptions {
   // Hydration waits, mirroring how dembrandt handles SPAs.
   settleMs?: number;
   maxElements?: number;
+  // Per-navigation timeout in ms (default 45000). Raise it for slow sites.
+  timeoutMs?: number;
   // Emulates `prefers-color-scheme`. Sites that honour the media query render
   // their dark palette under "dark"; ones that gate theme on a class/localStorage
   // toggle won't switch from this alone (a known limitation).
   colorScheme?: "light" | "dark";
+}
+
+// Turn a raw Playwright/Chromium failure into a short, actionable message. Most
+// failures here aren't bugs — they're sites that are down, slow, or actively
+// refusing automated browsers — so we tell the user which and what to try.
+export function navError(url: string, err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/ERR_NAME_NOT_RESOLVED|ENOTFOUND|getaddrinfo/i.test(msg))
+    return `Could not resolve ${url} — check the address is correct and reachable.`;
+  if (/timeout|timed out/i.test(msg))
+    return `${url} took too long to load (it may be slow or blocking automated browsers). Try a higher --timeout.`;
+  if (/ERR_CONNECTION|ECONNREFUSED|ERR_ABORTED|ERR_CERT|net::/i.test(msg))
+    return `Could not connect to ${url} — the site may be down or refusing automated browsers.`;
+  return `Failed to load ${url}: ${msg}`;
 }
 
 export async function extract(
@@ -20,10 +36,21 @@ export async function extract(
     headful = false,
     settleMs = 3500,
     maxElements = 5000,
+    timeoutMs = 45000,
     colorScheme = "light",
   } = opts;
 
-  const browser = await chromium.launch({ headless: !headful });
+  let browser: Awaited<ReturnType<typeof chromium.launch>>;
+  try {
+    browser = await chromium.launch({ headless: !headful });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (/executable doesn'?t exist|Looks like Playwright|install/i.test(msg))
+      throw new Error(
+        "Chromium isn't installed. Run: npx playwright install chromium",
+      );
+    throw err;
+  }
   try {
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
@@ -40,10 +67,20 @@ export async function extract(
     );
     const page = await context.newPage();
 
-    await page.goto(url, { waitUntil: "networkidle", timeout: 45000 }).catch(
+    try {
+      await page.goto(url, { waitUntil: "networkidle", timeout: timeoutMs });
+    } catch {
       // networkidle can hang on chatty sites; fall back to domcontentloaded.
-      () => page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 }),
-    );
+      // If that also fails the site is genuinely unreachable — surface why.
+      try {
+        await page.goto(url, {
+          waitUntil: "domcontentloaded",
+          timeout: timeoutMs,
+        });
+      } catch (err) {
+        throw new Error(navError(url, err));
+      }
+    }
     await page.waitForTimeout(settleMs); // let SPAs hydrate / fonts settle
 
     const raw = await page.evaluate((limit: number) => {

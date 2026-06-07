@@ -21,11 +21,30 @@ URL
              └─ outputs a DesignProfile JSON
 ```
 
-## Setup
+## Install
+
+```bash
+# one-off, no install
+npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md
+
+# or install the CLI / library
+npm i @designscan/extractor
+npx playwright install chromium   # one-time (drives headless Chromium)
+```
+
+```ts
+// as a library
+import { extract, normalize, generate, preview } from "@designscan/extractor";
+const profile = normalize(url, await extract(url));
+const md = generate(profile); // spec-valid DESIGN.md
+```
+
+## Local development
 
 ```bash
 pnpm install                      # from the repo root
 pnpm --filter @designscan/extractor exec playwright install chromium  # one-time
+pnpm build                        # tsc -> dist (the publishable build)
 ```
 
 ## Usage
@@ -52,9 +71,15 @@ pnpm extract vercel.com --theme both --md --out out/vercel.DESIGN.md
 # (out/vercel.preview.html) rendering every token; --theme both adds a toggle
 pnpm extract vercel.com --theme both --md --preview --out out/vercel.DESIGN.md
 
+# slow site? raise the per-navigation timeout (default 45000ms)
+pnpm extract some-slow-site.com --md --timeout 90000
+
 # watch the browser work
 pnpm extract vercel.com --headful
 ```
+
+Load failures (unreachable host, timeout, a site refusing automated browsers)
+exit non-zero with a short, actionable message rather than a raw stack trace.
 
 ## Files
 

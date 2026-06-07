@@ -12,7 +12,22 @@ spec-compliant [DESIGN.md](https://github.com/google-labs-code/design.md) file
 | [`examples/`](examples) | Curated sample outputs (Stripe, Linear) — token JSON + generated `DESIGN.md`. |
 | [`docs/`](docs) | Research: market/forensic analysis and acquisition memo (EN/BN). |
 
-## Quick start
+## Install (as a CLI / library)
+
+The engine ships as the publishable [`@designscan/extractor`](packages/extractor)
+package — a `designscan` CLI and a typed library.
+
+```bash
+# one-off, no install
+npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md
+
+# or install the CLI
+npm i -g @designscan/extractor
+npx playwright install chromium   # one-time (the engine drives headless Chromium)
+designscan stripe.com --md --preview --out stripe.DESIGN.md
+```
+
+## Quick start (from this repo)
 
 This is a [pnpm](https://pnpm.io) workspace (`corepack enable` to get pnpm).
 
@@ -43,7 +58,8 @@ pnpm extract stripe.com --md --preview --out out/stripe.DESIGN.md
 
 | Script | Does |
 |--------|------|
-| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--preview] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it) |
+| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--preview] [--timeout ms] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it) |
+| `pnpm build` | Compile the publishable package (`tsc` → `dist`) |
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm test` | Run the test suite (vitest) |
 | `pnpm check` | Biome — format + lint (use `pnpm format` to auto-fix) |

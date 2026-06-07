@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extract } from "./extract.js";
+import { extract, navError } from "./extract.js";
 
 // Integration test: drives the real Playwright/Chromium path in extract()
 // against a fully-known static page served as a data: URL. No network, no
@@ -71,6 +71,27 @@ const PAGE = `<!doctype html>
     <a class="link" href="#">A plain link</a>
   </body>
 </html>`;
+
+describe("navError – friendly, actionable load failures", () => {
+  const url = "https://example.com";
+  it("explains an unresolvable host", () => {
+    const m = navError(url, new Error("net::ERR_NAME_NOT_RESOLVED at ..."));
+    expect(m).toContain("Could not resolve");
+    expect(m).not.toMatch(/net::|at /); // no raw chromium noise
+  });
+  it("explains a timeout and points to --timeout", () => {
+    const m = navError(url, new Error("Timeout 45000ms exceeded."));
+    expect(m).toContain("--timeout");
+  });
+  it("explains a refused/down connection", () => {
+    const m = navError(url, new Error("net::ERR_CONNECTION_REFUSED"));
+    expect(m).toMatch(/down or refusing/);
+  });
+  it("falls back to the raw message for anything unrecognised", () => {
+    const m = navError(url, new Error("something weird happened"));
+    expect(m).toContain("something weird happened");
+  });
+});
 
 describe("extract (integration)", () => {
   it(
