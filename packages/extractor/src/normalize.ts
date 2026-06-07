@@ -136,6 +136,16 @@ function pickSurfaces(
   };
 }
 
+// User-agent default link colors (unvisited blue, visited purple, active red).
+// An unstyled <a> reports these, so they signal "the site didn't style this
+// link" rather than a brand color — exclude them from the primary heuristic.
+const DEFAULT_LINK_COLORS = new Set([
+  "#0000ee",
+  "#0000ff",
+  "#551a8b",
+  "#ee0000",
+]);
+
 function pickPrimary(
   raw: RawObservations,
   background: string | null,
@@ -177,11 +187,15 @@ function pickPrimary(
   //    a solid button bg). Use the most common *saturated* link color before the
   //    palette guess. This is fallback-only — sites with a real colored button
   //    already returned above — so it can't override a correct primary.
+  //    Skip the user-agent default link colors: an unstyled <a> reports the
+  //    browser's built-in blue/purple/red, which is never the brand (dogfood:
+  //    spotify picked #0000ee over its real green). Those are not design choices.
   const linkCount = new Map<string, number>();
   for (const l of raw.links) {
     const c = parseColor(l.color);
     if (!c || c.a < 0.9 || isNeutral(c) || saturation(c) < 0.4) continue;
     const hex = toHex(c);
+    if (DEFAULT_LINK_COLORS.has(hex)) continue;
     linkCount.set(hex, (linkCount.get(hex) ?? 0) + 1);
   }
   const topLink = [...linkCount.entries()].sort((a, b) => b[1] - a[1])[0];

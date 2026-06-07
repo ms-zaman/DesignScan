@@ -189,6 +189,38 @@ describe("normalize – colors", () => {
     expect(profile.colors.primary).toBe("#ff385c");
   });
 
+  it("ignores the default browser link blue (#0000ee) as a primary signal", () => {
+    // spotify case: an unstyled <a> reports #0000ee — never the brand. With no
+    // other styled link and no colored button, primary falls through to null
+    // rather than emitting the UA default.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(18, 18, 18)": 1_000_000 }, // dark page
+        buttons: [button({ bg: "rgb(40, 40, 40)" })], // neutral CTA
+        links: [{ color: "rgb(0, 0, 238)" }], // #0000ee UA default
+        colorCount: { "rgb(18,18,18)": 50, "rgb(179,179,179)": 30 }, // all neutral
+      }),
+    );
+    expect(profile.colors.primary).not.toBe("#0000ee");
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("still uses a real styled link over the default-link exclusion", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        buttons: [button({ bg: "rgb(242, 242, 242)" })],
+        links: [
+          { color: "rgb(0, 0, 238)" }, // UA default — skipped
+          { color: "rgb(255, 56, 92)" }, // #ff385c real brand link
+        ],
+      }),
+    );
+    expect(profile.colors.primary).toBe("#ff385c");
+  });
+
   it("does not let a link color override a real colored button", () => {
     // The button is the stronger signal; the link must not win.
     const profile = normalize(
