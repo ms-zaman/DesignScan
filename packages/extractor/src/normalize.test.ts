@@ -173,6 +173,68 @@ describe("normalize – colors", () => {
   });
 });
 
+describe("normalize – surfaces (border & muted-surface)", () => {
+  it("splits subtle near-background fills into a hairline border + muted fill", () => {
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(255, 255, 255)": 1_000_000, // background
+          "rgb(229, 237, 245)": 300_000, // #e5edf5 — more visible -> border
+          "rgb(248, 250, 253)": 250_000, // #f8fafd — subtler -> muted fill
+          "rgb(13, 23, 56)": 200_000, // dark block — not a subtle surface
+        },
+      }),
+    );
+    expect(p.colors.background).toBe("#ffffff");
+    expect(p.colors.border).toBe("#e5edf5");
+    expect(p.colors.mutedSurface).toBe("#f8fafd");
+  });
+
+  it("prefers a real captured border color over the fill fallback", () => {
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(255, 255, 255)": 1_000_000,
+          "rgb(245, 245, 245)": 300_000, // #f5f5f5 subtle fill -> muted
+        },
+        borderColors: { "rgb(208, 215, 222)": 40 }, // #d0d7de real border
+      }),
+    );
+    expect(p.colors.border).toBe("#d0d7de");
+    expect(p.colors.mutedSurface).toBe("#f5f5f5");
+  });
+
+  it("emits no surfaces when the page has only the background and a dark block", () => {
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(255, 255, 255)": 1_000_000,
+          "rgb(13, 23, 56)": 300_000, // high-contrast block, not subtle
+        },
+      }),
+    );
+    expect(p.colors.border).toBeNull();
+    expect(p.colors.mutedSurface).toBeNull();
+  });
+
+  it("keeps only a border when a single subtle color fills both roles", () => {
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(255, 255, 255)": 1_000_000,
+          "rgb(229, 237, 245)": 300_000, // the only subtle fill
+        },
+      }),
+    );
+    expect(p.colors.border).toBe("#e5edf5");
+    expect(p.colors.mutedSurface).toBeNull();
+  });
+});
+
 describe("normalize – typography", () => {
   it("keeps only the first family from a stack and strips quotes", () => {
     const profile = normalize(

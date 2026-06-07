@@ -55,6 +55,8 @@ function colorsSection(roles: ColorRoles): string {
     ["accent-1", roles.accent1],
     ["accent-2", roles.accent2],
     ["on-accent-2", roles.onAccent2],
+    ["border", roles.border],
+    ["muted-surface", roles.mutedSurface],
   ];
   const cells = swatches
     .filter(([, hex]) => hex)
@@ -141,6 +143,9 @@ function componentsSection(
   const pSm = pick(spacing, "sm", 0);
   const bodyFont = fontStack(bodyLevel?.family);
   const bodySize = bodyLevel ? `${bodyLevel.size}px` : "14px";
+  // Real hairline color when extracted; a faint neutral otherwise so the card
+  // edge still reads.
+  const brd = roles.border ?? "rgba(0,0,0,.12)";
 
   const parts: string[] = [];
 
@@ -150,14 +155,31 @@ function componentsSection(
     <button style="background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${bodySize}/1 ${bodyFont};cursor:pointer">Primary action</button>
   </div>`);
 
-  // surface / card + input + body-text (need background & text)
+  // surface / card + input + body-text (need background & text); card edge and
+  // input border painted in the extracted `border` color.
   if (roles.background && roles.text) {
     parts.push(`<div class="cmp">
-      <span class="cmp-label">surface · input · body-text</span>
-      <div style="background:${esc(roles.background)};color:${esc(roles.text)};border-radius:${rLg};padding:${pLg};font:400 ${bodySize}/1.5 ${bodyFont};box-shadow:0 1px 3px rgba(0,0,0,.12)">
+      <span class="cmp-label">surface · input · body-text${roles.border ? " · border" : ""}</span>
+      <div style="background:${esc(roles.background)};color:${esc(roles.text)};border:1px solid ${esc(brd)};border-radius:${rLg};padding:${pLg};font:400 ${bodySize}/1.5 ${bodyFont};box-shadow:0 1px 3px rgba(0,0,0,.06)">
         <p style="margin:0 0 ${pMd}">Body text on the surface color — this is what reading copy looks like.</p>
-        <input placeholder="input field" style="background:${esc(roles.background)};color:${esc(roles.text)};border:1px solid currentColor;border-radius:${rSm};padding:${pSm};font:400 ${bodySize}/1 ${bodyFont};width:60%;opacity:.85" />
+        <input placeholder="input field" style="background:${esc(roles.background)};color:${esc(roles.text)};border:1px solid ${esc(brd)};border-radius:${rSm};padding:${pSm};font:400 ${bodySize}/1 ${bodyFont};width:60%" />
       </div>
+    </div>`);
+  }
+
+  // divider — a 1px rule in the hairline color
+  if (roles.border) {
+    parts.push(`<div class="cmp">
+      <span class="cmp-label">divider</span>
+      <div style="height:1px;background:${esc(roles.border)}"></div>
+    </div>`);
+  }
+
+  // surface-muted — subtle secondary panel
+  if (roles.mutedSurface && roles.text) {
+    parts.push(`<div class="cmp">
+      <span class="cmp-label">surface-muted</span>
+      <div style="background:${esc(roles.mutedSurface)};color:${esc(roles.text)};border-radius:${rLg};padding:${pLg};font:400 ${bodySize}/1.5 ${bodyFont}">Subtle secondary surface — sidebars, sections, callouts.</div>
     </div>`);
   }
 
@@ -165,7 +187,7 @@ function componentsSection(
   if (roles.accent1) {
     parts.push(`<div class="cmp">
       <span class="cmp-label">link</span>
-      <div class="cmp-onsurface" style="background:${esc(roles.background ?? "#fff")}">
+      <div class="cmp-onsurface" style="background:${esc(roles.background ?? "#fff")};border-color:${esc(brd)}">
         <a href="#" style="color:${esc(roles.accent1)};font:400 ${bodySize}/1.5 ${bodyFont}">Inline link example →</a>
       </div>
     </div>`);

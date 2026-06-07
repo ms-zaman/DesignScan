@@ -109,6 +109,10 @@ describe("extract (integration)", () => {
       expect(raw.radii).toHaveProperty("8px");
       expect(Object.keys(raw.shadows).length).toBeGreaterThan(0);
 
+      // The CTA's 1px border contributes its color to the border-color map.
+      expect(raw.borderColors).toBeDefined();
+      expect(raw.borderColors).toHaveProperty("rgb(220, 20, 60)");
+
       // Transparent backgrounds are excluded from the area map.
       expect(raw.bgArea).not.toHaveProperty("rgba(0, 0, 0, 0)");
     },

@@ -317,4 +317,33 @@ describe("generate – no orphan colors", () => {
     expect(keys).toContain("on-accent-2");
     for (const k of keys) expect(md).toContain(`{colors.${k}}`);
   });
+
+  it("wires border + muted-surface into divider/surface-muted, still no orphans", () => {
+    const md = generate(
+      profile({
+        colors: {
+          background: "#ffffff",
+          text: "#222222",
+          primary: "#1a73e8",
+          border: "#e5e7eb",
+          mutedSurface: "#f7f8fa",
+          palette: [{ hex: "#1a73e8", count: 9 }],
+        },
+      }),
+    );
+    expect(md).toContain("divider:");
+    expect(md).toContain("height: 1px");
+    expect(md).toContain("surface-muted:");
+    const keys = colorKeys(frontMatter(md));
+    expect(keys).toContain("border");
+    expect(keys).toContain("muted-surface");
+    // The invariant that keeps the linter quiet: no orphan color tokens.
+    for (const k of keys) expect(md).toContain(`{colors.${k}}`);
+  });
+
+  it("omits divider/surface-muted when no subtle surfaces were found", () => {
+    const md = generate(profile()); // helper profile has no border/mutedSurface
+    expect(md).not.toContain("divider:");
+    expect(md).not.toContain("surface-muted:");
+  });
 });

@@ -32,8 +32,17 @@ function buildColorsAndComponents(
 ) {
   const cn = (base: string) => `${base}${suffix}`; // suffixed color-token name
   const ref = (base: string) => `{colors.${base}${suffix}}`;
-  const { primary, onPrimary, background, text, accent1, accent2, onAccent2 } =
-    resolveColorRoles(profile);
+  const {
+    primary,
+    onPrimary,
+    background,
+    text,
+    accent1,
+    accent2,
+    onAccent2,
+    border,
+    mutedSurface,
+  } = resolveColorRoles(profile);
 
   const pick = (entries: [string, string][], preferred: string, idx: number) =>
     entries.find(([k]) => k === preferred)?.[0] ?? entries[idx]?.[0];
@@ -100,6 +109,27 @@ function buildColorsAndComponents(
     else if (roundedSm) lines.push(`    rounded: "{rounded.${roundedSm}}"`);
   }
 
+  // Divider — a 1px rule painted in the hairline `border` color. The spec has no
+  // borderColor property, so the border token lives here as a thin filled bar
+  // (backgroundColor + height are both standard component properties).
+  if (border) {
+    lines.push(`  ${cn("divider")}:`);
+    lines.push(`    backgroundColor: "${ref("border")}"`);
+    use("border");
+    lines.push(`    height: 1px`);
+  }
+
+  // Muted surface — a subtle secondary panel fill (e.g. a sidebar/section).
+  if (mutedSurface && text) {
+    lines.push(`  ${cn("surface-muted")}:`);
+    lines.push(`    backgroundColor: "${ref("muted-surface")}"`);
+    use("muted-surface");
+    lines.push(`    textColor: "${ref("text")}"`);
+    use("text");
+    if (roundedLg) lines.push(`    rounded: "{rounded.${roundedLg}}"`);
+    if (spacingLg) lines.push(`    padding: "{spacing.${spacingLg}}"`);
+  }
+
   const candidates: [string, string | null][] = [
     ["primary", primary],
     ["on-primary", onPrimary],
@@ -108,6 +138,8 @@ function buildColorsAndComponents(
     ["accent-1", accent1],
     ["accent-2", accent2],
     ["on-accent-2", onAccent2],
+    ["border", border],
+    ["muted-surface", mutedSurface],
   ];
   const colors = candidates
     .filter(([name, hex]) => hex && used.has(name))
@@ -124,6 +156,8 @@ const COLOR_LABEL: Record<string, string> = {
   "accent-1": "a supporting accent (used for links)",
   "accent-2": "a secondary accent (used for badges/tags)",
   "on-accent-2": "the readable foreground on the secondary accent",
+  border: "the hairline color for dividers, card edges, and input borders",
+  "muted-surface": "a subtle secondary surface fill for panels and sections",
 };
 
 // `dark`, when supplied, is a second profile captured under
@@ -308,6 +342,16 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   if (cmap["accent-2"]) {
     body.push(
       "- **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.",
+    );
+  }
+  if (cmap.border) {
+    body.push(
+      "- **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.",
+    );
+  }
+  if (cmap["muted-surface"]) {
+    body.push(
+      "- **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.",
     );
   }
   if (darkBlock) {

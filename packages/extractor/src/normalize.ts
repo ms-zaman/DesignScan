@@ -64,6 +64,68 @@ function pickText(
   return (best ?? fallback)?.hex ?? null;
 }
 
+// Subtle near-background neutrals: a hairline `border` and a secondary surface
+// fill (`muted-surface`). Both sit close to the background in luminance — a
+// border a touch more visible than a fill. We work off the area-weighted
+// background map (real fills) plus captured border colors when present, gating
+// on a low contrast band so dark section blocks and the background itself never
+// qualify.
+function pickSurfaces(
+  raw: RawObservations,
+  background: string | null,
+): { border: string | null; mutedSurface: string | null } {
+  if (!background) return { border: null, mutedSurface: null };
+  const bg = parseColor(background);
+  if (!bg) return { border: null, mutedSurface: null };
+  const bgLum = luminance(bg);
+  const bgHex = toHex(bg);
+
+  // Candidate subtle fills from the area map: visibly distinct from the
+  // background but not a heavy/dark block (which is a real surface/section).
+  const fills: { hex: string; area: number; ctr: number }[] = [];
+  for (const [rawColor, area] of Object.entries(raw.bgArea)) {
+    const c = parseColor(rawColor);
+    if (!c || c.a < 0.9) continue;
+    const hex = toHex(c);
+    if (hex === bgHex) continue;
+    const ctr = contrastRatio(luminance(c), bgLum);
+    if (ctr < 1.025 || ctr > 2) continue;
+    fills.push({ hex, area, ctr });
+  }
+  // Drop slivers (stray 1px fills); keep the meaningful surfaces.
+  const maxArea = Math.max(0, ...fills.map((c) => c.area));
+  const meaningful = fills.filter((c) => c.area >= maxArea * 0.05);
+  // muted-surface: the subtlest meaningful fill (closest to the background).
+  const muted = [...meaningful].sort((a, b) => a.ctr - b.ctr)[0]?.hex ?? null;
+
+  // border: prefer a real captured border color (opaque, hairline contrast),
+  // else the most visible subtle fill — kept distinct from muted-surface.
+  let border: string | null = null;
+  for (const [rawColor] of Object.entries(raw.borderColors ?? {}).sort(
+    (a, b) => b[1] - a[1],
+  )) {
+    const c = parseColor(rawColor);
+    if (!c || c.a < 0.5) continue;
+    const hex = toHex(c);
+    if (hex === bgHex) continue;
+    const ctr = contrastRatio(luminance(c), bgLum);
+    if (ctr < 1.05 || ctr > 4.5) continue; // a hairline, not text or a block
+    border = hex;
+    break;
+  }
+  if (!border) {
+    const visible = [...meaningful].sort((a, b) => b.ctr - a.ctr);
+    border =
+      visible.find((c) => c.hex !== muted)?.hex ?? visible[0]?.hex ?? null;
+  }
+  // When both roles collapse onto the same single subtle color, keep only the
+  // border (the more broadly useful token).
+  return {
+    border,
+    mutedSurface: muted && muted !== border ? muted : null,
+  };
+}
+
 function pickPrimary(
   raw: RawObservations,
   background: string | null,
@@ -296,6 +358,7 @@ const intMode = (map?: Record<string, number>): number | undefined => {
 
 export function normalize(url: string, raw: RawObservations): DesignProfile {
   const background = pickBackground(raw.bgArea);
+  const surfaces = pickSurfaces(raw, background);
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
@@ -306,6 +369,8 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       background,
       text: pickText(raw.textColorArea ?? raw.colorCount, background),
       primary: pickPrimary(raw, background),
+      border: surfaces.border,
+      mutedSurface: surfaces.mutedSurface,
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },
     typography: {

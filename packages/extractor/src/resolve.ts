@@ -131,6 +131,10 @@ export interface ColorRoles {
   accent1: string | null;
   accent2: string | null;
   onAccent2: string | null;
+  // Subtle near-background neutrals (resolved upstream in normalize, where the
+  // raw border colors / background fills live): a hairline and a muted surface.
+  border: string | null;
+  mutedSurface: string | null;
 }
 
 // Resolve a profile's palette into named roles. Primary falls back through the
@@ -173,6 +177,8 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
     accent1,
     accent2,
     onAccent2: accent2 ? onColor(accent2) : null,
+    border: profile.colors.border ?? null,
+    mutedSurface: profile.colors.mutedSurface ?? null,
   };
 }
 

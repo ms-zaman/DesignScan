@@ -39,6 +39,9 @@ describe("golden – normalize on real captured observations", () => {
     expect(p.typography.fontStack).toBe(
       'sohne-var, "SF Pro Display", sans-serif',
     );
+    // Subtle near-white surfaces: a visible hairline + a subtler section fill.
+    expect(p.colors.border).toBe("#e5edf5");
+    expect(p.colors.mutedSurface).toBe("#f8fafd");
   });
 
   it("vercel.com (light): monochrome black primary via the contrast guard", () => {

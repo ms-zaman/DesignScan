@@ -73,6 +73,17 @@ describe("preview – HTML proof sheet", () => {
     expect(html).not.toContain('data-theme-panel="dark"');
   });
 
+  it("paints border + muted-surface swatches and the divider/surface-muted components", () => {
+    const p = profileFor("stripe"); // has border #e5edf5 + muted #f8fafd
+    const html = preview(p);
+    expect(html.toLowerCase()).toContain("#e5edf5"); // border swatch
+    expect(html.toLowerCase()).toContain("#f8fafd"); // muted-surface swatch
+    expect(html).toContain(">border<");
+    expect(html).toContain(">muted-surface<");
+    expect(html).toContain(">divider<");
+    expect(html).toContain(">surface-muted<");
+  });
+
   it("escapes the page title into the document", () => {
     const html = preview(profileFor("stripe"));
     expect(html).toContain("DesignScan preview");

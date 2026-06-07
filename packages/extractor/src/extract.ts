@@ -57,6 +57,7 @@ export async function extract(
       const letterSpacings: Record<string, number> = {};
       const radii: Record<string, number> = {};
       const borderWidths: Record<string, number> = {};
+      const borderColors: Record<string, number> = {};
       const shadows: Record<string, number> = {};
       const spacings: Record<string, number> = {};
       const buttons: any[] = [];
@@ -156,8 +157,16 @@ export async function extract(
         if (cs.borderTopLeftRadius && cs.borderTopLeftRadius !== "0px") {
           bump(radii, cs.borderTopLeftRadius);
         }
-        if (cs.borderTopWidth && cs.borderTopWidth !== "0px") {
+        if (
+          cs.borderTopWidth &&
+          cs.borderTopWidth !== "0px" &&
+          cs.borderTopStyle !== "none"
+        ) {
           bump(borderWidths, cs.borderTopWidth);
+          // The border color is the real signal for the `border` token. Skip
+          // fully transparent borders (a width with no paint).
+          if (cs.borderTopColor && !cs.borderTopColor.includes(", 0)"))
+            bump(borderColors, cs.borderTopColor);
         }
         if (cs.boxShadow && cs.boxShadow !== "none")
           bump(shadows, cs.boxShadow);
@@ -200,6 +209,7 @@ export async function extract(
         letterSpacings,
         radii,
         borderWidths,
+        borderColors,
         shadows,
         spacings,
         buttons,

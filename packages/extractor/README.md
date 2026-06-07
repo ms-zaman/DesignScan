@@ -15,8 +15,9 @@ URL
  └─ Playwright (headless Chromium) renders the live page, waits for hydration
      └─ reads getComputedStyle from every visible element
          └─ normalize.ts clusters the raw CSS into a clean token profile:
-            background / text / primary colors, palette, font families,
-            font-size scale, spacing scale, radius scale, shadows
+            background / text / primary / border / muted-surface colors,
+            palette, font families, font-size scale, spacing scale,
+            radius scale, shadows
              └─ outputs a DesignProfile JSON
 ```
 

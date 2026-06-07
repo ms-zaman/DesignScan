@@ -13,6 +13,10 @@ export interface RawObservations {
   letterSpacings: Record<string, number>;
   radii: Record<string, number>;
   borderWidths: Record<string, number>;
+  // Border colors of elements that paint a visible border -> element count. The
+  // real signal for the `border` token. Optional: profiles captured before this
+  // field fall back to a near-background neutral derived from bgArea.
+  borderColors?: Record<string, number>;
   shadows: Record<string, number>;
   spacings: Record<string, number>;
   buttons: ButtonSample[];
@@ -41,7 +45,7 @@ export interface ButtonSample {
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.2";
+export const PROFILE_SCHEMA_VERSION = "1.3";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -57,6 +61,11 @@ export interface DesignProfile {
     background: string | null;
     text: string | null;
     primary: string | null;
+    // Subtle near-background neutrals: a hairline/divider color and a secondary
+    // surface fill. Either may be null when the page shows no such color.
+    // Optional for back-compat with profiles captured before schema 1.3.
+    border?: string | null;
+    mutedSurface?: string | null;
     palette: { hex: string; count: number }[];
   };
   typography: {
