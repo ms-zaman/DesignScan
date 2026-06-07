@@ -1,4 +1,5 @@
 import {
+  chroma,
   isNeutral,
   luminance,
   parseColor,
@@ -80,12 +81,21 @@ function pickSurfaces(
   const bgLum = luminance(bg);
   const bgHex = toHex(bg);
 
+  // Borders and muted surfaces are neutral hairlines/fills, never decorative
+  // brand color. Reject clearly-colorful candidates (a saturated link-blue
+  // "border" like #2997ff, a code-block tint) while keeping subtly-tinted greys
+  // (#e5edf5 ~0.06). The cap sits well above real tinted greys, well below
+  // accents — see the dogfood findings on tailwind/apple/figma.
+  const CHROMA_MAX = 0.18;
+  const tooColorful = (c: ReturnType<typeof parseColor>) =>
+    !!c && chroma(c) > CHROMA_MAX;
+
   // Candidate subtle fills from the area map: visibly distinct from the
   // background but not a heavy/dark block (which is a real surface/section).
   const fills: { hex: string; area: number; ctr: number }[] = [];
   for (const [rawColor, area] of Object.entries(raw.bgArea)) {
     const c = parseColor(rawColor);
-    if (!c || c.a < 0.9) continue;
+    if (!c || c.a < 0.9 || tooColorful(c)) continue;
     const hex = toHex(c);
     if (hex === bgHex) continue;
     const ctr = contrastRatio(luminance(c), bgLum);
@@ -105,7 +115,7 @@ function pickSurfaces(
     (a, b) => b[1] - a[1],
   )) {
     const c = parseColor(rawColor);
-    if (!c || c.a < 0.5) continue;
+    if (!c || c.a < 0.5 || tooColorful(c)) continue;
     const hex = toHex(c);
     if (hex === bgHex) continue;
     const ctr = contrastRatio(luminance(c), bgLum);
@@ -392,6 +402,43 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       .map(([s]) => s)
       .slice(0, 4),
   };
+}
+
+// Sanity-check a finished profile and return human-readable warnings about
+// extractions that almost certainly aren't the real site — bot-protection
+// interstitials (Cloudflare's "Just a moment...") and near-empty renders that
+// yield no usable tokens. Returns [] for a healthy profile. The CLI surfaces
+// these so a degenerate result is never mistaken for real design tokens.
+const CHALLENGE_TITLE =
+  /just a moment|attention required|checking (if you are|your browser)|verify(ing)? you are human|are you (a )?human|enable javascript|access denied|please wait|ddos|cloudflare|captcha|bot detection/i;
+
+export function profileWarnings(profile: DesignProfile): string[] {
+  const warnings: string[] = [];
+  const title = profile.title ?? "";
+  if (CHALLENGE_TITLE.test(title)) {
+    warnings.push(
+      `The page looks like a bot-protection / interstitial screen ("${title}"), ` +
+        "not the real site — the extracted tokens are unreliable.",
+    );
+  }
+
+  const c = profile.colors;
+  const missing = [
+    !c.primary && "primary",
+    !c.background && "background",
+    !c.text && "text",
+  ].filter(Boolean) as string[];
+  const thin =
+    c.palette.length < 3 && profile.typography.sizeScalePx.length < 2;
+  if (missing.length >= 2 || thin) {
+    warnings.push(
+      "Very few design signals were detected" +
+        (missing.length ? ` (missing ${missing.join(", ")})` : "") +
+        `; only ${c.palette.length} palette color(s). The site may block ` +
+        "automated browsers, require a login, or render almost no CSS.",
+    );
+  }
+  return warnings;
 }
 
 // Tiny helper kept here so the role picks are reproducible/testable later.

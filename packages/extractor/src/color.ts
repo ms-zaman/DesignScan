@@ -338,11 +338,18 @@ export function saturation({ r, g, b }: RGBA): number {
   return l > 0.5 ? d / (2 - max - min) : d / (max + min);
 }
 
+// Raw colorfulness: the RGB spread, 0 (grey) to 1 (fully saturated primary).
+// Unlike HSL saturation it doesn't blow up near white/black, so it cleanly
+// separates a subtle tinted grey (e.g. #e5edf5 ~0.06) from a decorative accent
+// (e.g. #2997ff ~0.84).
+export function chroma(c: RGBA): number {
+  return (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) / 255;
+}
+
 export function isNeutral(c: RGBA): boolean {
   // HSL saturation blows up near white/black (its denominator -> 0), so an
   // almost-white cream like #faf9f5 reports a high "saturation" despite being
   // perceptually neutral. Guard with a raw chroma floor: tiny RGB spread is grey
   // regardless of what the HSL math says.
-  const chroma = (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) / 255;
-  return chroma < 0.06 || saturation(c) < 0.12;
+  return chroma(c) < 0.06 || saturation(c) < 0.12;
 }

@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 import { Command } from "commander";
 import { extract } from "./extract.js";
 import { generate } from "./generate.js";
-import { normalize } from "./normalize.js";
+import { normalize, profileWarnings } from "./normalize.js";
 import { preview } from "./preview.js";
 
 // Where the preview .html lands relative to the run. With --out we sit beside
@@ -127,6 +127,12 @@ program
           "",
         ].join("\n"),
       );
+    }
+
+    // Always surface quality warnings (even under --quiet): a bot-challenge or
+    // near-empty extraction must never be mistaken for real tokens.
+    for (const w of profileWarnings(profile)) {
+      process.stderr.write(`⚠ ${w}\n`);
     }
   });
 

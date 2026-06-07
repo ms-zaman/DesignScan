@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalize } from "./normalize.js";
+import { normalize, profileWarnings } from "./normalize.js";
 import type { ButtonSample, RawObservations } from "./types.js";
 import { PROFILE_SCHEMA_VERSION } from "./types.js";
 
@@ -232,6 +232,74 @@ describe("normalize – surfaces (border & muted-surface)", () => {
     );
     expect(p.colors.border).toBe("#e5edf5");
     expect(p.colors.mutedSurface).toBeNull();
+  });
+
+  it("rejects a saturated decorative border in favour of a neutral hairline", () => {
+    // Dogfood: tailwind/apple handed a saturated link-blue (#2997ff) as the
+    // "border". The chroma cap drops it for the subtle grey hairline.
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(255, 255, 255)": 1_000_000,
+          "rgb(234, 234, 234)": 200_000, // #eaeaea neutral hairline
+        },
+        borderColors: {
+          "rgb(41, 151, 255)": 80, // #2997ff saturated — must be skipped
+          "rgb(226, 226, 226)": 30, // #e2e2e2 neutral — acceptable
+        },
+      }),
+    );
+    expect(p.colors.border).not.toBe("#2997ff");
+    expect(p.colors.border).toBe("#e2e2e2");
+  });
+
+  it("keeps a subtly-tinted grey border (not every tint is decorative)", () => {
+    // #e5edf5 is a real blue-grey hairline (chroma ~0.06) and must survive the
+    // cap — it sits well below the saturated-accent threshold.
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        borderColors: { "rgb(229, 237, 245)": 50 },
+      }),
+    );
+    expect(p.colors.border).toBe("#e5edf5");
+  });
+});
+
+describe("normalize – profileWarnings", () => {
+  it("flags a bot-protection interstitial by title", () => {
+    const p = normalize("u", raw({ title: "Just a moment..." }));
+    const w = profileWarnings(p);
+    expect(w.some((m) => /interstitial|bot-protection/i.test(m))).toBe(true);
+  });
+
+  it("flags a near-empty extraction with no usable signals", () => {
+    // Empty observations -> no colors, no sizes.
+    const p = normalize("u", raw());
+    expect(profileWarnings(p).some((m) => /few design signals/i.test(m))).toBe(
+      true,
+    );
+  });
+
+  it("stays silent for a healthy profile", () => {
+    const p = normalize(
+      "u",
+      raw({
+        title: "Acme — Real Site",
+        colorCount: {
+          "rgb(255,255,255)": 50,
+          "rgb(20,20,20)": 40,
+          "rgb(83,58,253)": 20,
+          "rgb(100,116,141)": 15,
+        },
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        fontSizes: { "16px": 100, "32px": 20, "14px": 80 },
+        buttons: [button({ bg: "rgb(83, 58, 253)" })],
+      }),
+    );
+    expect(profileWarnings(p)).toEqual([]);
   });
 });
 
