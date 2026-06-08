@@ -5,6 +5,7 @@
 // lint-clean (every defined token is referenced), but the prose is meant to be
 // refined (eventually LLM-assisted).
 
+import { agentNotes } from "./agentNotes.js";
 import {
   isDistinctDark,
   resolveColorRoles,
@@ -369,6 +370,22 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     "- **Don't** treat these auto-extracted values as final — verify contrast " +
       "and intent before production.",
   );
+
+  // Notes for the consuming AI agent — deterministic, per-extraction guidance
+  // (contrast, heading hierarchy, font fallback) so the agent applies the tokens
+  // with intent instead of guessing. The length guard only drops the heading if
+  // every note somehow elided (a profile with no resolvable primary).
+  const notes = agentNotes(profile, levels);
+  if (notes.length) {
+    body.push("");
+    body.push("## Notes for your coding agent");
+    body.push("");
+    body.push(
+      "Computed from this extraction — act on these before treating the tokens as final:",
+    );
+    body.push("");
+    body.push(...notes);
+  }
 
   return `---\n${fm.join("\n")}\n---\n\n${body.join("\n")}\n`;
 }

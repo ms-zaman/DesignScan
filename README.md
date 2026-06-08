@@ -103,7 +103,10 @@ The engine is consumable as a library through its public API
 - [x] **Step 1 — Extraction engine** (Playwright → clean token profile)
 - [x] **Step 2 — Generator** (token profile → spec-valid `DESIGN.md`, lint-clean)
 - [x] **Step 3 — HTML preview** (`--preview` → self-contained token proof sheet, light/dark toggle)
-- [ ] **Step 4** — LLM-refined prose & color-role assignment
+- [~] **Step 4** — agent guidance. Each `DESIGN.md` now ships a **Notes for your
+      coding agent** section: deterministic, per-extraction instructions (contrast,
+      heading hierarchy, font fallback) so the consuming agent applies the tokens
+      with intent — no LLM on our side. (Optional LLM-refined prose still future.)
 - [~] **Step 5** — brand-seed library (`pnpm seed`, curated [corpus](examples) + gallery) done; `npx … add` / checkout next
 
 See [`packages/extractor/README.md`](packages/extractor/README.md) for the full

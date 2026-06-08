@@ -24,7 +24,7 @@ export function onColor(hex: string): string {
 
 // WCAG contrast ratio between two hex colors (1–21). Unparseable input -> 1
 // (treated as no contrast) so callers reject it.
-function contrast(a: string, b: string): number {
+export function contrastRatio(a: string, b: string): number {
   const ca = parseColor(a);
   const cb = parseColor(b);
   if (!ca || !cb) return 1;
@@ -163,7 +163,7 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
   // against we fall back to raw palette order. accent-2 is taken from what's
   // left so the two roles don't collapse onto the same hex.
   const usable = (minContrast: number) => (hex: string) =>
-    !background || contrast(hex, background) >= minContrast;
+    !background || contrastRatio(hex, background) >= minContrast;
   const accent1 = extras.find(usable(ACCENT1_MIN_CONTRAST)) ?? null;
   const accent2 =
     extras.filter((h) => h !== accent1).find(usable(ACCENT2_MIN_CONTRAST)) ??

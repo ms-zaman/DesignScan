@@ -142,3 +142,13 @@ Corner radii observed: 6px, 8px, 12px, 16px, 24px, 60px. Use the smaller values 
 
 - **Do** reserve `primary` for the most important actions.
 - **Don't** treat these auto-extracted values as final — verify contrast and intent before production.
+
+## Notes for your coding agent
+
+Computed from this extraction — act on these before treating the tokens as final:
+
+- **Fonts:** the brand face `Mona Sans` likely isn't installed locally. Use the full stack `"Mona Sans", MonaSansFallback, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
+- **Primary actions:** `primary` (#08872b) with `on-primary` (#ffffff) text is 4.7:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Links:** use `accent-1` (#9198a1) for inline links, distinct from the `primary` button color.
+- **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
+- **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.

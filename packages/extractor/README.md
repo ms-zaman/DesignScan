@@ -89,6 +89,7 @@ exit non-zero with a short, actionable message rather than a raw stack trace.
 | `src/normalize.ts` | Clusters raw values into token scales + role heuristics |
 | `src/resolve.ts`   | Shared role/level/scale resolution (one source of truth for generate + preview) |
 | `src/generate.ts`  | `DesignProfile` → Google-format `DESIGN.md` (YAML + prose) |
+| `src/agentNotes.ts`| Deterministic "Notes for your coding agent" section (contrast/heading/font guidance) appended to the `DESIGN.md` |
 | `src/preview.ts`   | `DesignProfile` → self-contained HTML proof sheet (`--preview`) |
 | `src/color.ts`     | rgb/hex parsing, luminance, saturation, neutral test |
 | `src/types.ts`     | `RawObservations` and `DesignProfile` shapes |
@@ -109,7 +110,13 @@ exit non-zero with a short, actionable message rather than a raw stack trace.
       six components — inside neutral chrome, with a Light/Dark toggle when a
       distinct dark theme exists. Resolves the same roles/levels/scales as the
       generator (via `resolve.ts`), so it can't drift from the `DESIGN.md`.
-- [ ] **Step 4 — LLM-refined prose & color-role assignment** (semantic intent)
+- [~] **Step 4 — agent guidance** (`agentNotes.ts`): every `DESIGN.md` now ends
+      with a **Notes for your coding agent** section — deterministic, per-extraction
+      instructions derived from this profile's actual numbers (heading hierarchy
+      vs. muted `text`, sub-AA body contrast, brand-font fallback, primary-button
+      contrast, shape/spacing rhythm). The insight: the file is always consumed by
+      an AI agent, so we compute the semantic calls here (no LLM, no API key) and
+      let the *user's* agent apply them. Optional LLM-refined prose is still future.
 - [ ] **Step 5 — Seed 30–40 brand files + public repo** (distribution wedge)
 - [ ] **Step 6 — `npx ... add <brand>` CLI** + per-brand SEO pages
 - [ ] **Step 7 — Checkout + email delivery** (paid private path)

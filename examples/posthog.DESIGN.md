@@ -136,3 +136,14 @@ Corner radii observed: 2px, 4px, 6px, 8px. Use the smaller values for inputs and
 
 - **Do** reserve `primary` for the most important actions.
 - **Don't** treat these auto-extracted values as final — verify contrast and intent before production.
+
+## Notes for your coding agent
+
+Computed from this extraction — act on these before treating the tokens as final:
+
+- **Headings:** the `text` token (#374151) sits at 10.3:1 on `background` — fine for body copy, but it reads muted at display sizes. For large headings use `accent-2` (#111827, 17.7:1) to keep visual hierarchy. Reserve `text` for paragraph and UI copy.
+- **Fonts:** the brand face `IBM Plex Sans Variable` likely isn't installed locally. Use the full stack `"IBM Plex Sans Variable", "IBM Plex Sans", -apple-system, system-ui, "avenir next", avenir, "segoe ui", "helvetica neue", helvetica, Ubuntu, roboto, noto, arial, sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
+- **Primary actions:** `primary` (#cd8407) with `on-primary` (#111111) text is 6.2:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Links:** use `accent-1` (#4d4f46) for inline links, distinct from the `primary` button color.
+- **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
+- **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.

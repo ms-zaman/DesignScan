@@ -137,3 +137,12 @@ Corner radii observed: 2px, 4px, 6px, 8px, 12px, 16px, 22px. Use the smaller val
 
 - **Do** reserve `primary` for the most important actions.
 - **Don't** treat these auto-extracted values as final — verify contrast and intent before production.
+
+## Notes for your coding agent
+
+Computed from this extraction — act on these before treating the tokens as final:
+
+- **Primary actions:** `primary` (#e5e5e6) with `on-primary` (#111111) text is 15.0:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Links:** use `accent-1` (#62666d) for inline links, distinct from the `primary` button color.
+- **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
+- **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
