@@ -12,6 +12,22 @@ scales, components — so you can eyeball the result before trusting it:
 
 [![DesignScan preview proof sheet for stripe.com](examples/stripe.preview.png)](examples/stripe.preview.html)
 
+## Notes for your coding agent
+
+A `DESIGN.md` is always *consumed by an AI coding agent* (Cursor, Claude Code, …).
+So rather than run our own LLM to resolve semantic intent, every file ends with a
+**Notes for your coding agent** section: deterministic, per-extraction
+instructions computed from the actual tokens — heading hierarchy vs. a muted
+`text` color, sub-AA body contrast, brand-font fallback, the primary-button
+contract, shape/spacing rhythm. The reasoning stays on our side (no API key); the
+*application* happens for free inside the agent you already use.
+
+It measurably changes the output. Below: the same `stripe.DESIGN.md` cloned by an
+agent that **ignored** the notes (left) vs one that **followed** them (right) —
+identical tokens, layout, and copy:
+
+![Same DESIGN.md, with vs without the agent notes](examples/agent-notes.proof.png)
+
 ## Brand corpus
 
 A growing, curated library of real-brand specs lives in [`examples/`](examples) —
