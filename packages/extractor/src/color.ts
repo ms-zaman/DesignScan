@@ -314,6 +314,59 @@ function parseColorMix(s: string): RGBA | null {
   };
 }
 
+// ---- gradient stop extraction ---------------------------------------------
+
+// The color at the start of a gradient stop chunk (the rest is position hints).
+// A stop is "<color> [<pos>...]"; the leading token is either a color function
+// (rgb/oklch/color-mix/…, captured to its matching paren) or a bare hex token.
+// Non-color chunks (a direction like "to right", an angle "90deg", "circle at
+// center") yield null. We validate with parseColor so only real colors pass.
+function leadingColor(chunk: string): string | null {
+  if (!chunk) return null;
+  if (/^[a-z][a-z0-9-]*\(/i.test(chunk)) {
+    let depth = 0;
+    for (let i = 0; i < chunk.length; i++) {
+      if (chunk[i] === "(") depth++;
+      else if (chunk[i] === ")" && --depth === 0) {
+        const cand = chunk.slice(0, i + 1);
+        return parseColor(cand) ? cand : null;
+      }
+    }
+    return null;
+  }
+  const tok = chunk.split(/\s+/)[0];
+  return tok && parseColor(tok) ? tok : null;
+}
+
+// Pull the color stops out of any CSS gradient(s) in a background-image value.
+// getComputedStyle serializes gradients with legacy rgb()/rgba() stops, but we
+// stay format-agnostic (hex, oklch, color-mix, …) since parseColor handles them.
+// Returns the raw color token strings in stop order; parse them with parseColor.
+// Brand colors frequently live only in a hero/CTA gradient, invisible to the
+// flat-computed-color heuristics, so this is how those get recovered.
+export function gradientStops(image: string | undefined | null): string[] {
+  if (!image || !/gradient\(/i.test(image)) return [];
+  const stops: string[] = [];
+  const re = /gradient\(/gi;
+  let m: RegExpExecArray | null = re.exec(image);
+  while (m !== null) {
+    let depth = 0;
+    let i = m.index + m[0].length - 1; // the opening "(" of this gradient
+    const start = i + 1;
+    for (; i < image.length; i++) {
+      if (image[i] === "(") depth++;
+      else if (image[i] === ")" && --depth === 0) break;
+    }
+    for (const chunk of splitTopLevel(image.slice(start, i), ",")) {
+      const color = leadingColor(chunk.trim());
+      if (color) stops.push(color);
+    }
+    re.lastIndex = i + 1; // skip past this gradient (don't re-match a nested one)
+    m = re.exec(image);
+  }
+  return stops;
+}
+
 export function toHex({ r, g, b }: RGBA): string {
   const h = (n: number) => n.toString(16).padStart(2, "0");
   return `#${h(r)}${h(g)}${h(b)}`;

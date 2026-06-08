@@ -59,6 +59,15 @@ const PAGE = `<!doctype html>
       a.link {
         color: rgb(0, 102, 204);
       }
+      .hero {
+        width: 400px;
+        height: 200px;
+        background-image: linear-gradient(
+          90deg,
+          rgb(29, 185, 84) 0%,
+          rgb(0, 0, 0) 100%
+        );
+      }
     </style>
   </head>
   <body>
@@ -67,6 +76,7 @@ const PAGE = `<!doctype html>
       Body copy with enough text that the paragraph occupies real space on the
       page, giving the extractor a non-zero box to measure.
     </p>
+    <div class="hero"></div>
     <button class="cta">Get started</button>
     <a class="link" href="#">A plain link</a>
   </body>
@@ -136,6 +146,12 @@ describe("extract (integration)", () => {
 
       // Transparent backgrounds are excluded from the area map.
       expect(raw.bgArea).not.toHaveProperty("rgba(0, 0, 0, 0)");
+
+      // The .hero element's gradient is captured (area-weighted) so its brand
+      // stop colors are available to the primary heuristic.
+      const gradients = Object.keys(raw.gradientImages ?? {});
+      expect(gradients.some((g) => g.includes("gradient("))).toBe(true);
+      expect(gradients.some((g) => g.includes("rgb(29, 185, 84)"))).toBe(true);
     },
     TEST_TIMEOUT,
   );
@@ -217,6 +233,55 @@ describe("extract (integration)", () => {
         raw.textColorArea?.["rgb(120, 120, 120)"] ?? 0,
       );
       expect(raw.textColorArea).not.toHaveProperty("rgb(9, 9, 9)");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "ignores links inside code samples (syntax colors aren't the brand)",
+    async () => {
+      // A real brand link plus a syntax-highlighted <a> inside <pre><code>. Only
+      // the brand link should be bucketed; the code-block token must be skipped.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Code links</title></head>
+  <body style="margin: 0">
+    <a href="#" style="color: rgb(255, 56, 92)">Brand link</a>
+    <pre><code><a href="#" style="color: rgb(97, 218, 251)">React</a></code></pre>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      expect(raw.links.some((l) => l.color === "rgb(255, 56, 92)")).toBe(true);
+      // The #61dafb React-cyan link lives inside <pre><code> -> not collected.
+      expect(raw.links.some((l) => l.color === "rgb(97, 218, 251)")).toBe(
+        false,
+      );
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "size-weights the heading line-height so the display value wins over abundant medium text",
+    async () => {
+      // One large display heading at a tight 1.1 line-height (1x) vs two smaller
+      // heading-bucket lines at a loose 1.5 (2x). A plain count would pick 1.50;
+      // size-weighting by px lets the 60px display set the heading leading.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Heading lh</title></head>
+  <body style="margin: 0">
+    <h1 style="font-size: 60px; line-height: 1.1; margin: 0; width: 900px; height: 120px">Big display heading</h1>
+    <h2 style="font-size: 20px; line-height: 1.5; margin: 0">Looser subheading one</h2>
+    <h2 style="font-size: 20px; line-height: 1.5; margin: 0">Looser subheading two</h2>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      // 1.10 carries 60 (one 60px line); 1.50 carries 2x20=40 -> 1.10 wins.
+      const lh110 = raw.lhHeading?.["1.10"] ?? 0;
+      const lh150 = raw.lhHeading?.["1.50"] ?? 0;
+      expect(lh110).toBeGreaterThan(lh150);
     },
     TEST_TIMEOUT,
   );

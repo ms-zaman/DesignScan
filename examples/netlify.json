@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://netlify.com",
+  "title": "Push your ideas to the web | Netlify",
+  "fetchedAt": "2026-06-08T05:17:57.816Z",
+  "theme": "light",
+  "colors": {
+    "background": "#ffffff",
+    "text": "#353a3e",
+    "primary": "#32e6e2",
+    "border": "#e9ebed",
+    "mutedSurface": "#f6f6f7",
+    "palette": [
+      {
+        "hex": "#89ddff",
+        "count": 281
+      },
+      {
+        "hex": "#e4f0fb",
+        "count": 117
+      },
+      {
+        "hex": "#181a1c",
+        "count": 87
+      },
+      {
+        "hex": "#353a3e",
+        "count": 63
+      },
+      {
+        "hex": "#545a61",
+        "count": 55
+      },
+      {
+        "hex": "#c792ea",
+        "count": 45
+      },
+      {
+        "hex": "#ffffff",
+        "count": 44
+      },
+      {
+        "hex": "#add7ff",
+        "count": 38
+      },
+      {
+        "hex": "#5fb3ff",
+        "count": 22
+      },
+      {
+        "hex": "#32e6e2",
+        "count": 18
+      },
+      {
+        "hex": "#060b10",
+        "count": 15
+      },
+      {
+        "hex": "#5de4c7",
+        "count": 15
+      },
+      {
+        "hex": "#7fdbca",
+        "count": 14
+      },
+      {
+        "hex": "#2e51ed",
+        "count": 9
+      },
+      {
+        "hex": "#f6f6f7",
+        "count": 5
+      },
+      {
+        "hex": "#9da7b2",
+        "count": 5
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "Instrument Sans",
+      "Martian Mono",
+      "Figtree",
+      "Times"
+    ],
+    "fontStack": "\"Instrument Sans\", system-ui, Helvetica, sans-serif",
+    "sizeScalePx": [
+      12,
+      14,
+      16,
+      18,
+      24,
+      32,
+      37,
+      48,
+      64
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "lineHeightHeading": 1.1,
+    "lineHeightBody": 1.5,
+    "weightHeading": 800,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": 0,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "radiusScalePx": [
+    2,
+    4,
+    6,
+    8,
+    12,
+    16
+  ],
+  "shadows": [
+    "color(srgb 0 0 0 / 0.07) 0px 16px 24px 0px, color(srgb 0 0 0 / 0.06) 0px 6px 30px 0px, color(srgb 0 0 0 / 0.1) 0px 8px 10px 0px",
+    "rgb(128, 128, 128) 0px 0px 5px 0px",
+    "oklab(0 0 0 / 0) 0px 0px 0px 0px, oklab(0 0 0 / 0) 0px 0px 0px 0px",
+    "color(srgb 0 0 0 / 0.25) 0px 4px 12px 0px"
+  ]
+}

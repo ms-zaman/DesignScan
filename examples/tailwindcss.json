@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://tailwindcss.com",
+  "title": "Tailwind CSS - Rapidly build modern websites without ever leaving your HTML.",
+  "fetchedAt": "2026-06-08T05:17:11.830Z",
+  "theme": "light",
+  "colors": {
+    "background": "#ffffff",
+    "text": "#030712",
+    "primary": "#f6339a",
+    "border": "#ddd6ff",
+    "mutedSurface": "#fefce8",
+    "palette": [
+      {
+        "hex": "#030712",
+        "count": 120
+      },
+      {
+        "hex": "#90a1b9",
+        "count": 108
+      },
+      {
+        "hex": "#cad5e2",
+        "count": 88
+      },
+      {
+        "hex": "#74d4ff",
+        "count": 49
+      },
+      {
+        "hex": "#fb64b6",
+        "count": 44
+      },
+      {
+        "hex": "#ffffff",
+        "count": 40
+      },
+      {
+        "hex": "#f8fafc",
+        "count": 30
+      },
+      {
+        "hex": "#4a5565",
+        "count": 22
+      },
+      {
+        "hex": "#96f7e4",
+        "count": 15
+      },
+      {
+        "hex": "#6a7282",
+        "count": 12
+      },
+      {
+        "hex": "#bedbff",
+        "count": 11
+      },
+      {
+        "hex": "#00a6f4",
+        "count": 9
+      },
+      {
+        "hex": "#e60076",
+        "count": 6
+      },
+      {
+        "hex": "#000000",
+        "count": 3
+      },
+      {
+        "hex": "#f6339a",
+        "count": 3
+      },
+      {
+        "hex": "#00bcff",
+        "count": 3
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "inter",
+      "plexMono"
+    ],
+    "fontStack": "inter, \"inter Fallback\", system-ui",
+    "sizeScalePx": [
+      13,
+      16,
+      18,
+      20,
+      24,
+      30,
+      40
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ],
+    "lineHeightHeading": 1,
+    "lineHeightBody": 1.5,
+    "weightHeading": 500,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": 0,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    40,
+    64
+  ],
+  "radiusScalePx": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32
+  ],
+  "shadows": [
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.05) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.1) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+  ]
+}

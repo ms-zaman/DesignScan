@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tailwind CSS - Rapidly build modern websites without ever leaving your HTML. — DesignScan preview</title>
+<style>
+:root{--bg:#f4f5f7;--panel:#fff;--ink:#1a1d24;--muted:#6b7280;--line:#e5e7eb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 28px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+header h1{font-size:16px;margin:0;font-weight:600}
+header .sub{color:var(--muted);font-size:12px;margin-top:2px}
+header a{color:var(--muted)}
+main{max-width:980px;margin:0 auto;padding:28px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:20px}
+section h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 16px}
+.swatches,.scale-row,.shadow-row{display:flex;flex-wrap:wrap;gap:16px}
+.swatch,.scale-item,.shadow-item{margin:0;text-align:center}
+.chip{width:96px;height:64px;border-radius:8px;border:1px solid var(--line)}
+figcaption{margin-top:8px;font-size:12px;display:flex;flex-direction:column;gap:2px}
+figcaption code{color:var(--muted);font-size:11px}
+.type-list{display:flex;flex-direction:column;gap:18px}
+.type-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:baseline;border-top:1px solid var(--line);padding-top:14px}
+.type-row:first-child{border-top:0;padding-top:0}
+.type-meta{display:flex;flex-direction:column}
+.type-meta span{color:var(--muted);font-size:11px}
+.type-specimen{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{height:24px;min-width:2px;background:#9ca3af;border-radius:3px}
+.scale-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.scale-item figcaption{align-items:flex-start}
+.radius-box{width:56px;height:56px;background:#9ca3af}
+.shadow-box{width:120px;height:72px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.shadow-row{padding:8px 0}
+.shadow-item figcaption{color:var(--muted)}
+.cmp-grid{display:flex;flex-direction:column;gap:20px}
+.cmp{display:flex;flex-direction:column;gap:8px}
+.cmp-label{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
+.cmp-onsurface{padding:16px;border-radius:8px;border:1px solid var(--line)}
+.muted{color:var(--muted)}
+.toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.toggle button{border:0;background:var(--panel);color:var(--muted);padding:6px 14px;cursor:pointer;font:inherit;font-size:13px}
+.toggle button.active{background:var(--ink);color:#fff}
+[hidden]{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Tailwind CSS - Rapidly build modern websites without ever leaving your HTML.</h1>
+    <div class="sub">DesignScan preview · <a href="https://tailwindcss.com">https://tailwindcss.com</a> · 2026-06-08</div>
+  </div>
+  
+</header>
+<main>
+<div data-theme-panel="light"><section><h2>Colors</h2><div class="swatches"><figure class="swatch">
+        <div class="chip" style="background:#f6339a"></div>
+        <figcaption><b>primary</b><code>#f6339a</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#111111"></div>
+        <figcaption><b>on-primary</b><code>#111111</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#ffffff"></div>
+        <figcaption><b>background</b><code>#ffffff</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#030712"></div>
+        <figcaption><b>text</b><code>#030712</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#4a5565"></div>
+        <figcaption><b>accent-1</b><code>#4a5565</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#90a1b9"></div>
+        <figcaption><b>accent-2</b><code>#90a1b9</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#111111"></div>
+        <figcaption><b>on-accent-2</b><code>#111111</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#ddd6ff"></div>
+        <figcaption><b>border</b><code>#ddd6ff</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#fefce8"></div>
+        <figcaption><b>muted-surface</b><code>#fefce8</code></figcaption>
+      </figure></div></section>
+<section><h2>Typography</h2><div class="type-list"><div class="type-row">
+        <div class="type-meta"><b>display</b><span>40px · 500 · lh 1</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:40px;font-weight:500;line-height:1;">The quick brown fox jumps</div>
+      </div>
+<div class="type-row">
+        <div class="type-meta"><b>headline-md</b><span>30px · 500 · lh 1</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:30px;font-weight:500;line-height:1;">The quick brown fox jumps</div>
+      </div>
+<div class="type-row">
+        <div class="type-meta"><b>headline-sm</b><span>24px · 500 · lh 1</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:24px;font-weight:500;line-height:1;">The quick brown fox jumps</div>
+      </div>
+<div class="type-row">
+        <div class="type-meta"><b>title</b><span>20px · 500 · lh 1</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:20px;font-weight:500;line-height:1;">The quick brown fox jumps</div>
+      </div>
+<div class="type-row">
+        <div class="type-meta"><b>title-18</b><span>18px · 500 · lh 1</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:18px;font-weight:500;line-height:1;">The quick brown fox jumps</div>
+      </div>
+<div class="type-row">
+        <div class="type-meta"><b>body-lg</b><span>16px · 400 · lh 1.5</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:16px;font-weight:400;line-height:1.5;">The quick brown fox jumps</div>
+      </div>
+<div class="type-row">
+        <div class="type-meta"><b>label</b><span>13px · 400 · lh 1.5</span></div>
+        <div class="type-specimen" style="font-family:inter, "inter Fallback", system-ui;font-size:13px;font-weight:400;line-height:1.5;">The quick brown fox jumps</div>
+      </div></div></section>
+<section><h2>Spacing</h2><div class="scale-row"><figure class="scale-item"><div class="bar" style="width:4px"></div><figcaption><b>xs</b><code>4px</code></figcaption></figure>
+<figure class="scale-item"><div class="bar" style="width:8px"></div><figcaption><b>sm</b><code>8px</code></figcaption></figure>
+<figure class="scale-item"><div class="bar" style="width:12px"></div><figcaption><b>md</b><code>12px</code></figcaption></figure>
+<figure class="scale-item"><div class="bar" style="width:16px"></div><figcaption><b>lg</b><code>16px</code></figcaption></figure>
+<figure class="scale-item"><div class="bar" style="width:24px"></div><figcaption><b>xl</b><code>24px</code></figcaption></figure>
+<figure class="scale-item"><div class="bar" style="width:32px"></div><figcaption><b>2xl</b><code>32px</code></figcaption></figure>
+<figure class="scale-item"><div class="bar" style="width:40px"></div><figcaption><b>3xl</b><code>40px</code></figcaption></figure></div></section>
+<section><h2>Radius</h2><div class="scale-row"><figure class="scale-item"><div class="radius-box" style="border-radius:4px"></div><figcaption><b>xs</b><code>4px</code></figcaption></figure>
+<figure class="scale-item"><div class="radius-box" style="border-radius:8px"></div><figcaption><b>sm</b><code>8px</code></figcaption></figure>
+<figure class="scale-item"><div class="radius-box" style="border-radius:12px"></div><figcaption><b>md</b><code>12px</code></figcaption></figure>
+<figure class="scale-item"><div class="radius-box" style="border-radius:16px"></div><figcaption><b>lg</b><code>16px</code></figcaption></figure>
+<figure class="scale-item"><div class="radius-box" style="border-radius:24px"></div><figcaption><b>xl</b><code>24px</code></figcaption></figure>
+<figure class="scale-item"><div class="radius-box" style="border-radius:32px"></div><figcaption><b>2xl</b><code>32px</code></figcaption></figure></div></section>
+<section><h2>Elevation</h2><div class="shadow-row"><figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"></div><figcaption>level 1</figcaption></figure>
+<figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px"></div><figcaption>level 2</figcaption></figure>
+<figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.05) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"></div><figcaption>level 3</figcaption></figure>
+<figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.1) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"></div><figcaption>level 4</figcaption></figure></div></section>
+<section><h2>Components</h2><div class="cmp-grid"><div class="cmp">
+    <span class="cmp-label">button-primary</span>
+    <button style="background:#f6339a;color:#111111;border:0;border-radius:12px;padding:12px calc(12px * 2);font:600 18px/1 inter, "inter Fallback", system-ui;cursor:pointer">Primary action</button>
+  </div>
+<div class="cmp">
+      <span class="cmp-label">surface · input · body-text · border</span>
+      <div style="background:#ffffff;color:#030712;border:1px solid #ddd6ff;border-radius:16px;padding:16px;font:400 18px/1.5 inter, "inter Fallback", system-ui;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <p style="margin:0 0 12px">Body text on the surface color — this is what reading copy looks like.</p>
+        <input placeholder="input field" style="background:#ffffff;color:#030712;border:1px solid #ddd6ff;border-radius:8px;padding:8px;font:400 18px/1 inter, "inter Fallback", system-ui;width:60%" />
+      </div>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">divider</span>
+      <div style="height:1px;background:#ddd6ff"></div>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">surface-muted</span>
+      <div style="background:#fefce8;color:#030712;border-radius:16px;padding:16px;font:400 18px/1.5 inter, "inter Fallback", system-ui">Subtle secondary surface — sidebars, sections, callouts.</div>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">link</span>
+      <div class="cmp-onsurface" style="background:#ffffff;border-color:#ddd6ff">
+        <a href="#" style="color:#4a5565;font:400 18px/1.5 inter, "inter Fallback", system-ui">Inline link example →</a>
+      </div>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">badge</span>
+      <span style="background:#90a1b9;color:#111111;border-radius:9999px;padding:8px 12px;font:500 18px/1 inter, "inter Fallback", system-ui">Badge</span>
+    </div></div></section></div>
+
+</main>
+
+</body>
+</html>

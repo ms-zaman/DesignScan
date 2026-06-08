@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://posthog.com",
+  "title": "PostHog – We make dev tools for product engineers",
+  "fetchedAt": "2026-06-08T05:18:06.589Z",
+  "theme": "light",
+  "colors": {
+    "background": "#ffffff",
+    "text": "#374151",
+    "primary": "#cd8407",
+    "border": "#bfc1b7",
+    "mutedSurface": "#eeefe9",
+    "palette": [
+      {
+        "hex": "#4d4f46",
+        "count": 65
+      },
+      {
+        "hex": "#374151",
+        "count": 49
+      },
+      {
+        "hex": "#111827",
+        "count": 38
+      },
+      {
+        "hex": "#65675e",
+        "count": 17
+      },
+      {
+        "hex": "#e1d7c2",
+        "count": 17
+      },
+      {
+        "hex": "#eeefe9",
+        "count": 11
+      },
+      {
+        "hex": "#f54e00",
+        "count": 10
+      },
+      {
+        "hex": "#23251d",
+        "count": 8
+      },
+      {
+        "hex": "#000000",
+        "count": 8
+      },
+      {
+        "hex": "#ffffff",
+        "count": 8
+      },
+      {
+        "hex": "#e5e7e0",
+        "count": 7
+      },
+      {
+        "hex": "#eb9d2a",
+        "count": 7
+      },
+      {
+        "hex": "#b6b7af",
+        "count": 5
+      },
+      {
+        "hex": "#cd8407",
+        "count": 4
+      },
+      {
+        "hex": "#9ea096",
+        "count": 2
+      },
+      {
+        "hex": "#29dbbb",
+        "count": 2
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "IBM Plex Sans Variable",
+      "ui-monospace",
+      "Source Code Pro"
+    ],
+    "fontStack": "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif",
+    "sizeScalePx": [
+      13,
+      15,
+      18,
+      21,
+      24
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "lineHeightHeading": 1.33,
+    "lineHeightBody": 1.71,
+    "weightHeading": 700,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": -0.025,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    36
+  ],
+  "radiusScalePx": [
+    2,
+    4,
+    6,
+    8
+  ],
+  "shadows": [
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.4) 0px 0px 6px 2px"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://supabase.com",
+  "title": "Supabase | The Postgres Development Platform.",
+  "fetchedAt": "2026-06-08T05:17:40.879Z",
+  "theme": "light",
+  "colors": {
+    "background": "#fcfcfc",
+    "text": "#707070",
+    "primary": "#72e3ad",
+    "border": "#dfdfdf",
+    "mutedSurface": null,
+    "palette": [
+      {
+        "hex": "#707070",
+        "count": 159
+      },
+      {
+        "hex": "#ffffff",
+        "count": 124
+      },
+      {
+        "hex": "#171717",
+        "count": 123
+      },
+      {
+        "hex": "#fcfcfc",
+        "count": 73
+      },
+      {
+        "hex": "#000000",
+        "count": 54
+      },
+      {
+        "hex": "#fdfdfd",
+        "count": 12
+      },
+      {
+        "hex": "#525252",
+        "count": 11
+      },
+      {
+        "hex": "#3fcf8e",
+        "count": 6
+      },
+      {
+        "hex": "#72e3ad",
+        "count": 5
+      },
+      {
+        "hex": "#dfdfdf",
+        "count": 3
+      },
+      {
+        "hex": "#a9f1ca",
+        "count": 1
+      },
+      {
+        "hex": "#00bb68",
+        "count": 1
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "Circular",
+      "Source Code Pro"
+    ],
+    "fontStack": "Circular, custom-font, \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+    "sizeScalePx": [
+      12,
+      14,
+      16,
+      18,
+      24,
+      36,
+      72
+    ],
+    "weights": [
+      400,
+      500
+    ],
+    "lineHeightHeading": 1.2,
+    "lineHeightBody": 1.5,
+    "weightHeading": 400,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": 0,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    80
+  ],
+  "radiusScalePx": [
+    6,
+    8,
+    12,
+    16
+  ],
+  "shadows": [
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px"
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://retool.com",
+  "title": "Retool | Build internal software better, with AI.",
+  "fetchedAt": "2026-06-08T05:19:38.142Z",
+  "theme": "light",
+  "colors": {
+    "background": "#151515",
+    "text": "#e9ebdf",
+    "primary": "#518dd2",
+    "border": "#433e38",
+    "mutedSurface": "#242424",
+    "palette": [
+      {
+        "hex": "#e9ebdf",
+        "count": 154
+      },
+      {
+        "hex": "#cbccc4",
+        "count": 37
+      },
+      {
+        "hex": "#151515",
+        "count": 20
+      },
+      {
+        "hex": "#f7f8f4",
+        "count": 11
+      },
+      {
+        "hex": "#8b867f",
+        "count": 9
+      },
+      {
+        "hex": "#242424",
+        "count": 8
+      },
+      {
+        "hex": "#b6b8af",
+        "count": 6
+      },
+      {
+        "hex": "#518dd2",
+        "count": 2
+      },
+      {
+        "hex": "#000000",
+        "count": 2
+      },
+      {
+        "hex": "#0e352c",
+        "count": 1
+      },
+      {
+        "hex": "#0e0e0e",
+        "count": 1
+      },
+      {
+        "hex": "#185849",
+        "count": 1
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "ui-sans-serif",
+      "saansFont",
+      "pxGroteskFont",
+      "ui-monospace"
+    ],
+    "fontStack": "ui-sans-serif, system-ui, sans-serif",
+    "sizeScalePx": [
+      12,
+      14,
+      16,
+      18,
+      24,
+      32,
+      36,
+      48,
+      72
+    ],
+    "weights": [
+      300,
+      380,
+      400,
+      570
+    ],
+    "lineHeightHeading": 1.2,
+    "lineHeightBody": 1.5,
+    "weightHeading": 380,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": -0.01,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    40,
+    80
+  ],
+  "radiusScalePx": [
+    4,
+    6,
+    8,
+    20,
+    36
+  ],
+  "shadows": [
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.35) 0px 68px 116px 0px",
+    "rgba(0, 0, 0, 0.12) 0px 1px 2px 0px, rgb(0, 0, 0) 0px 0px 0px 0.5px"
+  ]
+}

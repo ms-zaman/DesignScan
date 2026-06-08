@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://railway.app",
+  "title": "Railway | The all-in-one intelligent cloud provider",
+  "fetchedAt": "2026-06-08T05:19:12.731Z",
+  "theme": "light",
+  "colors": {
+    "background": "#13111c",
+    "text": "#f7f7f8",
+    "primary": "#180d43",
+    "border": "#33323e",
+    "mutedSurface": "#1b2132",
+    "palette": [
+      {
+        "hex": "#f7f7f8",
+        "count": 363
+      },
+      {
+        "hex": "#ffffff",
+        "count": 22
+      },
+      {
+        "hex": "#33323e",
+        "count": 14
+      },
+      {
+        "hex": "#878593",
+        "count": 9
+      },
+      {
+        "hex": "#13111c",
+        "count": 7
+      },
+      {
+        "hex": "#dcdce0",
+        "count": 5
+      },
+      {
+        "hex": "#180d43",
+        "count": 1
+      },
+      {
+        "hex": "#553f83",
+        "count": 1
+      },
+      {
+        "hex": "#0d0c14",
+        "count": 1
+      },
+      {
+        "hex": "#291839",
+        "count": 1
+      },
+      {
+        "hex": "#3d2259",
+        "count": 1
+      },
+      {
+        "hex": "#bf93ec",
+        "count": 1
+      },
+      {
+        "hex": "#1b2132",
+        "count": 1
+      },
+      {
+        "hex": "#42946e",
+        "count": 1
+      },
+      {
+        "hex": "#eab38a",
+        "count": 1
+      },
+      {
+        "hex": "#1f2b2e",
+        "count": 1
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "Inter",
+      "JetBrains Mono",
+      "Helvetica",
+      "IBM Plex Serif"
+    ],
+    "fontStack": "Inter, -apple-system, system-ui, \"Segoe UI\", sans-serif, Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\"",
+    "sizeScalePx": [
+      12,
+      14,
+      16,
+      18,
+      20,
+      24,
+      36,
+      40
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "lineHeightHeading": 1.5,
+    "lineHeightBody": 1.63,
+    "weightHeading": 400,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": 0,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    40,
+    96
+  ],
+  "radiusScalePx": [
+    6,
+    8,
+    10,
+    16
+  ],
+  "shadows": [
+    "rgba(65, 78, 166, 0.1) 0px -12px 127px 0px, rgba(65, 78, 166, 0.07) 0px -4.38px 46.357px 0px, rgba(65, 78, 166, 0.06) 0px -2.127px 22.506px 0px, rgba(65, 78, 166, 0.04) 0px -1.042px 11.033px 0px, rgba(65, 78, 166, 0.03) 0px -0.412px 4.362px 0px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
+    "rgb(204, 204, 204) 0px 0px 2px 2px",
+    "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 0px 0px 1.5px inset"
+  ]
+}

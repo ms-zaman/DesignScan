@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  gradientStops,
   isNeutral,
   luminance,
   parseColor,
@@ -157,6 +158,60 @@ describe("parseColor – modern formats", () => {
       64,
       4,
     );
+  });
+});
+
+describe("gradientStops", () => {
+  it("returns [] for non-gradient or empty input", () => {
+    expect(gradientStops(undefined)).toEqual([]);
+    expect(gradientStops(null)).toEqual([]);
+    expect(gradientStops("none")).toEqual([]);
+    expect(gradientStops('url("hero.png")')).toEqual([]);
+  });
+
+  it("pulls legacy rgb() stops, skipping the direction keyword", () => {
+    expect(
+      gradientStops(
+        "linear-gradient(to right, rgb(255, 0, 0), rgb(0, 0, 255))",
+      ),
+    ).toEqual(["rgb(255, 0, 0)", "rgb(0, 0, 255)"]);
+  });
+
+  it("drops an angle prefix and keeps stop positions out of the color", () => {
+    expect(
+      gradientStops(
+        "linear-gradient(90deg, rgb(29, 185, 84) 0%, rgb(0, 0, 0) 100%)",
+      ),
+    ).toEqual(["rgb(29, 185, 84)", "rgb(0, 0, 0)"]);
+  });
+
+  it("handles radial/conic prefixes and bare hex stops", () => {
+    expect(
+      gradientStops("radial-gradient(circle at center, #ff385c, #fff)"),
+    ).toEqual(["#ff385c", "#fff"]);
+    expect(
+      gradientStops("conic-gradient(from 90deg at 50% 50%, #0a0, #00f)"),
+    ).toEqual(["#0a0", "#00f"]);
+  });
+
+  it("keeps modern oklch / color-mix stops intact (commas and all)", () => {
+    expect(
+      gradientStops(
+        "linear-gradient(in oklch, oklch(0.7 0.15 30), color-mix(in srgb, #fff, #000))",
+      ),
+    ).toEqual(["oklch(0.7 0.15 30)", "color-mix(in srgb, #fff, #000)"]);
+  });
+
+  it("extracts stops from multiple stacked gradients", () => {
+    const stops = gradientStops(
+      "linear-gradient(rgb(1, 1, 1), rgb(2, 2, 2)), radial-gradient(rgb(3, 3, 3), rgb(4, 4, 4))",
+    );
+    expect(stops).toEqual([
+      "rgb(1, 1, 1)",
+      "rgb(2, 2, 2)",
+      "rgb(3, 3, 3)",
+      "rgb(4, 4, 4)",
+    ]);
   });
 });
 

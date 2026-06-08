@@ -87,6 +87,7 @@ export async function extract(
       const colorCount: Record<string, number> = {};
       const textColorArea: Record<string, number> = {};
       const bgArea: Record<string, number> = {};
+      const gradientImages: Record<string, number> = {};
       const fontFamilies: Record<string, number> = {};
       const fontSizes: Record<string, number> = {};
       const fontWeights: Record<string, number> = {};
@@ -144,6 +145,19 @@ export async function extract(
           bgArea[bg] = (bgArea[bg] || 0) + area;
         }
 
+        // Gradient fills (linear/radial/conic) carry brand colors that never
+        // appear as a flat background-color, so capture the raw value
+        // area-weighted for the primary heuristic to mine. Keep tractable: skip
+        // huge declarations and cap the distinct-value count, while still
+        // accumulating area onto values already seen.
+        const bgImage = cs.backgroundImage;
+        if (bgImage?.includes("gradient(") && bgImage.length < 1000) {
+          if (gradientImages[bgImage] !== undefined)
+            gradientImages[bgImage] += area;
+          else if (Object.keys(gradientImages).length < 200)
+            gradientImages[bgImage] = area;
+        }
+
         bump(fontFamilies, cs.fontFamily);
         bump(fontSizes, cs.fontSize);
         bump(fontWeights, cs.fontWeight);
@@ -169,8 +183,14 @@ export async function extract(
           // mode. Floor body higher so we capture real prose leading or fall
           // back cleanly. Headings legitimately run tighter.
           const lhFloor = isHeading ? 0.9 : 1.15;
+          // Size-weight the heading line-height vote (like the weight vote
+          // below): a page has far more ~18px heading-bucket text (feature copy,
+          // nav) at the body leading than true display/H1 lines, so a plain
+          // count makes headings inherit a loose body line-height. Weighting by
+          // px lets the largest, most heading-like text set the leading. Body
+          // stays a plain count.
           if (ratio !== null && ratio >= lhFloor && ratio <= 3) {
-            bump(lhTarget, ratio.toFixed(2));
+            bump(lhTarget, ratio.toFixed(2), isHeading ? fpx : 1);
           }
 
           // Size-weight the heading vote by font-size: a page often has lots of
@@ -186,8 +206,11 @@ export async function extract(
           let em: number | null = null;
           if (ls === "normal") em = 0;
           else if (ls?.endsWith("px")) em = parseFloat(ls) / fpx;
+          // Size-weight the heading letter-spacing vote for the same reason as
+          // line-height: display headings often set a tight tracking the
+          // abundant medium text doesn't, and a plain count would bury it.
           if (em !== null && em >= -0.2 && em <= 0.5) {
-            bump(lsTarget, em.toFixed(3));
+            bump(lsTarget, em.toFixed(3), isHeading ? fpx : 1);
           }
         }
 
@@ -230,7 +253,10 @@ export async function extract(
             padding: cs.padding,
           });
         } else if (tag === "a" && links.length < 50) {
-          links.push({ color: cs.color });
+          // Skip links inside code samples: syntax highlighting paints tokens in
+          // language colors (e.g. React-cyan #61dafb in astro's docs) that the
+          // link heuristic would otherwise mistake for the brand accent.
+          if (!el.closest("pre, code")) links.push({ color: cs.color });
         }
       }
 
@@ -239,6 +265,7 @@ export async function extract(
         colorCount,
         textColorArea,
         bgArea,
+        gradientImages,
         fontFamilies,
         fontSizes,
         fontWeights,

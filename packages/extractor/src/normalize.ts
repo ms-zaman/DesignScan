@@ -1,5 +1,6 @@
 import {
   chroma,
+  gradientStops,
   isNeutral,
   luminance,
   parseColor,
@@ -105,8 +106,23 @@ function pickSurfaces(
   // Drop slivers (stray 1px fills); keep the meaningful surfaces.
   const maxArea = Math.max(0, ...fills.map((c) => c.area));
   const meaningful = fills.filter((c) => c.area >= maxArea * 0.05);
-  // muted-surface: the subtlest meaningful fill (closest to the background).
-  const muted = [...meaningful].sort((a, b) => a.ctr - b.ctr)[0]?.hex ?? null;
+  // A muted/recessed surface should sit on the *content* side of the background,
+  // not lighter than it: a pure-white "surface" on an already off-white page
+  // (supabase/vercel — #ffffff on #fafafa) is the document base showing through
+  // and reads as invisible. On a light page require the fill to be no lighter
+  // than the background; on a dark page, no darker. (Borders may go either way,
+  // so this gates only the muted role.)
+  const recessed = (hex: string) => {
+    const c = parseColor(hex);
+    if (!c) return false;
+    const l = luminance(c);
+    return bgLum > 0.5 ? l <= bgLum + 1e-6 : l >= bgLum - 1e-6;
+  };
+  // muted-surface: the subtlest *recessed* meaningful fill (closest to the bg).
+  const muted =
+    [...meaningful]
+      .filter((c) => recessed(c.hex))
+      .sort((a, b) => a.ctr - b.ctr)[0]?.hex ?? null;
 
   // border: prefer a real captured border color (opaque, hairline contrast),
   // else the most visible subtle fill — kept distinct from muted-surface.
@@ -124,7 +140,12 @@ function pickSurfaces(
     break;
   }
   if (!border) {
-    const visible = [...meaningful].sort((a, b) => b.ctr - a.ctr);
+    // Guess a border from the subtle fills, but only recessed ones — a fill
+    // lighter than an off-white page (the document base showing through) is as
+    // invisible as a border as it is as a muted surface.
+    const visible = [...meaningful]
+      .filter((c) => recessed(c.hex))
+      .sort((a, b) => b.ctr - a.ctr);
     border =
       visible.find((c) => c.hex !== muted)?.hex ?? visible[0]?.hex ?? null;
   }
@@ -146,6 +167,12 @@ const DEFAULT_LINK_COLORS = new Set([
   "#ee0000",
 ]);
 
+// A primary must clear at least this contrast against the background to count as
+// a visible accent. The bar is deliberately low (near-identical colors only):
+// it rejects a button that resolves to ~the page background, without touching
+// any genuinely visible brand color.
+const PRIMARY_MIN_CONTRAST = 1.5;
+
 function pickPrimary(
   raw: RawObservations,
   background: string | null,
@@ -160,8 +187,18 @@ function pickPrimary(
     solid.set(hex, (solid.get(hex) || 0) + 1);
   }
   if (solid.size) {
+    const bg = background ? parseColor(background) : null;
+    const bgLum = bg ? luminance(bg) : null;
+    // A primary must read as a distinct accent, not as the page itself. A
+    // "colored" button that resolves to ~the background (sentry's near-black
+    // #150f23 on a near-black page is non-neutral but invisible) is rejected so
+    // a real signal can win instead. With no known background we can't test, so
+    // the candidate is kept.
+    const distinct = (hex: string) =>
+      bgLum === null ||
+      contrastRatio(luminance(parseColor(hex)!), bgLum) >= PRIMARY_MIN_CONTRAST;
     const colored = [...solid.entries()]
-      .filter(([hex]) => !isNeutral(parseColor(hex)!))
+      .filter(([hex]) => !isNeutral(parseColor(hex)!) && distinct(hex))
       .sort((a, b) => b[1] - a[1]);
     if (colored.length) return colored[0][0];
 
@@ -170,14 +207,13 @@ function pickPrimary(
     //    accept it if that contrast is real (>=3); a near-background "button"
     //    (e.g. a white card button on a white page) isn't the primary action, so
     //    we fall through to the saturated-accent heuristic instead.
-    const bg = background ? parseColor(background) : null;
-    const bgLum = bg ? luminance(bg) : 1;
+    const monoLum = bgLum ?? 1;
     const best = [...solid.entries()].sort((a, b) => {
-      const ca = contrastRatio(luminance(parseColor(a[0])!), bgLum);
-      const cb = contrastRatio(luminance(parseColor(b[0])!), bgLum);
+      const ca = contrastRatio(luminance(parseColor(a[0])!), monoLum);
+      const cb = contrastRatio(luminance(parseColor(b[0])!), monoLum);
       return cb - ca || b[1] - a[1];
     })[0];
-    if (best && contrastRatio(luminance(parseColor(best[0])!), bgLum) >= 3) {
+    if (best && contrastRatio(luminance(parseColor(best[0])!), monoLum) >= 3) {
       return best[0];
     }
   }
@@ -201,7 +237,35 @@ function pickPrimary(
   const topLink = [...linkCount.entries()].sort((a, b) => b[1] - a[1])[0];
   if (topLink) return topLink[0];
 
-  // 4) Last resort: the most saturated reasonably-frequent color overall.
+  // 4) Gradient stop colors. A brand color often lives *only* in a hero/CTA
+  //    gradient (spotify's green, anthropic's coral) — never a flat fill, a
+  //    link, or a solid button — so every flat-color heuristic above misses it.
+  //    Mine the saturated stop colors out of the captured gradients, weight them
+  //    by the painted gradient area, and take the dominant one. Fallback-only:
+  //    a real colored button or link already returned, so this never overrides a
+  //    stronger signal; it only beats the last-resort palette guess below (which
+  //    is what these sites wrongly fell through to before). Skip neutral/low-
+  //    saturation stops (gradients routinely fade to white/black) and the UA
+  //    default link colors, mirroring the link heuristic.
+  //    Unlike the flat-color tallies we do NOT require opacity here: brand colors
+  //    are frequently used at low alpha for a soft glow (figma's blurple lives
+  //    only in `rgba(77, 73, 252, 0.125)` stops), yet the RGB channels still
+  //    carry the real brand hue. The neutral/saturation gate already drops the
+  //    translucent black/white overlays that make up most decorative gradients.
+  const gradAccent = new Map<string, number>();
+  for (const [image, area] of Object.entries(raw.gradientImages ?? {})) {
+    for (const stop of gradientStops(image)) {
+      const c = parseColor(stop);
+      if (!c || isNeutral(c) || saturation(c) < 0.4) continue;
+      const hex = toHex(c);
+      if (DEFAULT_LINK_COLORS.has(hex)) continue;
+      gradAccent.set(hex, (gradAccent.get(hex) ?? 0) + area);
+    }
+  }
+  const topGrad = [...gradAccent.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (topGrad) return topGrad[0];
+
+  // 5) Last resort: the most saturated reasonably-frequent color overall.
   const candidates = buildPalette(raw.colorCount)
     .map((p) => ({ ...p, c: parseColor(p.hex)! }))
     .filter((p) => p.c && !isNeutral(p.c) && p.count >= 2)

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.3",
+  "url": "https://github.com",
+  "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
+  "fetchedAt": "2026-06-08T05:17:28.599Z",
+  "theme": "light",
+  "colors": {
+    "background": "#0d1117",
+    "text": "#ffffff",
+    "primary": "#08872b",
+    "border": "#484f58",
+    "mutedSurface": null,
+    "palette": [
+      {
+        "hex": "#000000",
+        "count": 73
+      },
+      {
+        "hex": "#ffffff",
+        "count": 59
+      },
+      {
+        "hex": "#9198a1",
+        "count": 58
+      },
+      {
+        "hex": "#a4aea6",
+        "count": 31
+      },
+      {
+        "hex": "#58635b",
+        "count": 30
+      },
+      {
+        "hex": "#8dd6ff",
+        "count": 23
+      },
+      {
+        "hex": "#0d1117",
+        "count": 6
+      },
+      {
+        "hex": "#f0f6fc",
+        "count": 4
+      },
+      {
+        "hex": "#e4ebe6",
+        "count": 3
+      },
+      {
+        "hex": "#24292f",
+        "count": 2
+      },
+      {
+        "hex": "#08872b",
+        "count": 2
+      },
+      {
+        "hex": "#0d3024",
+        "count": 2
+      },
+      {
+        "hex": "#7c8980",
+        "count": 2
+      },
+      {
+        "hex": "#1f6feb",
+        "count": 1
+      },
+      {
+        "hex": "#0377ff",
+        "count": 1
+      },
+      {
+        "hex": "#2e374a",
+        "count": 1
+      }
+    ]
+  },
+  "typography": {
+    "families": [
+      "Mona Sans",
+      "Mona Sans VF",
+      "Mona Sans Mono",
+      "ui-monospace",
+      "sans-serif"
+    ],
+    "fontStack": "\"Mona Sans\", MonaSansFallback, -apple-system, system-ui, \"Segoe UI\", Helvetica, Arial, sans-serif",
+    "sizeScalePx": [
+      12,
+      14,
+      16,
+      18,
+      22,
+      24,
+      40,
+      48
+    ],
+    "weights": [
+      400,
+      425,
+      440,
+      460,
+      480,
+      500,
+      600,
+      700,
+      800
+    ],
+    "lineHeightHeading": 1.5,
+    "lineHeightBody": 1.5,
+    "weightHeading": 400,
+    "weightBody": 400,
+    "letterSpacingHeadingEm": 0,
+    "letterSpacingBodyEm": 0
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    48
+  ],
+  "radiusScalePx": [
+    6,
+    8,
+    12,
+    16,
+    24,
+    60
+  ],
+  "shadows": [
+    "rgba(209, 217, 224, 0.25) 0px 0px 0px 1px, rgba(37, 41, 46, 0.04) 0px 6px 12px -3px, rgba(37, 41, 46, 0.12) 0px 6px 18px 0px",
+    "rgba(255, 255, 255, 0) 0px 0px 0px 1px inset"
+  ]
+}

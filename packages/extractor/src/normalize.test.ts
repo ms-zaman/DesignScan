@@ -221,6 +221,95 @@ describe("normalize – colors", () => {
     expect(profile.colors.primary).toBe("#ff385c");
   });
 
+  it("recovers a brand color that lives only in a gradient (spotify case)", () => {
+    // spotify's green #1db954 appears only in a hero/CTA gradient — no colored
+    // button, no styled link — so the flat-color heuristics miss it. The
+    // gradient step recovers it instead of the wrong last-resort palette guess.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(18, 18, 18)": 1_000_000 }, // dark page
+        buttons: [button({ bg: "rgb(40, 40, 40)" })], // neutral CTA
+        gradientImages: {
+          "linear-gradient(90deg, rgb(29, 185, 84) 0%, rgb(0, 0, 0) 100%)": 500_000,
+        },
+        colorCount: { "rgb(18,18,18)": 50, "rgb(179,179,179)": 30 }, // neutrals
+      }),
+    );
+    expect(profile.colors.primary).toBe("#1db954");
+  });
+
+  it("area-weights gradient stops so the dominant gradient's brand color wins", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        gradientImages: {
+          // small decorative gradient
+          "linear-gradient(rgb(255, 0, 0), rgb(0, 0, 0))": 1_000,
+          // large hero gradient -> its saturated stop should win
+          "linear-gradient(rgb(29, 185, 84), rgb(255, 255, 255))": 800_000,
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#1db954");
+  });
+
+  it("recovers a brand hue from a low-alpha gradient glow (figma case)", () => {
+    // figma's blurple #4d49fc lives only in translucent glow stops
+    // (rgba(77, 73, 252, 0.125)); the RGB still carries the brand hue, so the
+    // gradient step recovers it even though the stop is mostly transparent.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        gradientImages: {
+          "radial-gradient(circle at 20% 80%, rgba(77, 73, 252, 0.125) 0%, rgba(0, 0, 0, 0) 50%)": 600_000,
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#4d49fc");
+  });
+
+  it("ignores neutral gradient fades (white/black) with no saturated stop", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        gradientImages: {
+          "linear-gradient(rgb(255, 255, 255), rgb(0, 0, 0))": 900_000,
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("does not let a gradient stop override a real colored button", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        buttons: [button({ bg: "rgb(83, 58, 253)" })], // #533afd CTA
+        gradientImages: {
+          "linear-gradient(rgb(29, 185, 84), rgb(0, 0, 0))": 900_000,
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#533afd");
+  });
+
+  it("does not let a gradient stop override a saturated brand link", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        buttons: [button({ bg: "rgb(242, 242, 242)" })], // neutral CTA
+        links: [{ color: "rgb(255, 56, 92)" }], // #ff385c brand link
+        gradientImages: {
+          "linear-gradient(rgb(29, 185, 84), rgb(0, 0, 0))": 900_000,
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#ff385c");
+  });
+
   it("does not let a link color override a real colored button", () => {
     // The button is the stronger signal; the link must not win.
     const profile = normalize(
@@ -231,6 +320,33 @@ describe("normalize – colors", () => {
       }),
     );
     expect(profile.colors.primary).toBe("#533afd");
+  });
+
+  it("rejects a non-neutral button that collides with the background (sentry case)", () => {
+    // sentry's #150f23 button is non-neutral but ~equal to the near-black page,
+    // so it's invisible as an accent. The contrast guard rejects it and the real
+    // saturated signal (a violet link) wins instead.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(20, 15, 35)": 1_000_000 }, // #140f23 dark page
+        buttons: [button({ bg: "rgb(21, 15, 35)" })], // #150f23 — near-bg
+        links: [{ color: "rgb(126, 87, 194)" }], // #7e57c2 sentry violet
+      }),
+    );
+    expect(profile.colors.primary).not.toBe("#150f23");
+    expect(profile.colors.primary).toBe("#7e57c2");
+  });
+
+  it("keeps a visible colored button on a dark page (guard only rejects near-bg)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(18, 18, 18)": 1_000_000 }, // near-black page
+        buttons: [button({ bg: "rgb(126, 87, 194)" })], // visible violet CTA
+      }),
+    );
+    expect(profile.colors.primary).toBe("#7e57c2");
   });
 });
 
@@ -265,6 +381,38 @@ describe("normalize – surfaces (border & muted-surface)", () => {
     );
     expect(p.colors.border).toBe("#d0d7de");
     expect(p.colors.mutedSurface).toBe("#f5f5f5");
+  });
+
+  it("rejects a muted surface lighter than an off-white background (supabase case)", () => {
+    // #ffffff sitting on a #fafafa page is the document base showing through,
+    // not a recessed surface — emitting it as a muted/border token would be a
+    // near-invisible color. Both subtle roles stay null instead.
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(250, 250, 250)": 1_000_000, // #fafafa background
+          "rgb(255, 255, 255)": 300_000, // #ffffff — lighter, not recessed
+        },
+      }),
+    );
+    expect(p.colors.background).toBe("#fafafa");
+    expect(p.colors.mutedSurface).toBeNull();
+    expect(p.colors.border).toBeNull();
+  });
+
+  it("keeps a recessed (darker) fill on an off-white page", () => {
+    // A genuinely darker tint than the off-white page is a real hairline/surface.
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: {
+          "rgb(250, 250, 250)": 1_000_000, // #fafafa background
+          "rgb(229, 229, 229)": 300_000, // #e5e5e5 — darker -> recessed
+        },
+      }),
+    );
+    expect(p.colors.border).toBe("#e5e5e5");
   });
 
   it("emits no surfaces when the page has only the background and a dark block", () => {

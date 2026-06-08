@@ -6,6 +6,11 @@ export interface RawObservations {
   // Optional: older recorded fixtures may omit it (pickText falls back to count).
   textColorArea?: Record<string, number>;
   bgArea: Record<string, number>; // backgroundColor -> total px^2 area
+  // Raw CSS background-image gradient values -> total px^2 area of the elements
+  // painting them. Brand colors often live only in a hero/CTA gradient (never a
+  // flat fill, link, or solid button); their stop colors feed the primary
+  // heuristic. Optional: profiles captured before this field simply skip it.
+  gradientImages?: Record<string, number>;
   fontFamilies: Record<string, number>;
   fontSizes: Record<string, number>;
   fontWeights: Record<string, number>;

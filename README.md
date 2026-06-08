@@ -4,12 +4,32 @@ URL → design tokens → `DESIGN.md`. Point it at any website and get a
 spec-compliant [DESIGN.md](https://github.com/google-labs-code/design.md) file
 (YAML tokens + prose) that AI coding agents can read to match that site's look.
 
+## Preview
+
+Every run can also emit a self-contained HTML proof sheet (`--preview`) that
+renders the extracted tokens — color roles, type specimens, spacing/radius
+scales, components — so you can eyeball the result before trusting it:
+
+[![DesignScan preview proof sheet for stripe.com](examples/stripe.preview.png)](examples/stripe.preview.html)
+
+## Brand corpus
+
+A growing, curated library of real-brand specs lives in [`examples/`](examples) —
+each one a `DESIGN.md`, an HTML preview, and the raw token JSON, indexed in
+[`examples/README.md`](examples/README.md) (visual gallery: [`index.html`](examples/index.html)).
+
+[![DesignScan brand corpus gallery](examples/gallery.png)](examples/README.md)
+
+Rebuild it from the committed JSON with `pnpm seed rebuild` (no network), or add
+brands with `pnpm seed add <url>` — degenerate / bot-challenged pages are skipped
+automatically so the corpus only holds trustworthy specs.
+
 ## Monorepo layout
 
 | Path | What |
 |------|------|
 | [`packages/extractor`](packages/extractor) | The extraction + generation engine (Playwright → tokens → `DESIGN.md`). |
-| [`examples/`](examples) | Curated sample outputs (Stripe, Linear) — token JSON + generated `DESIGN.md`. |
+| [`examples/`](examples) | The brand corpus — `DESIGN.md` + HTML preview + token JSON per brand, with a gallery index. |
 | [`docs/`](docs) | Research: market/forensic analysis and acquisition memo (EN/BN). |
 
 ## Install (as a CLI / library)
@@ -52,13 +72,22 @@ pnpm extract vercel.com --md --theme both --out out/vercel.DESIGN.md
 # can eyeball the extraction before trusting it (--theme both adds a Light/Dark toggle)
 pnpm extract stripe.com --md --preview --out out/stripe.DESIGN.md
 # → out/stripe.DESIGN.md  +  out/stripe.preview.html
+
+# --strict = exit non-zero if the result looks degenerate (bot challenge / too
+# few signals), for CI/automation that must not consume junk tokens
+pnpm extract stripe.com --strict --quiet
+
+# seed / rebuild the curated brand corpus under examples/
+pnpm seed add tailwindcss.com vercel.com   # extract live + add to the corpus
+pnpm seed rebuild                          # regen md/preview/gallery from JSON
 ```
 
 ## Scripts (root)
 
 | Script | Does |
 |--------|------|
-| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--preview] [--timeout ms] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it) |
+| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--preview] [--strict] [--timeout ms] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it; `--strict` = non-zero exit on a degenerate result) |
+| `pnpm seed rebuild` / `pnpm seed add <url…>` | Build the brand corpus under `examples/` (md + preview + gallery; `add` extracts live) |
 | `pnpm build` | Compile the publishable package (`tsc` → `dist`) |
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm test` | Run the test suite (vitest) |
@@ -75,7 +104,7 @@ The engine is consumable as a library through its public API
 - [x] **Step 2 — Generator** (token profile → spec-valid `DESIGN.md`, lint-clean)
 - [x] **Step 3 — HTML preview** (`--preview` → self-contained token proof sheet, light/dark toggle)
 - [ ] **Step 4** — LLM-refined prose & color-role assignment
-- [ ] **Step 5** — brand-seed library, `npx ... add`, checkout
+- [~] **Step 5** — brand-seed library (`pnpm seed`, curated [corpus](examples) + gallery) done; `npx … add` / checkout next
 
 See [`packages/extractor/README.md`](packages/extractor/README.md) for the full
 roadmap and engine details.

@@ -50,6 +50,12 @@ program
   )
   .option("--headful", "run the browser with a visible window", false)
   .option("--quiet", "suppress the human-readable summary", false)
+  .option(
+    "--strict",
+    "exit non-zero if the extraction looks degenerate (bot challenge / too " +
+      "few signals) — for CI/automation that must not trust junk tokens",
+    false,
+  )
   .action(async (url: string, opts) => {
     const target = /^https?:\/\//i.test(url) ? url : `https://${url}`;
 
@@ -131,8 +137,19 @@ program
 
     // Always surface quality warnings (even under --quiet): a bot-challenge or
     // near-empty extraction must never be mistaken for real tokens.
-    for (const w of profileWarnings(profile)) {
+    const warnings = profileWarnings(profile);
+    for (const w of warnings) {
       process.stderr.write(`⚠ ${w}\n`);
+    }
+    // --strict turns those warnings into a failing exit code so CI/automation
+    // doesn't silently consume a challenge page or a near-empty render as if it
+    // were real tokens. The output is still written (callers may want to inspect
+    // it); only the exit status changes.
+    if (opts.strict && warnings.length) {
+      process.stderr.write(
+        "✗ --strict: the extraction looks unreliable (see warnings above)\n",
+      );
+      process.exitCode = 1;
     }
   });
 
