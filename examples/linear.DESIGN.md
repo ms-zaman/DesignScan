@@ -3,51 +3,53 @@ version: alpha
 name: "Linear – The system for product development"
 description: "Auto-extracted from https://linear.app by DesignScan."
 colors:
-  primary: "#e5e5e6"
-  on-primary: "#111111"
+  primary: "#5e6ad2"
+  on-primary: "#ffffff"
   background: "#08090a"
   text: "#d0d6e0"
   accent-1: "#62666d"
   accent-2: "#8a8f98"
   on-accent-2: "#111111"
+  border: "#23252a"
+  muted-surface: "#0f1011"
 typography:
   display:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 64px
-    fontWeight: "400"
-    lineHeight: 1.6
+    fontWeight: "510"
+    lineHeight: 1
     letterSpacing: "-0.022em"
   display-48:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 48px
-    fontWeight: "400"
-    lineHeight: 1.6
+    fontWeight: "510"
+    lineHeight: 1
     letterSpacing: "-0.022em"
   headline-lg:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 32px
-    fontWeight: "400"
-    lineHeight: 1.6
+    fontWeight: "510"
+    lineHeight: 1
     letterSpacing: "-0.022em"
   headline-sm:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 24px
-    fontWeight: "400"
-    lineHeight: 1.6
+    fontWeight: "510"
+    lineHeight: 1
     letterSpacing: "-0.022em"
   title:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 18px
-    fontWeight: "400"
-    lineHeight: 1.6
+    fontWeight: "510"
+    lineHeight: 1
     letterSpacing: "-0.022em"
   body-lg:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 16px
     fontWeight: "400"
     lineHeight: 1.5
   label:
-    fontFamily: "Inter Variable"
+    fontFamily: "\"Inter Variable\", \"SF Pro Display\", -apple-system, system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, \"Open Sans\", \"Helvetica Neue\", sans-serif"
     fontSize: 13px
     fontWeight: "400"
     lineHeight: 1.5
@@ -94,21 +96,31 @@ components:
     backgroundColor: "{colors.accent-2}"
     textColor: "{colors.on-accent-2}"
     rounded: "{rounded.full}"
+  divider:
+    backgroundColor: "{colors.border}"
+    height: 1px
+  surface-muted:
+    backgroundColor: "{colors.muted-surface}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.lg}"
+    padding: "{spacing.lg}"
 ---
 
 ## Overview
 
-Auto-extracted from https://linear.app by DesignScan on 2026-06-06. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://linear.app by DesignScan on 2026-06-10. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
-- **primary (#e5e5e6):** the dominant brand/accent color, used for primary actions.
-- **on-primary (#111111):** the readable foreground used on primary surfaces.
+- **primary (#5e6ad2):** the dominant brand/accent color, used for primary actions.
+- **on-primary (#ffffff):** the readable foreground used on primary surfaces.
 - **background (#08090a):** the base surface color behind most content.
 - **text (#d0d6e0):** the primary foreground / body-text color.
 - **accent-1 (#62666d):** a supporting accent (used for links).
 - **accent-2 (#8a8f98):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
+- **border (#23252a):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#0f1011):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 
@@ -132,6 +144,8 @@ Corner radii observed: 2px, 4px, 6px, 8px, 12px, 16px, 22px. Use the smaller val
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
+- **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.
+- **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.
 
 ## Do's and Don'ts
 
@@ -142,7 +156,8 @@ Corner radii observed: 2px, 4px, 6px, 8px, 12px, 16px, 22px. Use the smaller val
 
 Computed from this extraction — act on these before treating the tokens as final:
 
-- **Primary actions:** `primary` (#e5e5e6) with `on-primary` (#111111) text is 15.0:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Fonts:** the brand face `Inter Variable` likely isn't installed locally. Use the full stack `"Inter Variable", "SF Pro Display", -apple-system, system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
+- **Primary actions:** `primary` (#5e6ad2) with `on-primary` (#ffffff) text is 4.7:1 (passes AA). Reserve `primary` for the single most important action per view.
 - **Links:** use `accent-1` (#62666d) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.

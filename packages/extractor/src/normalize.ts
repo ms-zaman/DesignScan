@@ -173,10 +173,202 @@ const DEFAULT_LINK_COLORS = new Set([
 // any genuinely visible brand color.
 const PRIMARY_MIN_CONTRAST = 1.5;
 
+// Custom-property names that *are* the primary/brand color, matched on whole
+// name segments (split on -/_ and camelCase) so `--color-primary` and
+// `--hds-color-button-primary-bg` qualify but tailwind's palette entries
+// (`--color-blue-500`) don't. Substring matching is a trap here: an `on-`
+// pattern silently excluded stripe's correct `--hds-color-button-primary-bg`
+// (butt**on-**primary…), which let a wrong candidate through.
+const PRIMARY_SEGMENTS = new Set(["primary", "brand"]);
+// Segments *about* the primary rather than the primary itself: foregrounds,
+// state variants, washes, borders, scrims. shadcn's `--primary-foreground` is
+// the text painted ON the primary — trusting it would invert the brand; linear
+// declares `--color-fg-primary` (near-white) and `--color-overlay-primary` (a
+// black scrim) alongside its real `--color-brand-bg`. "link" defers to the
+// dedicated painted-link heuristic below. A false exclusion only costs us a
+// fallback to the statistical vote, never a wrong pick. Plain "bg" stays
+// allowed on purpose: `--color-brand-bg` is the brand fill we want, while a
+// page-background `--bg-primary` self-rejects on the contrast/neutral gates.
+const EXCLUDED_SEGMENTS = new Set([
+  "foreground",
+  "fg",
+  "text",
+  "on",
+  "contrast",
+  "inverse",
+  "muted",
+  "subtle",
+  "soft",
+  "hover",
+  "active",
+  "focus",
+  "visited",
+  "disabled",
+  "border",
+  "outline",
+  "ring",
+  "shadow",
+  "gradient",
+  "alpha",
+  "transparent",
+  "tint",
+  "dim",
+  "overlay",
+  "scrim",
+  "backdrop",
+  "link",
+  "line",
+  "selection",
+  "placeholder",
+  "icon",
+  // Gradient endpoints: GitHub's --brand-Label-color-green-blue-start is a
+  // decorative label gradient stop, not the brand.
+  "start",
+  "end",
+  "stop",
+  "from",
+  "to",
+  "via",
+  // Ranked/auxiliary palette roles are by definition not THE primary.
+  "secondary",
+  "tertiary",
+  "support",
+  "logo",
+  // A var that calls itself an accent/highlight is declaring an *accent* —
+  // our taxonomy keeps those separate from primary. GitHub's neon
+  // --brand-color-accent-primary / --brand-tiles-highlightColor are hero-glow
+  // decorations; its real primary is the green CTA the button heuristic finds.
+  "accent",
+  "highlight",
+]);
+// A variable that names its own hue (--brand-Icon-color-coral, tailwind's
+// --color-blue-500) is a palette/decorative entry — the singular brand color
+// doesn't need to say which color it is.
+const HUE_SEGMENTS = new Set([
+  "red",
+  "orange",
+  "amber",
+  "yellow",
+  "lime",
+  "green",
+  "emerald",
+  "teal",
+  "cyan",
+  "sky",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "fuchsia",
+  "magenta",
+  "pink",
+  "rose",
+  "coral",
+  "salmon",
+  "crimson",
+  "mint",
+  "navy",
+  "gold",
+  "silver",
+  "bronze",
+  "white",
+  "black",
+  "gray",
+  "grey",
+]);
+const nameSegments = (name: string): string[] =>
+  name
+    .replace(/^--/, "")
+    .split(/[-_]/)
+    .flatMap((s) => s.split(/(?=[A-Z])/)) // GitHub camelCases: iconColor
+    .map((s) => s.toLowerCase())
+    .filter(Boolean);
+
+// Step 0 of pickPrimary: the site's own declaration. When :root carries a
+// semantically named custom property (--primary, --color-brand, …) that parses
+// to a saturated color the page *actually painted*, the site is telling us its
+// primary — no vote needed. (Dogfood: linear's frequency heuristics picked a
+// warm accent; its declared --color-brand-bg is the truth.)
+// Deliberately strict — every rejection falls through to the heuristics:
+// - numeric segments are palette scales (stripe's --hds-color-util-brand-900
+//   is a ramp entry, not the brand);
+// - neutrals are never accepted: GitHub namespaces its whole marketing design
+//   system under --brand-* (including plain white), and monochrome brands are
+//   already served by the mono-button heuristic below;
+// - painted-on-page is a hard gate, so a variable from an unused theme or a
+//   namespace can't smuggle in a color the visitor never saw.
+function declaredPrimary(
+  raw: RawObservations,
+  background: string | null,
+): string | null {
+  const props = raw.customProps;
+  if (!props) return null;
+
+  // Colors the page actually painted (any signal: fills, text, buttons, links,
+  // gradient stops).
+  const painted = new Set<string>();
+  for (const key of [
+    ...Object.keys(raw.colorCount),
+    ...Object.keys(raw.bgArea),
+    ...raw.buttons.map((b) => b.bg),
+    ...raw.links.map((l) => l.color),
+  ]) {
+    const c = parseColor(key);
+    if (c) painted.add(toHex(c));
+  }
+  for (const image of Object.keys(raw.gradientImages ?? {})) {
+    for (const stop of gradientStops(image)) {
+      const c = parseColor(stop);
+      if (c) painted.add(toHex(c));
+    }
+  }
+
+  const bg = background ? parseColor(background) : null;
+  const bgLum = bg ? luminance(bg) : null;
+
+  const candidates: { name: string; hex: string }[] = [];
+  for (const [name, value] of Object.entries(props)) {
+    const segs = nameSegments(name);
+    if (!segs.some((s) => PRIMARY_SEGMENTS.has(s))) continue;
+    if (
+      segs.some(
+        (s) =>
+          EXCLUDED_SEGMENTS.has(s) || HUE_SEGMENTS.has(s) || /^\d+$/.test(s),
+      )
+    )
+      continue;
+    const c = parseColor(value);
+    // Mirror the link heuristic's bar: opaque, saturated, non-neutral, not a
+    // UA default — translucent washes and grey "brand" namespace entries out.
+    if (!c || c.a < 0.9 || isNeutral(c) || saturation(c) < 0.4) continue;
+    const hex = toHex(c);
+    if (DEFAULT_LINK_COLORS.has(hex)) continue;
+    if (!painted.has(hex)) continue;
+    if (
+      bgLum !== null &&
+      contrastRatio(luminance(c), bgLum) < PRIMARY_MIN_CONTRAST
+    )
+      continue;
+    candidates.push({ name: name.toLowerCase(), hex });
+  }
+  if (!candidates.length) return null;
+
+  // The most canonical (shortest) name wins; name as the final key keeps the
+  // pick deterministic.
+  candidates.sort(
+    (a, b) => a.name.length - b.name.length || (a.name < b.name ? -1 : 1),
+  );
+  return candidates[0].hex;
+}
+
 function pickPrimary(
   raw: RawObservations,
   background: string | null,
 ): string | null {
+  // 0) The site's own declared design system (see declaredPrimary above).
+  const declared = declaredPrimary(raw, background);
+  if (declared) return declared;
+
   // 1) Solid (opaque) button backgrounds are the clearest signal of the primary
   //    action. Tally them and prefer the most common *non-neutral* (brand) color.
   const solid = new Map<string, number>();

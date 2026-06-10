@@ -157,6 +157,35 @@ describe("extract (integration)", () => {
   );
 
   it(
+    "captures :root/body custom properties with var() chains resolved",
+    async () => {
+      const page = `<!doctype html><html><head><title>Vars</title><style>
+        :root {
+          --color-primary: #6633ee;
+          --radius-md: 8px;
+          --font-sans: Inter, sans-serif;
+          --alias-primary: var(--color-primary);
+        }
+        body { --scoped-surface: rgb(245, 245, 245); }
+      </style></head><body><p>hello</p></body></html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      expect(raw.customProps).toBeDefined();
+      const props = raw.customProps ?? {};
+      expect(props["--color-primary"]).toBe("#6633ee");
+      expect(props["--radius-md"]).toBe("8px");
+      expect(props["--font-sans"]).toContain("Inter");
+      // The browser substitutes var() chains at computed-value time, so the
+      // alias arrives already resolved — free indirection-following.
+      expect(props["--alias-primary"]).toBe("#6633ee");
+      // body-scoped declarations are visible too (custom properties inherit,
+      // and we read body's computed style on top of :root's).
+      expect(props["--scoped-surface"]).toBe("rgb(245, 245, 245)");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
     "honours the colorScheme option for prefers-color-scheme pages",
     async () => {
       const themed = `<!doctype html>

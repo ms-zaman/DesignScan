@@ -36,6 +36,12 @@ export interface RawObservations {
   lsBody?: Record<string, number>;
   // Which prefers-color-scheme this page was captured under.
   colorScheme?: "light" | "dark";
+  // CSS custom properties computed on :root/body (name -> computed value, with
+  // var() references already substituted by the browser). Modern sites declare
+  // their design system here outright — `--color-primary`, `--radius-md` —
+  // with semantic names attached, which beats reconstructing the same values
+  // by statistical vote. Optional: profiles captured before this field skip it.
+  customProps?: Record<string, string>;
 }
 
 export interface ButtonSample {

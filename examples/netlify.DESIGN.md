@@ -3,8 +3,8 @@ version: alpha
 name: "Push your ideas to the web | Netlify"
 description: "Auto-extracted from https://netlify.com by DesignScan."
 colors:
-  primary: "#32e6e2"
-  on-primary: "#111111"
+  primary: "#2e51ed"
+  on-primary: "#ffffff"
   background: "#ffffff"
   text: "#353a3e"
   accent-1: "#181a1c"
@@ -112,12 +112,12 @@ components:
 
 ## Overview
 
-Auto-extracted from https://netlify.com by DesignScan on 2026-06-08. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://netlify.com by DesignScan on 2026-06-10. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
-- **primary (#32e6e2):** the dominant brand/accent color, used for primary actions.
-- **on-primary (#111111):** the readable foreground used on primary surfaces.
+- **primary (#2e51ed):** the dominant brand/accent color, used for primary actions.
+- **on-primary (#ffffff):** the readable foreground used on primary surfaces.
 - **background (#ffffff):** the base surface color behind most content.
 - **text (#353a3e):** the primary foreground / body-text color.
 - **accent-1 (#181a1c):** a supporting accent (used for links).
@@ -162,7 +162,7 @@ Computed from this extraction — act on these before treating the tokens as fin
 
 - **Headings:** the `text` token (#353a3e) sits at 11.5:1 on `background` — fine for body copy, but it reads muted at display sizes. For large headings use `accent-1` (#181a1c, 17.5:1) to keep visual hierarchy. Reserve `text` for paragraph and UI copy.
 - **Fonts:** the brand face `Instrument Sans` likely isn't installed locally. Use the full stack `"Instrument Sans", system-ui, Helvetica, sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
-- **Primary actions:** `primary` (#32e6e2) with `on-primary` (#111111) text is 12.2:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Primary actions:** `primary` (#2e51ed) with `on-primary` (#ffffff) text is 6.0:1 (passes AA). Reserve `primary` for the single most important action per view.
 - **Links:** use `accent-1` (#181a1c) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.

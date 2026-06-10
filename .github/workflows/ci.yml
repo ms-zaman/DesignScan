@@ -23,3 +23,8 @@ jobs:
       - run: pnpm --filter @designscan/extractor exec playwright install --with-deps chromium
       - run: pnpm run test
       - run: pnpm run lint:designmd  # validate the committed example DESIGN.md files
+      # Corpus freshness: regenerate the gallery from the committed raw JSON
+      # (network-free) and fail if it differs — a generator change merged without
+      # re-running `pnpm seed rebuild` would otherwise leave the public gallery
+      # silently stale (exactly how the quoted-font-family preview bug shipped).
+      - run: pnpm seed rebuild && git diff --exit-code examples/

@@ -124,6 +124,30 @@ export async function extract(
         return false;
       };
 
+      // Custom properties declared on :root/body — many sites publish their
+      // design system here with semantic names (--color-primary, --radius-md),
+      // and the computed value arrives with var() chains already resolved.
+      // Custom properties inherit, so body's computed style sees the :root set
+      // too; reading both lets a body-level override win. Caps keep a
+      // palette-generator page (tailwind ships hundreds of --color-* entries)
+      // from bloating the profile: skip giant values, stop at 1000 names.
+      const customProps: Record<string, string> = {};
+      for (const el of [document.documentElement, document.body]) {
+        if (!el) continue;
+        const cs = getComputedStyle(el);
+        for (let i = 0; i < cs.length; i++) {
+          const name = cs.item(i);
+          if (!name.startsWith("--")) continue;
+          if (
+            Object.keys(customProps).length >= 1000 &&
+            customProps[name] === undefined
+          )
+            break;
+          const value = cs.getPropertyValue(name).trim();
+          if (value && value.length <= 300) customProps[name] = value;
+        }
+      }
+
       const all = Array.from(document.querySelectorAll("*")).slice(0, limit);
       for (const el of all) {
         const cs = getComputedStyle(el);
@@ -284,6 +308,7 @@ export async function extract(
         weightBody,
         lsHeading,
         lsBody,
+        customProps,
       } as RawObservations;
     }, maxElements);
 

@@ -350,6 +350,265 @@ describe("normalize – colors", () => {
   });
 });
 
+describe("normalize – declared primary (:root custom properties)", () => {
+  const whitePage = { "rgb(255, 255, 255)": 500_000 };
+
+  it("trusts a declared + painted custom property over the button vote", () => {
+    // The site *declares* its primary and paints it (a link); the red button
+    // is a secondary CTA.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        colorCount: { "rgb(83, 58, 253)": 12 },
+        buttons: [button({ bg: "rgb(220, 20, 60)" })],
+        customProps: { "--color-primary": "rgb(83, 58, 253)" },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#533afd");
+  });
+
+  it("requires the declared color to be painted on the page", () => {
+    // A stylesheet-only variable (unused theme, namespace leftovers) must not
+    // beat what the visitor actually sees.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        buttons: [button({ bg: "rgb(220, 20, 60)" })],
+        customProps: { "--color-primary": "rgb(83, 58, 253)" },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#dc143c");
+  });
+
+  it("never accepts a declared neutral (GitHub's --brand-* namespace)", () => {
+    // GitHub prefixes its whole marketing design system --brand-*, including
+    // plain white — on its dark homepage that's a high-contrast "ink" that
+    // would win without the neutral gate. Monochrome brands are served by the
+    // mono-button heuristic instead.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(13, 17, 23)": 500_000 },
+        colorCount: { "rgb(255, 255, 255)": 300 },
+        customProps: { "--brand-color-canvas-default": "rgb(255, 255, 255)" },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("never picks foreground/state variants of the primary", () => {
+    // shadcn convention: --primary-foreground is the text ON the primary.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        customProps: {
+          "--primary-foreground": "rgb(220, 20, 60)",
+          "--color-primary-hover": "rgb(200, 0, 40)",
+          "--brand-gradient": "rgb(255, 0, 255)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("never picks linear-style fg/overlay/link variants (dark page)", () => {
+    // linear.app declares all of these alongside its real --color-brand-bg;
+    // the near-white fg reads as high-contrast "ink" on the dark page and
+    // would win without the name exclusion.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(8, 9, 10)": 500_000 },
+        customProps: {
+          "--color-fg-primary": "rgb(247, 248, 248)",
+          "--color-overlay-primary": "rgba(0, 0, 0, 0.85)",
+          "--color-link-primary": "rgb(130, 143, 255)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("picks the brand fill out of linear's full token set", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(8, 9, 10)": 500_000 },
+        colorCount: { "rgb(94, 106, 210)": 25 }, // brand fill, painted
+        customProps: {
+          "--color-fg-primary": "rgb(247, 248, 248)",
+          "--color-bg-primary": "rgb(8, 9, 10)", // the page itself — self-rejects
+          "--color-border-primary": "rgb(35, 37, 42)",
+          "--color-brand-bg": "rgb(94, 106, 210)",
+          "--color-brand-text": "rgb(255, 255, 255)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#5e6ad2");
+  });
+
+  it("ignores palette-scale names like --color-blue-500 (tailwind)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        customProps: { "--color-blue-500": "rgb(59, 130, 246)" },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("rejects an invisible declared primary and falls back to the heuristics", () => {
+    // A variable from another theme that ~equals the page background must not
+    // smuggle in an invisible primary; the real button wins instead.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        buttons: [button({ bg: "rgb(220, 20, 60)" })],
+        customProps: { "--primary": "rgb(254, 254, 254)" },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#dc143c");
+  });
+
+  it("rejects a translucent declared value (a wash, not the brand)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        customProps: { "--primary": "rgba(83, 58, 253, 0.4)" },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("reads a declared primary in modern syntax (shadcn's oklch)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        colorCount: { "rgb(110, 105, 243)": 8 }, // painted as computed rgb
+        customProps: { "--primary": "oklch(0.6 0.2 280)" },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#6e69f3");
+  });
+
+  it("prefers the painted declared color over a stylesheet-only one", () => {
+    // --brand has the shorter (more canonical) name, but --color-primary is
+    // the one observed on the page (a button bg) — painted is a hard gate.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        buttons: [button({ bg: "rgb(83, 58, 253)" })],
+        customProps: {
+          "--brand": "rgb(0, 200, 96)",
+          "--color-primary": "rgb(83, 58, 253)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#533afd");
+  });
+
+  it("skips palette-scale entries for the canonical declared token (stripe case)", () => {
+    // Stripe ships a --hds-color-util-brand-* ramp (900/200/25…) plus the real
+    // --hds-color-button-primary-bg. The ramp entries are scale steps, not the
+    // brand; and "button" must not be excluded by an over-eager substring
+    // match (butt**on-**primary broke this once).
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        colorCount: {
+          "rgb(127, 125, 252)": 30, // brand-400 ramp entry, painted
+          "rgb(83, 58, 253)": 40, // the real primary, painted
+        },
+        customProps: {
+          "--hds-color-util-brand-400": "rgb(127, 125, 252)",
+          "--hds-color-button-primary-bg": "rgb(83, 58, 253)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#533afd");
+  });
+
+  it("excludes camelCase variant segments (GitHub's iconColor)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        // Painted once: enough for the painted gate, below the palette
+        // fallback's count >= 2 bar — so a pick could only come from the
+        // declared path, which must refuse this variant name.
+        colorCount: { "rgb(220, 20, 60)": 1 },
+        customProps: {
+          "--button-primary-iconColor-disabled": "rgb(220, 20, 60)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+
+  it("skips hue-named and gradient-endpoint vars (GitHub's --brand-* namespace)", () => {
+    // GitHub namespaces decorative marketing tokens under --brand-*; a label
+    // gradient stop that names its own hues is not the brand. The real green
+    // button must win instead.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(13, 17, 23)": 500_000 },
+        colorCount: { "rgb(95, 237, 131)": 6 },
+        buttons: [button({ bg: "rgb(8, 135, 43)" })],
+        customProps: {
+          "--brand-Label-color-green-blue-start": "rgb(95, 237, 131)",
+          "--brand-Icon-color-coral": "rgb(250, 144, 114)",
+          "--brand-color-accent-primary": "rgb(95, 237, 131)",
+          "--brand-tiles-highlightColor": "rgb(95, 237, 131)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#08872b");
+  });
+
+  it("prefers the canonical brand-primary over a role-scoped button var (netlify)", () => {
+    // Netlify declares BOTH --color-brand-primary (the brand blue) and
+    // --ntl-button-primary-bg-color (the teal CTA). The canonical — shortest —
+    // semantic name is the site's own statement of its primary.
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        colorCount: {
+          "rgb(46, 81, 237)": 20,
+          "rgb(50, 230, 226)": 15,
+        },
+        customProps: {
+          "--color-brand-primary": "rgb(46, 81, 237)",
+          "--ntl-button-primary-bg-color": "rgb(50, 230, 226)",
+          "--color-brand-secondary": "rgb(20, 216, 212)",
+        },
+      }),
+    );
+    expect(profile.colors.primary).toBe("#2e51ed");
+  });
+
+  it("skips the user-agent default link blue even when declared", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        customProps: { "--primary": "rgb(0, 0, 238)" },
+      }),
+    );
+    expect(profile.colors.primary).toBeNull();
+  });
+});
+
 describe("normalize – surfaces (border & muted-surface)", () => {
   it("splits subtle near-background fills into a hairline border + muted fill", () => {
     const p = normalize(
