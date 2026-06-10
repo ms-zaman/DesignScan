@@ -46,7 +46,6 @@ automatically so the corpus only holds trustworthy specs.
 |------|------|
 | [`packages/extractor`](packages/extractor) | The extraction + generation engine (Playwright → tokens → `DESIGN.md`). |
 | [`examples/`](examples) | The brand corpus — `DESIGN.md` + HTML preview + token JSON per brand, with a gallery index. |
-| [`docs/`](docs) | Research: market/forensic analysis and acquisition memo (EN/BN). |
 
 ## Install (as a CLI / library)
 
