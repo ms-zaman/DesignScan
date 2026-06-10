@@ -155,10 +155,13 @@ function componentsSection(
 
   const parts: string[] = [];
 
-  // button-primary
+  // button-primary. align-self:flex-start opts out of the flex column's
+  // default stretch: a button (and the badge below) must hug its content —
+  // stretched edge-to-edge it reads as a banner, not a component. Cards,
+  // dividers and inputs keep the full width on purpose.
   parts.push(`<div class="cmp">
     <span class="cmp-label">button-primary</span>
-    <button style="background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${bodySize}/1 ${bodyFont};cursor:pointer">Primary action</button>
+    <button style="align-self:flex-start;background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${bodySize}/1 ${bodyFont};cursor:pointer">Primary action</button>
   </div>`);
 
   // surface / card + input + body-text (need background & text); card edge and
@@ -203,7 +206,7 @@ function componentsSection(
   if (roles.accent2 && roles.onAccent2) {
     parts.push(`<div class="cmp">
       <span class="cmp-label">badge</span>
-      <span style="background:${esc(roles.accent2)};color:${esc(roles.onAccent2)};border-radius:9999px;padding:${pSm} ${pMd};font:500 ${bodySize}/1 ${bodyFont}">Badge</span>
+      <span style="align-self:flex-start;background:${esc(roles.accent2)};color:${esc(roles.onAccent2)};border-radius:9999px;padding:${pSm} ${pMd};font:500 ${bodySize}/1 ${bodyFont}">Badge</span>
     </div>`);
   }
 

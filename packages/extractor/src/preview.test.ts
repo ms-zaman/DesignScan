@@ -105,6 +105,17 @@ describe("preview – HTML proof sheet", () => {
     expect(html).toContain(">surface-muted<");
   });
 
+  it("keeps button and badge content-hugging inside the flex column", () => {
+    // The component list is a flex column; its default align-items:stretch
+    // pulled the button and badge edge-to-edge so they read as banners.
+    // Cards/dividers/inputs stay full-width on purpose.
+    const html = preview(profileFor("stripe"));
+    const button = html.match(/<button style="([^"]*)"/)?.[1] ?? "";
+    expect(button).toContain("align-self:flex-start");
+    const badge = html.match(/<span style="([^"]*)"[^>]*>Badge/)?.[1] ?? "";
+    expect(badge).toContain("align-self:flex-start");
+  });
+
   it("escapes the page title into the document", () => {
     const html = preview(profileFor("stripe"));
     expect(html).toContain("DesignScan preview");
