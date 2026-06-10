@@ -11,6 +11,7 @@ export {
 } from "./color.js";
 export type { ExtractOptions } from "./extract.js";
 export { extract } from "./extract.js";
+export { cssVars, w3cTokens } from "./formats.js";
 export { generate } from "./generate.js";
 export { normalize, profileWarnings } from "./normalize.js";
 export { preview } from "./preview.js";

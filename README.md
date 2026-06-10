@@ -88,6 +88,11 @@ pnpm extract vercel.com --md --theme both --out out/vercel.DESIGN.md
 pnpm extract stripe.com --md --preview --out out/stripe.DESIGN.md
 # → out/stripe.DESIGN.md  +  out/stripe.preview.html
 
+# --format = pick your output: json (profile) | md (DESIGN.md) | w3c | css
+pnpm extract stripe.com --format w3c --out out/stripe.tokens.json  # W3C Design Tokens (Style Dictionary etc.)
+pnpm extract stripe.com --format css --out out/stripe.tokens.css   # CSS custom properties, paste-ready
+# (--theme both folds a genuinely distinct dark pass into every format)
+
 # --strict = exit non-zero if the result looks degenerate (bot challenge / too
 # few signals), for CI/automation that must not consume junk tokens
 pnpm extract stripe.com --strict --quiet
@@ -101,7 +106,7 @@ pnpm seed rebuild                          # regen md/preview/gallery from JSON
 
 | Script | Does |
 |--------|------|
-| `pnpm extract <url> [--md] [--theme light\|dark\|both] [--preview] [--strict] [--timeout ms] [--out f]` | Extract tokens / generate `DESIGN.md` (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it; `--strict` = non-zero exit on a degenerate result) |
+| `pnpm extract <url> [--format json\|md\|w3c\|css] [--theme light\|dark\|both] [--preview] [--strict] [--timeout ms] [--out f]` | Extract tokens in your format: profile JSON, `DESIGN.md` (`--md` shorthand), W3C Design Tokens, or CSS custom properties (`--theme both` = light + dark in one file; `--preview` = HTML proof sheet beside it; `--strict` = non-zero exit on a degenerate result) |
 | `pnpm seed rebuild` / `pnpm seed add <url…>` | Build the brand corpus under `examples/` (md + preview + gallery; `add` extracts live) |
 | `pnpm build` | Compile the publishable package (`tsc` → `dist`) |
 | `pnpm typecheck` | Type-check all packages |

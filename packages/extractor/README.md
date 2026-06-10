@@ -61,6 +61,11 @@ pnpm extract linear.app --out out/linear.json
 # emit a Google-format DESIGN.md instead of profile JSON
 pnpm extract stripe.com --md --out out/stripe.DESIGN.md
 
+# or pick another format: w3c (W3C Design Tokens JSON — Style Dictionary,
+# Tokens Studio, …) | css (paste-ready CSS custom properties)
+pnpm extract stripe.com --format w3c --out out/stripe.tokens.json
+pnpm extract stripe.com --format css --out out/stripe.tokens.css
+
 # pick a theme: light (default) | dark | both
 pnpm extract linear.app --theme dark --md --out out/linear.dark.DESIGN.md
 

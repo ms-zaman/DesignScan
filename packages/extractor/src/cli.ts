@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Command } from "commander";
 import { extract } from "./extract.js";
+import { cssVars, w3cTokens } from "./formats.js";
 import { generate } from "./generate.js";
 import { normalize, profileWarnings } from "./normalize.js";
 import { preview } from "./preview.js";
@@ -11,7 +12,8 @@ import { preview } from "./preview.js";
 // the spec file (out/stripe.DESIGN.md -> out/stripe.preview.html); without it we
 // fall back to a slug of the hostname in the cwd.
 function previewPath(out: string | undefined, target: string): string {
-  if (out) return `${out.replace(/\.(DESIGN\.md|md|json)$/i, "")}.preview.html`;
+  if (out)
+    return `${out.replace(/\.(DESIGN\.md|tokens\.json|md|json|css)$/i, "")}.preview.html`;
   let host = target;
   try {
     host = new URL(target).hostname;
@@ -27,10 +29,12 @@ program
   .argument("<url>", "URL to analyze")
   .option("-o, --out <file>", "write the output to a file instead of stdout")
   .option(
-    "--md",
-    "emit a DESIGN.md (Google format) instead of profile JSON",
-    false,
+    "--format <fmt>",
+    "output format: json (DesignProfile) | md (DESIGN.md, Google format) | " +
+      "w3c (W3C Design Tokens JSON) | css (CSS custom properties)",
+    "json",
   )
+  .option("--md", "shorthand for --format md", false)
   .option(
     "--theme <mode>",
     "which theme(s) to capture: light | dark | both " +
@@ -66,6 +70,14 @@ program
       );
     }
 
+    // --md predates --format and stays as a shorthand for it.
+    const format = opts.md ? "md" : String(opts.format).toLowerCase();
+    if (!["json", "md", "w3c", "css"].includes(format)) {
+      throw new Error(
+        `invalid --format "${opts.format}" (expected: json | md | w3c | css)`,
+      );
+    }
+
     const timeoutMs = Number(opts.timeout);
     if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
       throw new Error(`invalid --timeout "${opts.timeout}" (expected ms > 0)`);
@@ -83,26 +95,36 @@ program
 
     let profile: ReturnType<typeof normalize>;
     let dark: ReturnType<typeof normalize> | undefined;
-    let output: string;
     if (theme === "both") {
       // Light is the base document; dark is folded in as parallel tokens.
-      const light = await run("light");
+      profile = await run("light");
       dark = await run("dark");
-      profile = light;
-      output = opts.md
-        ? generate(light, dark)
-        : JSON.stringify({ light, dark }, null, 2);
     } else {
       profile = await run(theme);
-      output = opts.md ? generate(profile) : JSON.stringify(profile, null, 2);
     }
+
+    // Every emitter takes (light, dark?) and decides for itself whether the
+    // dark pass is distinct enough to include (they all share isDistinctDark).
+    // The raw-profile JSON keeps its historical {light, dark} envelope.
+    const output =
+      format === "md"
+        ? generate(profile, dark)
+        : format === "w3c"
+          ? w3cTokens(profile, dark)
+          : format === "css"
+            ? cssVars(profile, dark)
+            : JSON.stringify(
+                dark ? { light: profile, dark } : profile,
+                null,
+                2,
+              );
 
     if (opts.out) {
       await mkdir(dirname(opts.out), { recursive: true });
       await writeFile(opts.out, output, "utf8");
       process.stderr.write(`✓ wrote ${opts.out}\n`);
     } else {
-      process.stdout.write(output + (opts.md ? "" : "\n"));
+      process.stdout.write(output + (format === "json" ? "\n" : ""));
     }
 
     if (opts.preview) {
