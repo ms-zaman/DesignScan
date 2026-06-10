@@ -59,6 +59,27 @@ describe("preview – HTML proof sheet", () => {
     expect(html).toContain("sans-serif"); // a generic fallback is present
   });
 
+  it("survives double-quoted family names inside style attributes", () => {
+    // Stripe's declared stack is `sohne-var, "SF Pro Display", sans-serif`.
+    // A raw " inside the double-quoted style="" attribute terminates it early,
+    // so the browser silently dropped font-size/weight/line-height and every
+    // specimen rendered at the default 16px — this broke 11 of the 14 gallery
+    // previews (GitHub's "Mona Sans", GitLab's "GitLab Sans", …). The stack
+    // must be rewritten to single quotes before it lands in an attribute.
+    const html = preview(profileFor("stripe"));
+    expect(html).not.toContain('"SF Pro Display"');
+    expect(html).toContain("'SF Pro Display'");
+    // And the proof that matters: every type-specimen style attribute still
+    // carries its size declaration after the attribute is parsed.
+    const specimens = [
+      ...html.matchAll(/class="type-specimen" style="([^"]*)"/g),
+    ];
+    expect(specimens.length).toBeGreaterThan(0);
+    for (const [, style] of specimens) {
+      expect(style).toContain("font-size:");
+    }
+  });
+
   it("adds a Light/Dark toggle + dark panel for a genuinely distinct dark theme", () => {
     const html = preview(profileFor("vercel-light"), profileFor("vercel-dark"));
     expect(html).toContain('data-theme-btn="dark"');

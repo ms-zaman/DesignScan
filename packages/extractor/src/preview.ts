@@ -36,10 +36,16 @@ const FALLBACK_STACK =
 // `family` may already be a full CSS stack (resolve.ts prefers the site's
 // declared fallbacks); in that case use it verbatim. A bare single name gets
 // quoted and backed by the websafe chain.
+// Double quotes are rewritten to single quotes (CSS treats them identically):
+// these stacks land inside double-quoted style="" attributes, where a raw "
+// terminates the attribute and silently drops every declaration after
+// font-family — GitHub's "Mona Sans" / Stripe's "SF Pro Display" rendered all
+// type specimens at the browser-default 16px and unstyled buttons.
 const fontStack = (family: string | undefined) => {
   if (!family) return FALLBACK_STACK;
-  if (family.includes(",")) return family; // already a stack
-  return `'${family.replace(/'/g, "")}', ${FALLBACK_STACK}`;
+  const f = family.replace(/"/g, "'");
+  if (f.includes(",")) return f; // already a stack
+  return `'${f.replace(/'/g, "")}', ${FALLBACK_STACK}`;
 };
 
 const SPECIMEN = "The quick brown fox jumps";
