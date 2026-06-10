@@ -1,0 +1,38 @@
+name: Deploy gallery to Pages
+
+# Publishes the brand-corpus gallery (examples/) as a static site. The gallery's
+# index.html references its assets by relative path, so serving examples/ as the
+# site root works as-is — no build step.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+# Least-privilege token the Pages deploy needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once; let an in-flight one finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: examples
+      - id: deployment
+        uses: actions/deploy-pages@v4

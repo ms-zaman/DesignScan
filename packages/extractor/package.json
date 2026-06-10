@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/ms-zaman/DesignScan/tree/main/packages/extractor#readme",
   "bugs": "https://github.com/ms-zaman/DesignScan/issues",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18"
   },
