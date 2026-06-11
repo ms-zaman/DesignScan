@@ -111,6 +111,22 @@ export function agentNotes(
     );
   }
 
+  // 4b. Hover micro-interaction — the parts of the observed hover the token
+  // schema can't carry (shadow / lift). Observed on the live button, so the
+  // agent can reproduce the real interaction instead of inventing one.
+  const fx = profile.primaryButtonHover;
+  if (fx && (fx.shadow || fx.transform)) {
+    const bits: string[] = [];
+    if (fx.transform) bits.push(`moves (\`transform: ${fx.transform}\`)`);
+    if (fx.shadow) bits.push(`carries \`box-shadow: ${fx.shadow}\``);
+    notes.push(
+      `- **Primary button hover:** observed on the live site, the button also ` +
+        `${bits.join(" and ")} on \`:hover\`` +
+        `${profile.colors.primaryHover ? "" : " (its background color does not change)"}` +
+        `. Reproduce this for fidelity.`,
+    );
+  }
+
   // 5. Links — only when accent-1 is its own (non-primary) color, so the agent
   // doesn't conflate link color with the button color.
   if (accent1 && accent1 !== primary) {
@@ -135,6 +151,37 @@ export function agentNotes(
       `- **Spacing:** compose padding, gaps, and margins from the \`spacing\` scale ` +
         `(a ${base}px-based rhythm) rather than arbitrary pixel values.`,
     );
+  }
+
+  // 7. Declared-token provenance — when the site publishes its own scale as
+  // custom properties (mined + painted-corroborated in normalize), say so: the
+  // values stop being statistical guesses, and the agent can mirror the site's
+  // own variable names instead of inventing a parallel vocabulary.
+  const d = profile.declared;
+  if (d) {
+    const px = (rec: Record<string, number>) =>
+      Object.entries(rec)
+        .slice(0, 4)
+        .map(([n, v]) => `\`${n}: ${v}px\``)
+        .join(", ");
+    const groups: string[] = [];
+    if (d.radius) groups.push(`radii (${px(d.radius)})`);
+    if (d.spacing) groups.push(`spacing (${px(d.spacing)})`);
+    if (d.fontFamilies) {
+      const names = Object.keys(d.fontFamilies)
+        .slice(0, 3)
+        .map((n) => `\`${n}\``)
+        .join(", ");
+      groups.push(`fonts (${names})`);
+    }
+    if (groups.length) {
+      notes.push(
+        `- **Declared tokens:** the site publishes its design scale as CSS custom ` +
+          `properties — ${groups.join("; ")} — and the page paints these exact ` +
+          `values. Treat them as the canonical scale and reuse the site's own ` +
+          `variable names when you create tokens.`,
+      );
+    }
   }
 
   return notes;

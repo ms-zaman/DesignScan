@@ -109,3 +109,21 @@ describe("cssVars – CSS custom properties", () => {
     expect(open).toBe(close);
   });
 });
+
+describe("primary-hover (observed hover shift) in both emitters", () => {
+  it("emits the token when the profile carries one, in w3c and css alike", () => {
+    const p = profileFor("stripe");
+    p.colors.primaryHover = "#b40a28";
+    const doc = JSON.parse(w3cTokens(p));
+    expect(doc.color["primary-hover"].$value).toBe("#b40a28");
+    expect(cssVars(p)).toContain("--color-primary-hover: #b40a28;");
+  });
+
+  it("omits the token entirely when no hover was observed", () => {
+    const p = profileFor("stripe");
+    expect(p.colors.primaryHover ?? null).toBeNull();
+    const doc = JSON.parse(w3cTokens(p));
+    expect(doc.color["primary-hover"]).toBeUndefined();
+    expect(cssVars(p)).not.toContain("primary-hover");
+  });
+});

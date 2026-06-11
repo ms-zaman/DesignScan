@@ -126,6 +126,9 @@ export function scaleTokens(values: number[]): [string, string][] {
 export interface ColorRoles {
   primary: string;
   onPrimary: string;
+  // Observed hover shift of the primary button (null when none was seen).
+  // Resolved upstream in normalize by physically hovering the button.
+  primaryHover: string | null;
   background: string | null;
   text: string | null;
   accent1: string | null;
@@ -169,9 +172,18 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
     extras.filter((h) => h !== accent1).find(usable(ACCENT2_MIN_CONTRAST)) ??
     null;
 
+  // Only meaningful when it belongs to the primary we actually resolved: if
+  // primary fell back through the palette (normalize's pick was null), the
+  // hover observed on a *different* button must not tag along.
+  const primaryHover =
+    profile.colors.primary === primary
+      ? (profile.colors.primaryHover ?? null)
+      : null;
+
   return {
     primary,
     onPrimary: onColor(primary),
+    primaryHover,
     background,
     text,
     accent1,

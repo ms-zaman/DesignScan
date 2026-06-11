@@ -36,6 +36,7 @@ function buildColorsAndComponents(
   const {
     primary,
     onPrimary,
+    primaryHover,
     background,
     text,
     accent1,
@@ -67,6 +68,19 @@ function buildColorsAndComponents(
   use("on-primary");
   if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
   if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
+
+  // Hover variant — only when the site was *observed* hover-shifting its
+  // primary button (extract.ts physically hovers it). Mirrors button-primary
+  // with the shifted background so agents style :hover with the real value
+  // instead of inventing a darken().
+  if (primaryHover) {
+    lines.push(`  ${cn("button-primary-hover")}:`);
+    lines.push(`    backgroundColor: "${ref("primary-hover")}"`);
+    use("primary-hover");
+    lines.push(`    textColor: "${ref("on-primary")}"`);
+    if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
+    if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
+  }
 
   if (background && text) {
     lines.push(`  ${cn("surface")}:`);
@@ -134,6 +148,7 @@ function buildColorsAndComponents(
   const candidates: [string, string | null][] = [
     ["primary", primary],
     ["on-primary", onPrimary],
+    ["primary-hover", primaryHover],
     ["background", background],
     ["text", text],
     ["accent-1", accent1],
@@ -152,6 +167,7 @@ function buildColorsAndComponents(
 const COLOR_LABEL: Record<string, string> = {
   primary: "the dominant brand/accent color, used for primary actions",
   "on-primary": "the readable foreground used on primary surfaces",
+  "primary-hover": "the primary button background as observed on hover",
   background: "the base surface color behind most content",
   text: "the primary foreground / body-text color",
   "accent-1": "a supporting accent (used for links)",
@@ -332,6 +348,12 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
       (roundedMd ? `, rounded to \`{rounded.${roundedMd}}\`` : "") +
       ".",
   );
+  if (cmap["primary-hover"]) {
+    body.push(
+      "- **Primary button (hover):** background shifts to `{colors.primary-hover}` — " +
+        "observed on the live site, use it for `:hover` instead of a computed darken.",
+    );
+  }
   if (cmap.background && cmap.text) {
     body.push(
       "- **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.",

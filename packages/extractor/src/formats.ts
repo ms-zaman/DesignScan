@@ -26,6 +26,7 @@ function colorEntries(roles: ColorRoles): [string, string][] {
   const entries: [string, string | null][] = [
     ["primary", roles.primary],
     ["on-primary", roles.onPrimary],
+    ["primary-hover", roles.primaryHover],
     ["background", roles.background],
     ["text", roles.text],
     ["accent-1", roles.accent1],

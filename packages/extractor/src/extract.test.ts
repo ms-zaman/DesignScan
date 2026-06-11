@@ -316,6 +316,164 @@ describe("extract (integration)", () => {
   );
 
   it(
+    "detects submit inputs and cursor-pointer div CTAs as buttons, but not wrapper divs",
+    async () => {
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Button shapes</title></head>
+  <body style="margin: 0">
+    <form>
+      <input type="text" style="background: rgb(250, 250, 250)" />
+      <input type="submit" value="Subscribe"
+        style="background: rgb(10, 120, 60); color: rgb(255, 255, 255); border-radius: 6px; font-size: 15px; font-weight: 600; width: 140px; height: 44px" />
+    </form>
+    <div class="button-group" style="background: rgb(99, 99, 99); width: 600px; height: 80px">
+      <div class="btn" style="cursor: pointer; background: rgb(200, 30, 120); color: rgb(255, 255, 255); border-radius: 4px; width: 120px; height: 40px">Click me</div>
+    </div>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      // input[type=submit] is a button; input[type=text] is not.
+      expect(raw.buttons.some((b) => b.bg === "rgb(10, 120, 60)")).toBe(true);
+      expect(raw.buttons.some((b) => b.bg === "rgb(250, 250, 250)")).toBe(
+        false,
+      );
+
+      // The cursor:pointer .btn div is a button; the .button-group wrapper
+      // (no cursor) is not, despite its matching class substring.
+      expect(raw.buttons.some((b) => b.bg === "rgb(200, 30, 120)")).toBe(true);
+      expect(raw.buttons.some((b) => b.bg === "rgb(99, 99, 99)")).toBe(false);
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "pierces open shadow roots to observe web-component UI",
+    async () => {
+      // The brand button and its colors live entirely inside an open shadow
+      // root — invisible to document.querySelectorAll, reachable only via the
+      // shadow-piercing walk.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Shadow</title></head>
+  <body style="margin: 0">
+    <p>Light DOM text</p>
+    <x-card></x-card>
+    <script>
+      const host = document.querySelector("x-card");
+      const root = host.attachShadow({ mode: "open" });
+      root.innerHTML =
+        '<button style="background: rgb(80, 40, 200); color: rgb(255, 255, 255);' +
+        ' border-radius: 10px; font-size: 14px; font-weight: 700; width: 160px; height: 48px">' +
+        "Shadow CTA</button>" +
+        '<p style="color: rgb(60, 60, 60); font-size: 17px">Shadow body copy</p>';
+    </script>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      const shadowBtn = raw.buttons.find((b) => b.bg === "rgb(80, 40, 200)");
+      expect(shadowBtn).toBeDefined();
+      expect(shadowBtn?.radius).toBe("10px");
+      expect(raw.colorCount).toHaveProperty("rgb(60, 60, 60)");
+      expect(raw.fontSizes).toHaveProperty("17px");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "captures a button's :hover shift by really hovering it (transitions frozen)",
+    async () => {
+      // The 10s transition is the trap: reading mid-animation would observe an
+      // interpolated color, not rgb(20, 90, 200). The transition-killing style
+      // injected before the hover pass is what makes this deterministic.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Hover</title><style>
+    .cta {
+      background: rgb(30, 120, 255);
+      color: rgb(255, 255, 255);
+      border: 0;
+      width: 160px;
+      height: 48px;
+      transition: background 10s linear;
+    }
+    .cta:hover { background: rgb(20, 90, 200); }
+    .static { background: rgb(200, 200, 200); border: 0; width: 120px; height: 40px; }
+  </style></head>
+  <body style="margin: 0">
+    <button class="cta">Hover me</button>
+    <button class="static">No hover style</button>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      expect(raw.buttonHovers).toBeDefined();
+      const shift = raw.buttonHovers?.find(
+        (s) => s.restBg === "rgb(30, 120, 255)",
+      );
+      expect(shift).toBeDefined();
+      expect(shift?.bg).toBe("rgb(20, 90, 200)");
+      // The unchanged button produces no sample — only deltas are recorded.
+      expect(
+        raw.buttonHovers?.some((s) => s.restBg === "rgb(200, 200, 200)"),
+      ).toBe(false);
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "hovers cursor-pointer div CTAs too (the hover pass mirrors looksButton)",
+    async () => {
+      // PostHog-style: the CTA is a styled div, not a <button>/<a>. The hover
+      // pass must sample it, or sites built this way never get hover tokens.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Div hover</title><style>
+    .btn { cursor: pointer; background: rgb(235, 157, 42); width: 150px; height: 44px; }
+    .btn:hover { background: rgb(205, 132, 7); }
+  </style></head>
+  <body style="margin: 0"><div class="btn">Get started</div></body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+      const s = raw.buttonHovers?.find((x) => x.restBg === "rgb(235, 157, 42)");
+      expect(s).toBeDefined();
+      expect(s?.bg).toBe("rgb(205, 132, 7)");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "captures opacity / shadow / transform hover mechanisms, not just bg swaps",
+    async () => {
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Hover fx</title><style>
+    .fade {
+      background: rgb(30, 120, 255); color: rgb(255, 255, 255); border: 0;
+      width: 160px; height: 48px; transition: all 8s linear;
+    }
+    .fade:hover { opacity: 0.8; box-shadow: rgba(0, 0, 0, 0.25) 0px 6px 16px 0px; transform: translateY(-2px); }
+  </style></head>
+  <body style="margin: 0">
+    <button class="fade">Fade on hover</button>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      const s = raw.buttonHovers?.find((x) => x.restBg === "rgb(30, 120, 255)");
+      expect(s).toBeDefined();
+      expect(s?.bg).toBe(s?.restBg); // the bg itself never swaps
+      expect(s?.restOpacity).toBe(1);
+      expect(s?.opacity).toBeCloseTo(0.8, 5);
+      expect(s?.shadow).toContain("rgba(0, 0, 0, 0.25)");
+      expect(s?.transform).toBe("matrix(1, 0, 0, 1, 0, -2)");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
     "size-weights the heading weight so the largest text wins over abundant medium text",
     async () => {
       // One large bold display (1x) vs two smaller heading-bucket elements at the

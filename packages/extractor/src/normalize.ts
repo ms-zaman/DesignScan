@@ -4,6 +4,7 @@ import {
   isNeutral,
   luminance,
   parseColor,
+  type RGBA,
   saturation,
   toHex,
 } from "./color.js";
@@ -361,6 +362,167 @@ function declaredPrimary(
   return candidates[0].hex;
 }
 
+// --- Declared scale tokens (radius / spacing / fonts) -----------------------
+// The declaredPrimary lesson applied to dimensions: when :root names its scale
+// (--radius-md: 8px, --space-4: 16px, --font-sans: Inter…), mine the names —
+// the values themselves are already won by the statistical vote; what the
+// declarations add is the site's own *vocabulary* for them. Two of the color
+// gates carry over, one flips:
+// - painted-corroboration stays a hard gate: a declared value the page never
+//   painted is a stale theme/framework default the visitor never saw;
+// - segment matching stays (substring matching is the proven trap);
+// - numeric segments flip to *welcome*: --spacing-4 is a real scale-step name,
+//   not a palette-ramp entry like --color-blue-500.
+const RADIUS_NAME_SEGMENTS = new Set(["radius", "rounded"]);
+const SPACING_NAME_SEGMENTS = new Set(["spacing", "space", "gap"]);
+// --letter-spacing-* / --line-… are typography, not box rhythm; border /
+// outline / shadow / focus widths ride spacing namespaces (stripe's
+// --hds-space-button-border, --hds-space-input-focus-shadowSingle) and would
+// crowd the real scale out with 1–2px noise; scrollbar metrics are chrome.
+const SPACING_EXCLUDED = new Set([
+  "letter",
+  "word",
+  "line",
+  "font",
+  "text",
+  "border",
+  "outline",
+  "shadow",
+  "focus",
+  "scrollbar",
+]);
+const FONT_NAME_SEGMENTS = new Set(["font", "family", "typeface"]);
+// --font-size-*, --font-weight-* etc. describe type metrics, not a family.
+const FONT_EXCLUDED = new Set([
+  "size",
+  "weight",
+  "style",
+  "height",
+  "leading",
+  "tracking",
+  "feature",
+  "variant",
+  "variation",
+  "scale",
+  "smoothing",
+  "stretch",
+  "spacing",
+]);
+
+// A custom property's computed value keeps its unit (only var() chains are
+// substituted), so rem/em need converting with the page's real root font-size
+// — the 62.5% trick (1rem = 10px) is alive and well on older sites.
+function lengthPx(value: string, rootPx: number): number | null {
+  const m = value.trim().match(/^(-?\d*\.?\d+)(px|rem|em)$/);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  return m[2] === "px" ? n : n * rootPx;
+}
+
+function mineDeclaredScales(
+  raw: RawObservations,
+): DesignProfile["declared"] | undefined {
+  const props = raw.customProps;
+  if (!props) return undefined;
+  const rootPx = raw.rootFontSizePx || 16;
+
+  const paintedPx = (map: Record<string, number>): number[] =>
+    Object.keys(map)
+      .map((k) => parseFloat(k))
+      .filter((n) => Number.isFinite(n));
+  const paintedRadii = paintedPx(raw.radii);
+  const paintedSpacings = paintedPx(raw.spacings);
+  const near = (vals: number[], v: number) =>
+    vals.some((p) => Math.abs(p - v) <= 0.75);
+  // First family of each painted stack, lowercased — the faces actually
+  // rendered somewhere on the page.
+  const paintedFaces = new Set(
+    Object.keys(raw.fontFamilies)
+      .map((s) => s.split(",")[0].replace(/["']/g, "").trim().toLowerCase())
+      .filter(Boolean),
+  );
+
+  const radius: Record<string, number> = {};
+  const spacing: Record<string, number> = {};
+  const fontFamilies: Record<string, string> = {};
+
+  for (const [name, value] of Object.entries(props)) {
+    const segs = nameSegments(name);
+
+    if (segs.some((s) => RADIUS_NAME_SEGMENTS.has(s))) {
+      const px = lengthPx(value, rootPx);
+      // Same window as buildRadiusScale: sub-2px is a hairline, >=64px is the
+      // `full` pill token.
+      if (px !== null && px >= 2 && px < 64 && near(paintedRadii, px)) {
+        radius[name] = Math.round(px * 100) / 100;
+      }
+      continue;
+    }
+
+    if (
+      segs.some((s) => SPACING_NAME_SEGMENTS.has(s)) &&
+      !segs.some((s) => SPACING_EXCLUDED.has(s))
+    ) {
+      const px = lengthPx(value, rootPx);
+      if (px !== null && px > 0 && px <= 200 && near(paintedSpacings, px)) {
+        spacing[name] = Math.round(px * 100) / 100;
+      }
+      continue;
+    }
+
+    if (
+      segs.some((s) => FONT_NAME_SEGMENTS.has(s)) &&
+      !segs.some((s) => FONT_EXCLUDED.has(s))
+    ) {
+      const first = value.split(",")[0].replace(/["']/g, "").trim();
+      // Must read as a family name (not a bare number/length) and be a face
+      // the page really rendered.
+      if (
+        first &&
+        /[a-z]/i.test(first) &&
+        !lengthPx(first, rootPx) &&
+        paintedFaces.has(first.toLowerCase())
+      ) {
+        fontFamilies[name] = value;
+      }
+    }
+  }
+
+  // One canonical name per value — the shortest, per the declaredPrimary
+  // lesson (GitHub aliases 8px under eight different --*-gap-* names; a scale
+  // wants one name per step). Then smallest-to-largest reads as a scale, and
+  // the cap keeps a framework dump (tailwind's long --spacing-* ramp) from
+  // bloating the profile.
+  const shorter = (a: string, b: string) =>
+    a.length - b.length || (a < b ? -1 : 1);
+  const dedupe = <V>(rec: Record<string, V>): [string, V][] => {
+    const byVal = new Map<V, string>();
+    for (const [name, v] of Object.entries(rec)) {
+      const prev = byVal.get(v);
+      if (!prev || shorter(name, prev) < 0) byVal.set(v, name);
+    }
+    return [...byVal.entries()].map(([v, name]) => [name, v]);
+  };
+  const byValue = (rec: Record<string, number>, max: number) =>
+    Object.fromEntries(
+      dedupe(rec)
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, max),
+    );
+  const out: NonNullable<DesignProfile["declared"]> = {};
+  if (Object.keys(radius).length) out.radius = byValue(radius, 12);
+  if (Object.keys(spacing).length) out.spacing = byValue(spacing, 12);
+  if (Object.keys(fontFamilies).length) {
+    out.fontFamilies = Object.fromEntries(
+      // Same dedupe (one name per distinct stack), canonical-shortest first.
+      dedupe(fontFamilies)
+        .sort((a, b) => shorter(a[0], b[0]))
+        .slice(0, 8),
+    );
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 function pickPrimary(
   raw: RawObservations,
   background: string | null,
@@ -651,9 +813,126 @@ const intMode = (map?: Record<string, number>): number | undefined => {
   return Number.isNaN(n) ? undefined : n;
 };
 
+// What the primary button looks like on hover. Trust only a sample whose
+// *resting* background is the chosen primary — hover shifts on other buttons
+// (nav pills, ghost/secondary buttons) describe different components and
+// would mislabel, e.g., a nav link's underline-blue as the CTA hover.
+//
+// The color is "what the eye sees", whichever mechanism painted it:
+// - an opaque background swap is taken verbatim;
+// - a whole-element opacity fade composites the primary over the page
+//   background (that *is* the visible hex);
+// - a plain brightness() filter scales the channels;
+// - a translucent hover bg stays rejected: with layered button markup we
+//   can't know what it composites over, and a wrong hex is worse than none.
+// Shadow/transform deltas ride along as micro-interaction facts for the
+// agent notes + preview (the token schema has no home for them).
+interface HoverInfo {
+  color: string | null;
+  shadow?: string;
+  transform?: string;
+}
+
+// alpha·fg over an opaque bg — the resulting visible color.
+const mixOver = (fg: RGBA, alpha: number, bg: RGBA): RGBA => ({
+  r: Math.round(alpha * fg.r + (1 - alpha) * bg.r),
+  g: Math.round(alpha * fg.g + (1 - alpha) * bg.g),
+  b: Math.round(alpha * fg.b + (1 - alpha) * bg.b),
+  a: 1,
+});
+
+// brightness() factor of a computed filter: 1 for none, null when the filter
+// is anything more complex than a single brightness() (can't reason about it).
+function brightnessOf(filter?: string): number | null {
+  if (!filter || filter === "none") return 1;
+  const m = filter.match(/^brightness\((-?[\d.]+)(%)?\)$/);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  return m[2] ? n / 100 : n;
+}
+
+// Decompose a computed hover transform into the friendly CSS an agent would
+// write: pure translations and uniform scales get named forms; anything else
+// keeps the raw (still valid, still reproducible) matrix.
+function friendlyTransform(rest?: string, hov?: string): string | undefined {
+  if (!hov || hov === rest || hov === "none") return undefined;
+  const m = hov.match(
+    /^matrix\((-?[\d.]+), (-?[\d.]+), (-?[\d.]+), (-?[\d.]+), (-?[\d.]+), (-?[\d.]+)\)$/,
+  );
+  if (!m) return hov.length <= 100 ? hov : undefined;
+  const [a, b, c, d, e, f] = m.slice(1).map(Number);
+  const fmt = (n: number) => String(Math.round(n * 100) / 100);
+  if (b === 0 && c === 0 && a === 1 && d === 1) {
+    if (e !== 0 && f !== 0) return `translate(${fmt(e)}px, ${fmt(f)}px)`;
+    if (f !== 0) return `translateY(${fmt(f)}px)`;
+    if (e !== 0) return `translateX(${fmt(e)}px)`;
+    return undefined; // identity matrix — no visible move
+  }
+  if (b === 0 && c === 0 && e === 0 && f === 0 && a === d) {
+    return a === 1 ? undefined : `scale(${fmt(a)})`;
+  }
+  return hov;
+}
+
+function pickHoverInfo(
+  raw: RawObservations,
+  primary: string | null,
+  background: string | null,
+): HoverInfo {
+  if (!primary || !raw.buttonHovers?.length) return { color: null };
+  const bg = background ? parseColor(background) : null;
+  const pageBg = bg && bg.a >= 0.99 ? bg : null;
+
+  for (const s of raw.buttonHovers) {
+    const rest = parseColor(s.restBg);
+    if (!rest || rest.a < 0.9 || toHex(rest) !== primary) continue;
+
+    let color: string | null = null;
+    if (s.bg !== s.restBg) {
+      const hov = parseColor(s.bg);
+      if (hov && hov.a >= 0.9) color = toHex(hov);
+    } else if (
+      pageBg &&
+      s.opacity !== undefined &&
+      (s.restOpacity ?? 1) >= 0.98 &&
+      s.opacity >= 0.1 &&
+      s.opacity <= (s.restOpacity ?? 1) - 0.02
+    ) {
+      color = toHex(mixOver(rest, s.opacity, pageBg));
+    } else {
+      const n = brightnessOf(s.filter);
+      if (brightnessOf(s.restFilter) === 1 && n !== null && n !== 1) {
+        const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+        color = toHex({
+          r: clamp(rest.r * n),
+          g: clamp(rest.g * n),
+          b: clamp(rest.b * n),
+          a: 1,
+        });
+      }
+    }
+    if (color === primary) color = null;
+
+    const shadow =
+      s.shadow !== undefined &&
+      s.shadow !== (s.restShadow ?? "none") &&
+      s.shadow !== "none" &&
+      s.shadow.length <= 300
+        ? s.shadow
+        : undefined;
+    const transform = friendlyTransform(s.restTransform, s.transform);
+
+    if (color || shadow || transform) return { color, shadow, transform };
+  }
+  return { color: null };
+}
+
 export function normalize(url: string, raw: RawObservations): DesignProfile {
   const background = pickBackground(raw.bgArea);
   const surfaces = pickSurfaces(raw, background);
+  const primary = pickPrimary(raw, background);
+  const hover = pickHoverInfo(raw, primary, background);
+  const declared = mineDeclaredScales(raw);
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
@@ -663,9 +942,10 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
     colors: {
       background,
       text: pickText(raw.textColorArea ?? raw.colorCount, background),
-      primary: pickPrimary(raw, background),
+      primary,
       border: surfaces.border,
       mutedSurface: surfaces.mutedSurface,
+      primaryHover: hover.color,
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },
     typography: {
@@ -686,6 +966,16 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       .sort((a, b) => b[1] - a[1])
       .map(([s]) => s)
       .slice(0, 4),
+    // Only present when something was observed/mined — keeps persisted JSON tidy.
+    ...(hover.shadow || hover.transform
+      ? {
+          primaryButtonHover: {
+            ...(hover.shadow ? { shadow: hover.shadow } : {}),
+            ...(hover.transform ? { transform: hover.transform } : {}),
+          },
+        }
+      : {}),
+    ...(declared ? { declared } : {}),
   };
 }
 

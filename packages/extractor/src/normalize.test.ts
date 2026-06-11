@@ -948,3 +948,327 @@ describe("normalize – per-role typography", () => {
     expect(profile.typography.letterSpacingHeadingEm).toBeUndefined();
   });
 });
+
+describe("normalize – primaryHover", () => {
+  // A white page with one crimson CTA: pickPrimary resolves #dc143c.
+  const base = () =>
+    raw({
+      bgArea: { "rgb(255, 255, 255)": 50000 },
+      buttons: [button({ bg: "rgb(220, 20, 60)" })],
+    });
+
+  it("surfaces the hover shift observed on the primary button", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          {
+            restBg: "rgb(220, 20, 60)",
+            restColor: "rgb(255, 255, 255)",
+            bg: "rgb(180, 10, 40)",
+            color: "rgb(255, 255, 255)",
+          },
+        ],
+      }),
+    );
+    expect(profile.colors.primary).toBe("#dc143c");
+    expect(profile.colors.primaryHover).toBe("#b40a28");
+  });
+
+  it("ignores hover shifts on buttons that are not the primary", () => {
+    // A ghost/nav button hover-shifting must not be mislabelled as the CTA
+    // hover: its resting bg isn't the resolved primary.
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          {
+            restBg: "rgb(240, 240, 240)",
+            restColor: "rgb(0, 0, 0)",
+            bg: "rgb(220, 220, 220)",
+            color: "rgb(0, 0, 0)",
+          },
+        ],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBeNull();
+  });
+
+  it("rejects a translucent hover value (overlay tints, not a color)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          {
+            restBg: "rgb(220, 20, 60)",
+            restColor: "rgb(255, 255, 255)",
+            bg: "rgba(0, 0, 0, 0.2)",
+            color: "rgb(255, 255, 255)",
+          },
+        ],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBeNull();
+  });
+
+  it("is null when no hover samples were captured", () => {
+    expect(normalize("u", base()).colors.primaryHover).toBeNull();
+  });
+});
+
+describe("normalize – declared scale tokens (radius / spacing / fonts)", () => {
+  it("mines declared radius and spacing names for painted values only", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        radii: { "8px": 12, "16px": 3 },
+        spacings: { "16px": 30, "24px": 9 },
+        customProps: {
+          "--radius-md": "8px",
+          "--radius-xl": "32px", // never painted -> stale theme var, rejected
+          "--space-4": "16px",
+          "--gap-lg": "24px",
+          "--spacing-huge": "400px", // out of range
+        },
+      }),
+    );
+    expect(profile.declared?.radius).toEqual({ "--radius-md": 8 });
+    expect(profile.declared?.spacing).toEqual({
+      "--space-4": 16,
+      "--gap-lg": 24,
+    });
+  });
+
+  it("converts rem values with the page's real root font-size (62.5% trick)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        rootFontSizePx: 10, // html { font-size: 62.5% }
+        radii: { "8px": 5 },
+        customProps: { "--radius-md": "0.8rem" }, // 0.8 * 10 = 8px
+      }),
+    );
+    expect(profile.declared?.radius).toEqual({ "--radius-md": 8 });
+  });
+
+  it("keeps typography vars out of the box-spacing group", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        spacings: { "2px": 4 },
+        customProps: { "--letter-spacing-tight": "2px" },
+      }),
+    );
+    expect(profile.declared).toBeUndefined();
+  });
+
+  it("mines declared font families only when the page renders that face", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        fontFamilies: { '"Mona Sans", system-ui, sans-serif': 80 },
+        customProps: {
+          "--font-sans": '"Mona Sans", system-ui, sans-serif',
+          "--font-display": "Phantom Face, serif", // never rendered
+          "--font-size-base": "16px", // a metric, not a family
+        },
+      }),
+    );
+    expect(profile.declared?.fontFamilies).toEqual({
+      "--font-sans": '"Mona Sans", system-ui, sans-serif',
+    });
+  });
+
+  it("emits no declared block at all when nothing qualifies", () => {
+    const profile = normalize("u", raw({ customProps: { "--x": "1px" } }));
+    expect(profile.declared).toBeUndefined();
+    expect("declared" in profile).toBe(false);
+  });
+
+  it("orders dimension tokens smallest-first as a readable scale", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        radii: { "4px": 5, "8px": 5, "12px": 5 },
+        customProps: {
+          "--radius-lg": "12px",
+          "--radius-sm": "4px",
+          "--radius-md": "8px",
+        },
+      }),
+    );
+    expect(Object.values(profile.declared?.radius ?? {})).toEqual([4, 8, 12]);
+  });
+});
+
+describe("normalize – declared scale gates (live-sweep lessons)", () => {
+  it("keeps border/shadow/focus widths out of a spacing namespace", () => {
+    // Stripe rides border and focus-ring widths on its --hds-space-* namespace;
+    // without the gate the 1-2px noise crowds the real scale out of the cap.
+    const profile = normalize(
+      "u",
+      raw({
+        spacings: { "1px": 9, "2px": 9, "8px": 20 },
+        customProps: {
+          "--hds-space-button-border": "1px",
+          "--hds-space-input-focus-shadowSingle": "2px",
+          "--hds-space-core-100": "8px",
+        },
+      }),
+    );
+    expect(profile.declared?.spacing).toEqual({ "--hds-space-core-100": 8 });
+  });
+
+  it("keeps one canonical (shortest) name per value", () => {
+    // GitHub aliases the same 8px gap under many --*-gap-* names; a scale
+    // wants one name per step, and the shortest is the canonical alias.
+    const profile = normalize(
+      "u",
+      raw({
+        spacings: { "8px": 20 },
+        customProps: {
+          "--controlStack-medium-gap-condensed": "8px",
+          "--stack-gap-condensed": "8px",
+          "--control-large-gap": "8px",
+        },
+      }),
+    );
+    expect(profile.declared?.spacing).toEqual({ "--control-large-gap": 8 });
+  });
+
+  it("dedupes font vars pointing at the same stack", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        fontFamilies: { "Inter, sans-serif": 50 },
+        customProps: {
+          "--fontStack-sansSerif": "Inter, sans-serif",
+          "--font-sans": "Inter, sans-serif",
+        },
+      }),
+    );
+    expect(profile.declared?.fontFamilies).toEqual({
+      "--font-sans": "Inter, sans-serif",
+    });
+  });
+});
+
+describe("normalize – hover mechanisms beyond a bg swap", () => {
+  // White page, crimson primary CTA (#dc143c).
+  const base = () =>
+    raw({
+      bgArea: { "rgb(255, 255, 255)": 50000 },
+      buttons: [button({ bg: "rgb(220, 20, 60)" })],
+    });
+  const sample = (over: Partial<import("./types.js").HoverSample>) => ({
+    restBg: "rgb(220, 20, 60)",
+    restColor: "rgb(255, 255, 255)",
+    bg: "rgb(220, 20, 60)",
+    color: "rgb(255, 255, 255)",
+    ...over,
+  });
+
+  it("composites an opacity-fade hover into the visible hex", () => {
+    // opacity .5 over white: .5*220+127.5=238, .5*20+127.5=138, .5*60+127.5=158
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [sample({ restOpacity: 1, opacity: 0.5 })],
+      }),
+    );
+    expect(profile.colors.primary).toBe("#dc143c");
+    expect(profile.colors.primaryHover).toBe("#ee8a9e");
+  });
+
+  it("ignores an opacity fade when the page background is unknown", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        buttons: [button({ bg: "rgb(220, 20, 60)" })],
+        buttonHovers: [sample({ restOpacity: 1, opacity: 0.5 })],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBeNull();
+  });
+
+  it("applies a plain brightness() filter to the channels", () => {
+    // brightness(.5) on rgb(220,20,60) -> rgb(110,10,30)
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          sample({ restFilter: "none", filter: "brightness(0.5)" }),
+        ],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBe("#6e0a1e");
+  });
+
+  it("won't reason about a compound filter", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          sample({ restFilter: "none", filter: "brightness(0.5) blur(2px)" }),
+        ],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBeNull();
+  });
+
+  it("records a hover shadow + lift as the micro-interaction block", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          sample({
+            restShadow: "none",
+            shadow: "rgba(0, 0, 0, 0.2) 0px 4px 12px 0px",
+            restTransform: "none",
+            transform: "matrix(1, 0, 0, 1, 0, -2)",
+          }),
+        ],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBeNull(); // no color change at all
+    expect(profile.primaryButtonHover).toEqual({
+      shadow: "rgba(0, 0, 0, 0.2) 0px 4px 12px 0px",
+      transform: "translateY(-2px)",
+    });
+  });
+
+  it("decomposes a uniform scale matrix into scale()", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [
+          sample({
+            restTransform: "none",
+            transform: "matrix(1.05, 0, 0, 1.05, 0, 0)",
+          }),
+        ],
+      }),
+    );
+    expect(profile.primaryButtonHover?.transform).toBe("scale(1.05)");
+  });
+
+  it("emits no micro-interaction block when nothing beyond color changed", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonHovers: [sample({ bg: "rgb(180, 10, 40)" })],
+      }),
+    );
+    expect(profile.colors.primaryHover).toBe("#b40a28");
+    expect(profile.primaryButtonHover).toBeUndefined();
+  });
+});

@@ -56,6 +56,7 @@ function colorsSection(roles: ColorRoles): string {
   const swatches: [string, string | null][] = [
     ["primary", roles.primary],
     ["on-primary", roles.onPrimary],
+    ["primary-hover", roles.primaryHover],
     ["background", roles.background],
     ["text", roles.text],
     ["accent-1", roles.accent1],
@@ -136,6 +137,7 @@ function componentsSection(
   rounded: [string, string][],
   spacing: [string, string][],
   bodyLevel: TypeLevel | undefined,
+  hoverFx?: { shadow?: string; transform?: string },
 ): string {
   const pick = (entries: [string, string][], preferred: string, idx: number) =>
     entries.find(([k]) => k === preferred)?.[1] ??
@@ -159,9 +161,32 @@ function componentsSection(
   // default stretch: a button (and the badge below) must hug its content —
   // stretched edge-to-edge it reads as a banner, not a component. Cards,
   // dividers and inputs keep the full width on purpose.
+  // When a hover shift was observed on the live site, the specimen really
+  // hovers to it — color, shadow, and lift alike. Inline handlers (not a
+  // :hover rule) because the rest state lives in a style="" attribute, which
+  // a stylesheet rule can't out-rank without !important, and they scope per
+  // theme for free. mouseout restores: background to the rest value, the fx
+  // by clearing the inline property (the specimen declares neither at rest).
+  const overParts: string[] = [];
+  const outParts: string[] = [];
+  if (roles.primaryHover) {
+    overParts.push(`this.style.background='${roles.primaryHover}'`);
+    outParts.push(`this.style.background='${roles.primary}'`);
+  }
+  if (hoverFx?.shadow) {
+    overParts.push(`this.style.boxShadow='${hoverFx.shadow}'`);
+    outParts.push(`this.style.boxShadow=''`);
+  }
+  if (hoverFx?.transform) {
+    overParts.push(`this.style.transform='${hoverFx.transform}'`);
+    outParts.push(`this.style.transform=''`);
+  }
+  const hover = overParts.length
+    ? ` onmouseover="${esc(overParts.join(";"))}" onmouseout="${esc(outParts.join(";"))}"`
+    : "";
   parts.push(`<div class="cmp">
-    <span class="cmp-label">button-primary</span>
-    <button style="align-self:flex-start;background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${bodySize}/1 ${bodyFont};cursor:pointer">Primary action</button>
+    <span class="cmp-label">button-primary${roles.primaryHover ? ` · :hover ${esc(roles.primaryHover)}` : ""}</span>
+    <button${hover} style="align-self:flex-start;background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${bodySize}/1 ${bodyFont};cursor:pointer">Primary action</button>
   </div>`);
 
   // surface / card + input + body-text (need background & text); card edge and
@@ -228,7 +253,13 @@ function themeContent(profile: DesignProfile): string {
     scaleSection("Spacing", spacing, "spacing"),
     scaleSection("Radius", rounded, "radius"),
     shadowSection(profile.shadows),
-    componentsSection(roles, rounded, spacing, bodyLevel),
+    componentsSection(
+      roles,
+      rounded,
+      spacing,
+      bodyLevel,
+      profile.primaryButtonHover,
+    ),
   ].join("\n");
 }
 

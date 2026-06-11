@@ -347,3 +347,31 @@ describe("generate – no orphan colors", () => {
     expect(md).not.toContain("surface-muted:");
   });
 });
+
+describe("generate – primary-hover", () => {
+  const withHover = () =>
+    profile({
+      colors: {
+        background: "#ffffff",
+        text: "#222222",
+        primary: "#1a73e8",
+        primaryHover: "#1557b0",
+        palette: [{ hex: "#1a73e8", count: 9 }],
+      },
+    });
+
+  it("emits the color token, a hover component variant, and the prose note", () => {
+    const md = generate(withHover());
+    expect(md).toContain('primary-hover: "#1557b0"');
+    expect(md).toContain("button-primary-hover:");
+    expect(md).toContain('backgroundColor: "{colors.primary-hover}"');
+    expect(md).toContain("Primary button (hover):");
+    expect(md).toContain("observed on the live site");
+  });
+
+  it("emits none of it when the profile has no observed hover", () => {
+    const md = generate(profile());
+    expect(md).not.toContain("primary-hover");
+    expect(md).not.toContain("button-primary-hover");
+  });
+});

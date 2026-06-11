@@ -134,3 +134,54 @@ describe("agentNotes", () => {
     expect(find(lines, "Primary actions")).toBeTruthy();
   });
 });
+
+describe("agentNotes – declared-token provenance", () => {
+  it("tells the agent the scale is the site's own declared system", () => {
+    const p = profile({
+      declared: {
+        radius: { "--radius-sm": 4, "--radius-md": 8 },
+        spacing: { "--space-4": 16 },
+        fontFamilies: { "--font-sans": "Inter, sans-serif" },
+      },
+    });
+    const notes = agentNotes(p, typographyLevels(p)).join("\n");
+    expect(notes).toContain("**Declared tokens:**");
+    expect(notes).toContain("`--radius-md: 8px`");
+    expect(notes).toContain("`--space-4: 16px`");
+    expect(notes).toContain("`--font-sans`");
+    expect(notes).toContain("canonical");
+  });
+
+  it("stays silent when nothing was declared", () => {
+    const p = profile();
+    expect(agentNotes(p, typographyLevels(p)).join("\n")).not.toContain(
+      "Declared tokens",
+    );
+  });
+});
+
+describe("agentNotes – hover micro-interaction", () => {
+  it("describes the observed shadow + lift so the agent reproduces it", () => {
+    const p = profile({
+      primaryButtonHover: {
+        shadow: "rgba(0, 0, 0, 0.2) 0px 4px 12px 0px",
+        transform: "translateY(-2px)",
+      },
+    });
+    const notes = agentNotes(p, typographyLevels(p)).join("\n");
+    expect(notes).toContain("**Primary button hover:**");
+    expect(notes).toContain("`transform: translateY(-2px)`");
+    expect(notes).toContain(
+      "`box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 12px 0px`",
+    );
+    // No color shift on this profile -> the note says so explicitly.
+    expect(notes).toContain("background color does not change");
+  });
+
+  it("emits nothing without an observed micro-interaction", () => {
+    const p = profile();
+    expect(agentNotes(p, typographyLevels(p)).join("\n")).not.toContain(
+      "Primary button hover",
+    );
+  });
+});

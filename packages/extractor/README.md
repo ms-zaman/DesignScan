@@ -13,11 +13,12 @@ the extraction engine. It runs locally, needs **no API key**, and is the only
 ```
 URL
  └─ Playwright (headless Chromium) renders the live page, waits for hydration
-     └─ reads getComputedStyle from every visible element
+     └─ reads getComputedStyle from every visible element (shadow DOM included),
+        then physically hovers the buttons to observe their :hover shift
          └─ normalize.ts clusters the raw CSS into a clean token profile:
-            background / text / primary / border / muted-surface colors,
-            palette, font families, font-size scale, spacing scale,
-            radius scale, shadows
+            background / text / primary / primary-hover / border /
+            muted-surface colors, palette, font families, font-size scale,
+            spacing scale, radius scale, shadows
              └─ outputs a DesignProfile JSON
 ```
 

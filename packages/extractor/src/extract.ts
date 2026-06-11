@@ -1,5 +1,5 @@
 import { chromium } from "playwright";
-import type { RawObservations } from "./types.js";
+import type { HoverSample, RawObservations } from "./types.js";
 
 export interface ExtractOptions {
   headful?: boolean;
@@ -148,7 +148,19 @@ export async function extract(
         }
       }
 
-      const all = Array.from(document.querySelectorAll("*")).slice(0, limit);
+      // Depth-first walk that pierces open shadow roots: web-component sites
+      // (Lit, Stencil, many design systems) paint their real UI inside shadow
+      // DOM, which document.querySelectorAll("*") never reaches. Closed roots
+      // stay invisible (no handle exists) — a known limitation.
+      const all: Element[] = [];
+      const collect = (root: ParentNode) => {
+        for (const el of root.querySelectorAll("*")) {
+          if (all.length >= limit) return;
+          all.push(el);
+          if (el.shadowRoot) collect(el.shadowRoot);
+        }
+      };
+      collect(document);
       for (const el of all) {
         const cs = getComputedStyle(el);
         const rect = (el as HTMLElement).getBoundingClientRect();
@@ -262,10 +274,21 @@ export async function extract(
         const tag = el.tagName.toLowerCase();
         const roleAttr = el.getAttribute("role");
         const cls = typeof el.className === "string" ? el.className : "";
+        const typeAttr = el.getAttribute("type");
+        const btnClass = /btn|button|cta/i.test(cls);
         const looksButton =
           tag === "button" ||
           roleAttr === "button" ||
-          (tag === "a" && /btn|button|cta/i.test(cls));
+          (tag === "input" &&
+            (typeAttr === "submit" || typeAttr === "button")) ||
+          (tag === "a" && btnClass) ||
+          // Styled-div CTAs (common in older marketing pages and click-handler
+          // frameworks). The class alone would sweep in wrappers like
+          // .button-group, so require cursor:pointer — real CTAs set it,
+          // layout containers don't.
+          ((tag === "div" || tag === "span") &&
+            btnClass &&
+            cs.cursor === "pointer");
 
         if (looksButton && buttons.length < 50) {
           buttons.push({
@@ -286,6 +309,8 @@ export async function extract(
 
       return {
         title: document.title,
+        rootFontSizePx:
+          parseFloat(getComputedStyle(document.documentElement).fontSize) || 16,
         colorCount,
         textColorArea,
         bgArea,
@@ -313,8 +338,136 @@ export async function extract(
     }, maxElements);
 
     raw.colorScheme = colorScheme;
+    raw.buttonHovers = await sampleHovers(page);
     return raw;
   } finally {
     await browser.close();
   }
+}
+
+// Physically hover a handful of button-like elements and record any bg/text
+// color change — the only way to see :hover styles, since getComputedStyle
+// can't evaluate pseudo-class states that aren't active. Runs after the main
+// observation pass so side effects (menus opening, hover scrolling the
+// element into view) can't pollute the frequency maps. Best-effort by design:
+// any failure returns what was collected so far and never sinks the extraction.
+async function sampleHovers(
+  page: import("playwright").Page,
+): Promise<HoverSample[]> {
+  const samples: HoverSample[] = [];
+  const seen = new Set<string>();
+  try {
+    // Freeze transitions/animations first, otherwise the post-hover read sees
+    // a mid-interpolation value (e.g. a 200ms ease still in flight), not the
+    // final hover color.
+    await page.addStyleTag({
+      content:
+        "*, *::before, *::after { transition: none !important; animation: none !important; }",
+    });
+    // The same looksButton logic as the main pass (duplicated because
+    // evaluate bodies are serialized — they can't share an outer helper), and
+    // the same shadow-piercing walk, so the hover pass samples exactly the
+    // buttons the profile counted. A CSS-selector approximation here missed
+    // cursor-pointer div/span CTAs (PostHog's 3D button face) and every
+    // shadow-DOM button.
+    const arr = await page.evaluateHandle(() => {
+      const out: Element[] = [];
+      const collect = (root: ParentNode) => {
+        for (const el of root.querySelectorAll("*")) {
+          if (out.length >= 40) return;
+          const tag = el.tagName.toLowerCase();
+          const roleAttr = el.getAttribute("role");
+          const cls = typeof el.className === "string" ? el.className : "";
+          const typeAttr = el.getAttribute("type");
+          const btnClass = /btn|button|cta/i.test(cls);
+          const looks =
+            tag === "button" ||
+            roleAttr === "button" ||
+            (tag === "input" &&
+              (typeAttr === "submit" || typeAttr === "button")) ||
+            (tag === "a" && btnClass) ||
+            ((tag === "div" || tag === "span") &&
+              btnClass &&
+              getComputedStyle(el).cursor === "pointer");
+          if (looks) out.push(el);
+          if (el.shadowRoot) collect(el.shadowRoot);
+        }
+      };
+      collect(document);
+      return out;
+    });
+    const handles = [...(await arr.getProperties()).values()]
+      .map((v) => v.asElement())
+      .filter((h): h is NonNullable<typeof h> => h !== null);
+    // One snapshot shape for both reads: the bg/text colors plus every other
+    // mechanism a hover commonly paints through — whole-element opacity,
+    // brightness() filters, shadows, transforms. Capturing the mechanism (not
+    // just backgroundColor) is what lets normalize composite the *visible*
+    // hover color for sites that never swap the bg at all. NB: evaluate bodies
+    // are serialized into the page, so the property reads are spelled out in
+    // each (a shared outer helper would be an unserializable closure).
+    let tried = 0;
+    for (const h of handles) {
+      if (tried >= 12 || samples.length >= 8) break;
+      const rest = await h.evaluate((el: Element) => {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return {
+          bg: cs.backgroundColor,
+          color: cs.color,
+          opacity: parseFloat(cs.opacity) || 1,
+          shadow: cs.boxShadow,
+          transform: cs.transform,
+          filter: cs.filter,
+          visible: r.width > 0 && r.height > 0,
+        };
+      });
+      if (!rest.visible) continue;
+      try {
+        await h.hover({ timeout: 600 });
+      } catch {
+        continue; // covered/detached/off-screen — not worth fighting for
+      }
+      tried++;
+      const hov = await h.evaluate((el: Element) => {
+        const cs = getComputedStyle(el);
+        return {
+          bg: cs.backgroundColor,
+          color: cs.color,
+          opacity: parseFloat(cs.opacity) || 1,
+          shadow: cs.boxShadow,
+          transform: cs.transform,
+          filter: cs.filter,
+        };
+      });
+      const changed =
+        hov.bg !== rest.bg ||
+        hov.color !== rest.color ||
+        Math.abs(hov.opacity - rest.opacity) > 0.001 ||
+        hov.shadow !== rest.shadow ||
+        hov.transform !== rest.transform ||
+        hov.filter !== rest.filter;
+      if (!changed) continue;
+      const key = JSON.stringify([rest, hov]);
+      if (seen.has(key)) continue; // same design hover-shifts identically
+      seen.add(key);
+      samples.push({
+        restBg: rest.bg,
+        restColor: rest.color,
+        bg: hov.bg,
+        color: hov.color,
+        restOpacity: rest.opacity,
+        opacity: hov.opacity,
+        restShadow: rest.shadow,
+        shadow: hov.shadow,
+        restTransform: rest.transform,
+        transform: hov.transform,
+        restFilter: rest.filter,
+        filter: hov.filter,
+      });
+    }
+  } catch {
+    // Hover sampling is an enrichment, never a requirement.
+  }
+  return samples;
 }

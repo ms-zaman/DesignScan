@@ -116,9 +116,48 @@ describe("preview – HTML proof sheet", () => {
     expect(badge).toContain("align-self:flex-start");
   });
 
+  it("makes the primary button really hover to the observed hover color", () => {
+    const p = profileFor("stripe");
+    p.colors.primaryHover = "#4631b8";
+    const html = preview(p);
+    // The specimen carries inline handlers (a stylesheet :hover can't out-rank
+    // the style="" attribute), the label documents the hex, and the swatch
+    // grid gains a primary-hover chip.
+    expect(html).toContain("onmouseover=\"this.style.background='#4631b8'\"");
+    expect(html).toContain("onmouseout=");
+    expect(html).toContain(">primary-hover<");
+    expect(html).toContain("button-primary · :hover #4631b8");
+  });
+
+  it("emits no hover handlers when no hover shift was observed", () => {
+    const html = preview(profileFor("stripe"));
+    expect(html).not.toContain("onmouseover");
+    expect(html).not.toContain("primary-hover");
+  });
+
   it("escapes the page title into the document", () => {
     const html = preview(profileFor("stripe"));
     expect(html).toContain("DesignScan preview");
     expect(html).not.toContain("<script>alert"); // sanity: no raw injection path
+  });
+});
+
+describe("preview – hover micro-interaction", () => {
+  it("reproduces shadow + lift in the specimen's hover handlers", () => {
+    const p = profileFor("stripe");
+    p.colors.primaryHover = "#4631b8";
+    p.primaryButtonHover = {
+      shadow: "rgba(0, 0, 0, 0.2) 0px 4px 12px 0px",
+      transform: "translateY(-2px)",
+    };
+    const html = preview(p);
+    expect(html).toContain("this.style.background='#4631b8'");
+    expect(html).toContain(
+      "this.style.boxShadow='rgba(0, 0, 0, 0.2) 0px 4px 12px 0px'",
+    );
+    expect(html).toContain("this.style.transform='translateY(-2px)'");
+    // mouseout restores: bg to the rest primary, fx by clearing.
+    expect(html).toContain("this.style.boxShadow=''");
+    expect(html).toContain("this.style.transform=''");
   });
 });
