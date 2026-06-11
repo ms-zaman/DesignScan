@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "url": "https://tailwindcss.com",
   "title": "Tailwind CSS - Rapidly build modern websites without ever leaving your HTML.",
-  "fetchedAt": "2026-06-08T05:17:11.830Z",
+  "fetchedAt": "2026-06-11T01:37:16.435Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -10,6 +10,7 @@
     "primary": "#f6339a",
     "border": "#ddd6ff",
     "mutedSurface": "#fefce8",
+    "primaryHover": null,
     "palette": [
       {
         "hex": "#030712",
@@ -25,7 +26,7 @@
       },
       {
         "hex": "#74d4ff",
-        "count": 49
+        "count": 48
       },
       {
         "hex": "#fb64b6",
@@ -128,5 +129,24 @@
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.05) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.999994 0.0000455678 0.0000200868 / 0.1) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
-  ]
+  ],
+  "declared": {
+    "radius": {
+      "--radius-sm": 4,
+      "--radius-lg": 8,
+      "--radius-xl": 12,
+      "--radius-2xl": 16,
+      "--radius-3xl": 24,
+      "--radius-4xl": 32
+    },
+    "spacing": {
+      "--spacing": 4
+    },
+    "fontFamilies": {
+      "--font-mono": "\"plexMono\", \"plexMono Fallback\", monospace",
+      "--font-sans": "\"inter\", \"inter Fallback\", system-ui",
+      "--font-inter": "\"inter\", \"inter Fallback\"",
+      "--font-plex-mono": "\"plexMono\", \"plexMono Fallback\""
+    }
+  }
 }

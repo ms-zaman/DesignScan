@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "url": "https://github.com",
   "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
-  "fetchedAt": "2026-06-08T05:17:28.599Z",
+  "fetchedAt": "2026-06-11T01:33:13.952Z",
   "theme": "light",
   "colors": {
     "background": "#0d1117",
@@ -10,6 +10,7 @@
     "primary": "#08872b",
     "border": "#484f58",
     "mutedSurface": null,
+    "primaryHover": "#077124",
     "palette": [
       {
         "hex": "#000000",
@@ -135,5 +136,28 @@
   "shadows": [
     "rgba(209, 217, 224, 0.25) 0px 0px 0px 1px, rgba(37, 41, 46, 0.04) 0px 6px 12px -3px, rgba(37, 41, 46, 0.12) 0px 6px 18px 0px",
     "rgba(255, 255, 255, 0) 0px 0px 0px 1px inset"
-  ]
+  ],
+  "declared": {
+    "radius": {
+      "--borderRadius-medium": 6,
+      "--brand-Bento-item-borderRadius-large": 24
+    },
+    "spacing": {
+      "--control-small-gap": 4,
+      "--control-large-gap": 8,
+      "--controlStack-large-gap-spacious": 12,
+      "--Layout-row-gap": 16,
+      "--stack-gap-spacious": 24,
+      "--brand-Bento-gap-medium": 32,
+      "--brand-LogoSuite-logobar-marquee-gap-condensed": 40,
+      "--brand-Grid-spacing-row": 48,
+      "--brand-River-variant-gridline-spacing-outerBlock": 64,
+      "--brand-RiverBreakout-variant-gridline-spacing-outerBlockEnd": 80
+    },
+    "fontFamilies": {
+      "--fontStack-system": "\"Mona Sans VF\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "--brand-body-fontFamily": "\"Mona Sans\", \"MonaSansFallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "--brand-fontStack-monospace": "\"Mona Sans Mono\", monospace"
+    }
+  }
 }

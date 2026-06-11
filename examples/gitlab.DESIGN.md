@@ -5,12 +5,13 @@ description: "Auto-extracted from https://gitlab.com by DesignScan."
 colors:
   primary: "#7759c2"
   on-primary: "#ffffff"
-  background: "#171321"
-  text: "#ffffff"
+  background: "#ffffff"
+  text: "#171321"
   accent-1: "#74717a"
-  accent-2: "#d1d0d3"
-  on-accent-2: "#111111"
-  border: "#1f1c2e"
+  accent-2: "#1f1c2e"
+  on-accent-2: "#ffffff"
+  border: "#e8e7eb"
+  muted-surface: "#ebeaec"
 typography:
   display:
     fontFamily: "\"GitLab Sans\", sans-serif"
@@ -62,16 +63,17 @@ rounded:
   xs: 4px
   sm: 8px
   md: 16px
-  lg: 32px
-  full: 9999px
-spacing:
-  xs: 8px
-  sm: 12px
-  md: 16px
   lg: 24px
   xl: 32px
-  2xl: 48px
-  3xl: 64px
+  full: 9999px
+spacing:
+  xs: 4px
+  sm: 8px
+  md: 12px
+  lg: 16px
+  xl: 24px
+  2xl: 32px
+  3xl: 48px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -101,38 +103,44 @@ components:
   divider:
     backgroundColor: "{colors.border}"
     height: 1px
+  surface-muted:
+    backgroundColor: "{colors.muted-surface}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.lg}"
+    padding: "{spacing.lg}"
 ---
 
 ## Overview
 
-Auto-extracted from https://gitlab.com by DesignScan on 2026-06-08. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://gitlab.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
 - **primary (#7759c2):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
-- **background (#171321):** the base surface color behind most content.
-- **text (#ffffff):** the primary foreground / body-text color.
+- **background (#ffffff):** the base surface color behind most content.
+- **text (#171321):** the primary foreground / body-text color.
 - **accent-1 (#74717a):** a supporting accent (used for links).
-- **accent-2 (#d1d0d3):** a secondary accent (used for badges/tags).
-- **on-accent-2 (#111111):** the readable foreground on the secondary accent.
-- **border (#1f1c2e):** the hairline color for dividers, card edges, and input borders.
+- **accent-2 (#1f1c2e):** a secondary accent (used for badges/tags).
+- **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
+- **border (#e8e7eb):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#ebeaec):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 
-Primary typeface: **GitLab Sans**. Sizes range 14px–96px across 8 level(s); weights observed: 400, 580, 600, 660, 700.
+Primary typeface: **GitLab Sans**, with Inter. Sizes range 14px–96px across 8 level(s); weights observed: 400, 580, 600, 660, 700.
 
 ## Layout
 
-Spacing follows an observed scale of 8px, 12px, 16px, 24px, 32px, 48px, 64px — usable for padding, gaps, and margins.
+Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 48px — usable for padding, gaps, and margins.
 
 ## Elevation & Depth
 
-Depth is conveyed with 2 shadow level(s) observed on the page.
+Depth is conveyed with 4 shadow level(s) observed on the page.
 
 ## Shapes
 
-Corner radii observed: 4px, 8px, 16px, 32px. Use the smaller values for inputs and chips, larger for cards and surfaces.
+Corner radii observed: 4px, 8px, 16px, 24px, 32px. Use the smaller values for inputs and chips, larger for cards and surfaces.
 
 ## Components
 
@@ -141,6 +149,7 @@ Corner radii observed: 4px, 8px, 16px, 32px. Use the smaller values for inputs a
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
 - **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.
+- **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.
 
 ## Do's and Don'ts
 
@@ -155,4 +164,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Primary actions:** `primary` (#7759c2) with `on-primary` (#ffffff) text is 5.3:1 (passes AA). Reserve `primary` for the single most important action per view.
 - **Links:** use `accent-1` (#74717a) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
-- **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 8px-based rhythm) rather than arbitrary pixel values.
+- **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.

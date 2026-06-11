@@ -1,35 +1,36 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "url": "https://posthog.com",
   "title": "PostHog – We make dev tools for product engineers",
-  "fetchedAt": "2026-06-08T05:18:06.589Z",
+  "fetchedAt": "2026-06-11T01:34:23.190Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
     "text": "#374151",
-    "primary": "#cd8407",
+    "primary": "#eb9d2a",
     "border": "#bfc1b7",
     "mutedSurface": "#eeefe9",
+    "primaryHover": null,
     "palette": [
-      {
-        "hex": "#4d4f46",
-        "count": 65
-      },
       {
         "hex": "#374151",
         "count": 49
       },
       {
-        "hex": "#111827",
-        "count": 38
+        "hex": "#4d4f46",
+        "count": 47
       },
       {
-        "hex": "#65675e",
-        "count": 17
+        "hex": "#111827",
+        "count": 36
       },
       {
         "hex": "#e1d7c2",
         "count": 17
+      },
+      {
+        "hex": "#65675e",
+        "count": 16
       },
       {
         "hex": "#eeefe9",
@@ -37,6 +38,10 @@
       },
       {
         "hex": "#f54e00",
+        "count": 11
+      },
+      {
+        "hex": "#ffffff",
         "count": 10
       },
       {
@@ -44,20 +49,16 @@
         "count": 8
       },
       {
-        "hex": "#000000",
-        "count": 8
+        "hex": "#eb9d2a",
+        "count": 7
       },
       {
-        "hex": "#ffffff",
-        "count": 8
+        "hex": "#000000",
+        "count": 6
       },
       {
         "hex": "#e5e7e0",
-        "count": 7
-      },
-      {
-        "hex": "#eb9d2a",
-        "count": 7
+        "count": 5
       },
       {
         "hex": "#b6b7af",
@@ -68,11 +69,11 @@
         "count": 4
       },
       {
-        "hex": "#9ea096",
-        "count": 2
+        "hex": "#f7a501",
+        "count": 3
       },
       {
-        "hex": "#29dbbb",
+        "hex": "#9ea096",
         "count": 2
       }
     ]

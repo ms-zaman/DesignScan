@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "url": "https://retool.com",
   "title": "Retool | Build internal software better, with AI.",
-  "fetchedAt": "2026-06-08T05:19:38.142Z",
+  "fetchedAt": "2026-06-11T01:35:56.183Z",
   "theme": "light",
   "colors": {
     "background": "#151515",
@@ -10,6 +10,7 @@
     "primary": "#518dd2",
     "border": "#433e38",
     "mutedSurface": "#242424",
+    "primaryHover": "#4b81bf",
     "palette": [
       {
         "hex": "#e9ebdf",
@@ -24,16 +25,16 @@
         "count": 20
       },
       {
+        "hex": "#242424",
+        "count": 14
+      },
+      {
         "hex": "#f7f8f4",
         "count": 11
       },
       {
         "hex": "#8b867f",
         "count": 9
-      },
-      {
-        "hex": "#242424",
-        "count": 8
       },
       {
         "hex": "#b6b8af",
@@ -113,5 +114,11 @@
   "shadows": [
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.35) 0px 68px 116px 0px",
     "rgba(0, 0, 0, 0.12) 0px 1px 2px 0px, rgb(0, 0, 0) 0px 0px 0px 0.5px"
-  ]
+  ],
+  "declared": {
+    "fontFamilies": {
+      "--font-saans": "\"saansFont\", \"saansFont Fallback\"",
+      "--font-px-grotesk": "\"pxGroteskFont\", \"pxGroteskFont Fallback\""
+    }
+  }
 }

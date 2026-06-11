@@ -108,7 +108,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://linear.app by DesignScan on 2026-06-10. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://linear.app by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -161,3 +161,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#62666d) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-4: 4px`, `--radius-6: 6px`, `--radius-8: 8px`, `--radius-12: 12px`); spacing (`--editor-last-invisible-paragraph-spacing: 10px`, `--editor-block-spacing: 16px`); fonts (`--font-regular`, `--font-monospace`) — and the page paints these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

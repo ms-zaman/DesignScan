@@ -96,7 +96,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://sentry.io by DesignScan on 2026-06-08. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://sentry.io by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 

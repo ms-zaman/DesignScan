@@ -7,10 +7,10 @@ Auto-extracted design-token specs for 12 real brands, generated from live CSS by
 | Brand | Primary | Background | Font | Files | Source |
 |-------|---------|------------|------|-------|--------|
 | **GitHub** | `#08872b` | `#0d1117` | Mona Sans | [DESIGN.md](github.DESIGN.md) · [preview](github.preview.html) · [json](github.json) | [github.com](https://github.com) |
-| **Gitlab** | `#7759c2` | `#171321` | GitLab Sans | [DESIGN.md](gitlab.DESIGN.md) · [preview](gitlab.preview.html) · [json](gitlab.json) | [gitlab.com](https://gitlab.com) |
+| **Gitlab** | `#7759c2` | `#ffffff` | GitLab Sans | [DESIGN.md](gitlab.DESIGN.md) · [preview](gitlab.preview.html) · [json](gitlab.json) | [gitlab.com](https://gitlab.com) |
 | **Linear** | `#5e6ad2` | `#08090a` | Inter Variable | [DESIGN.md](linear.DESIGN.md) · [preview](linear.preview.html) · [json](linear.json) | [linear.app](https://linear.app) |
 | **Netlify** | `#2e51ed` | `#ffffff` | Instrument Sans | [DESIGN.md](netlify.DESIGN.md) · [preview](netlify.preview.html) · [json](netlify.json) | [netlify.com](https://netlify.com) |
-| **PostHog** | `#cd8407` | `#ffffff` | IBM Plex Sans Variable | [DESIGN.md](posthog.DESIGN.md) · [preview](posthog.preview.html) · [json](posthog.json) | [posthog.com](https://posthog.com) |
+| **PostHog** | `#eb9d2a` | `#ffffff` | IBM Plex Sans Variable | [DESIGN.md](posthog.DESIGN.md) · [preview](posthog.preview.html) · [json](posthog.json) | [posthog.com](https://posthog.com) |
 | **Railway** | `#180d43` | `#13111c` | Inter | [DESIGN.md](railway.DESIGN.md) · [preview](railway.preview.html) · [json](railway.json) | [railway.app](https://railway.app) |
 | **Retool** | `#518dd2` | `#151515` | ui-sans-serif | [DESIGN.md](retool.DESIGN.md) · [preview](retool.preview.html) · [json](retool.json) | [retool.com](https://retool.com) |
 | **Sentry** | `#79628c` | `#1f1633` | Rubik | [DESIGN.md](sentry.DESIGN.md) · [preview](sentry.preview.html) · [json](sentry.json) | [sentry.io](https://sentry.io) |

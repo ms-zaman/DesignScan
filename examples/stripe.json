@@ -1,13 +1,16 @@
 {
-  "schemaVersion": "1.2",
+  "schemaVersion": "1.4",
   "url": "https://stripe.com",
   "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
-  "fetchedAt": "2026-06-06T11:14:17.292Z",
+  "fetchedAt": "2026-06-11T01:36:54.211Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
     "text": "#64748d",
     "primary": "#533afd",
+    "border": "#e5edf5",
+    "mutedSurface": "#f8fafd",
+    "primaryHover": "#4032c8",
     "palette": [
       {
         "hex": "#50617a",
@@ -15,19 +18,19 @@
       },
       {
         "hex": "#061b31",
-        "count": 116
+        "count": 114
       },
       {
         "hex": "#64748d",
-        "count": 52
+        "count": 51
       },
       {
         "hex": "#ffffff",
-        "count": 50
+        "count": 49
       },
       {
         "hex": "#533afd",
-        "count": 49
+        "count": 48
       },
       {
         "hex": "#273951",
@@ -47,7 +50,7 @@
       },
       {
         "hex": "#f8fafd",
-        "count": 10
+        "count": 9
       },
       {
         "hex": "#ff6118",
@@ -99,7 +102,7 @@
     "lineHeightBody": 1.4,
     "weightHeading": 300,
     "weightBody": 400,
-    "letterSpacingHeadingEm": -0.01,
+    "letterSpacingHeadingEm": -0.02,
     "letterSpacingBodyEm": 0
   },
   "spacingScalePx": [
@@ -124,5 +127,30 @@
     "rgba(0, 0, 0, 0.1) 0px 30px 60px -50px, rgba(50, 50, 93, 0.25) 0px 30px 60px -10px",
     "rgba(23, 23, 23, 0.08) 0px 15px 35px 0px",
     "rgba(23, 23, 23, 0.06) 0px 3px 6px 0px"
-  ]
+  ],
+  "declared": {
+    "radius": {
+      "--hds-space-core-radius-xs": 2,
+      "--hds-space-core-radius-sm": 4,
+      "--hds-space-core-radius-md": 6,
+      "--hds-space-core-radius-lg": 16
+    },
+    "spacing": {
+      "--hds-space-core-1": 1,
+      "--hds-space-core-25": 2,
+      "--hds-space-core-50": 4,
+      "--hds-space-core-75": 6,
+      "--hds-space-core-100": 8,
+      "--hds-space-core-150": 12,
+      "--hds-space-core-200": 16,
+      "--hds-space-core-250": 20,
+      "--hds-space-core-300": 24,
+      "--hds-space-core-350": 28,
+      "--hds-space-core-400": 32,
+      "--hds-space-core-450": 36
+    },
+    "fontFamilies": {
+      "--hds-font-family": "\"sohne-var\",\"SF Pro Display\",sans-serif"
+    }
+  }
 }

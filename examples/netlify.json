@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "url": "https://netlify.com",
   "title": "Push your ideas to the web | Netlify",
-  "fetchedAt": "2026-06-10T18:03:02.159Z",
+  "fetchedAt": "2026-06-11T01:33:53.824Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -10,6 +10,7 @@
     "primary": "#2e51ed",
     "border": "#e9ebed",
     "mutedSurface": "#f6f6f7",
+    "primaryHover": null,
     "palette": [
       {
         "hex": "#89ddff",
@@ -21,7 +22,7 @@
       },
       {
         "hex": "#181a1c",
-        "count": 87
+        "count": 86
       },
       {
         "hex": "#353a3e",
@@ -29,7 +30,7 @@
       },
       {
         "hex": "#545a61",
-        "count": 55
+        "count": 58
       },
       {
         "hex": "#c792ea",
@@ -133,5 +134,31 @@
     "rgb(128, 128, 128) 0px 0px 5px 0px",
     "oklab(0 0 0 / 0) 0px 0px 0px 0px, oklab(0 0 0 / 0) 0px 0px 0px 0px",
     "color(srgb 0 0 0 / 0.25) 0px 4px 12px 0px"
-  ]
+  ],
+  "declared": {
+    "radius": {
+      "--radius-xs": 2,
+      "--radius-s": 4,
+      "--radius-m": 6,
+      "--border-radius-3": 8,
+      "--radius-l": 12,
+      "--radius-xl": 16
+    },
+    "spacing": {
+      "--space-3xs": 4,
+      "--space-2xs": 8,
+      "--space-xs": 12,
+      "--space-s": 16,
+      "--space-m": 24,
+      "--space-l": 32,
+      "--space-xl": 48,
+      "--space-2xl": 64,
+      "--space-3xl": 96
+    },
+    "fontFamilies": {
+      "--font-heading": "\"Figtree\", system-ui, \"Helvetica\", sans-serif",
+      "--font-primary": "\"Instrument Sans\", system-ui, \"Helvetica\", sans-serif",
+      "--font-monospace": "\"Martian Mono\", ui-monospace, \"Cascadia Code\", \"Source Code Pro\", \"Menlo\", \"Consolas\", \"DejaVu Sans Mono\", monospace"
+    }
+  }
 }

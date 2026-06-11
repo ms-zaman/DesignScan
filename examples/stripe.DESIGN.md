@@ -5,36 +5,39 @@ description: "Auto-extracted from https://stripe.com by DesignScan."
 colors:
   primary: "#533afd"
   on-primary: "#ffffff"
+  primary-hover: "#4032c8"
   background: "#ffffff"
   text: "#64748d"
   accent-1: "#50617a"
   accent-2: "#061b31"
   on-accent-2: "#ffffff"
+  border: "#e5edf5"
+  muted-surface: "#f8fafd"
 typography:
   display:
     fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 48px
     fontWeight: "300"
     lineHeight: 1.1
-    letterSpacing: "-0.01em"
+    letterSpacing: "-0.02em"
   headline-lg:
     fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 32px
     fontWeight: "300"
     lineHeight: 1.1
-    letterSpacing: "-0.01em"
+    letterSpacing: "-0.02em"
   headline-md:
     fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 26px
     fontWeight: "300"
     lineHeight: 1.1
-    letterSpacing: "-0.01em"
+    letterSpacing: "-0.02em"
   headline-sm:
     fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 22px
     fontWeight: "300"
     lineHeight: 1.1
-    letterSpacing: "-0.01em"
+    letterSpacing: "-0.02em"
   body-lg:
     fontFamily: "sohne-var, \"SF Pro Display\", sans-serif"
     fontSize: 16px
@@ -71,6 +74,11 @@ components:
     textColor: "{colors.on-primary}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+  button-primary-hover:
+    backgroundColor: "{colors.primary-hover}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.md}"
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -91,21 +99,32 @@ components:
     backgroundColor: "{colors.accent-2}"
     textColor: "{colors.on-accent-2}"
     rounded: "{rounded.full}"
+  divider:
+    backgroundColor: "{colors.border}"
+    height: 1px
+  surface-muted:
+    backgroundColor: "{colors.muted-surface}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.lg}"
+    padding: "{spacing.lg}"
 ---
 
 ## Overview
 
-Auto-extracted from https://stripe.com by DesignScan on 2026-06-06. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://stripe.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
 - **primary (#533afd):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+- **primary-hover (#4032c8):** the primary button background as observed on hover.
 - **background (#ffffff):** the base surface color behind most content.
 - **text (#64748d):** the primary foreground / body-text color.
 - **accent-1 (#50617a):** a supporting accent (used for links).
 - **accent-2 (#061b31):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
+- **border (#e5edf5):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#f8fafd):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 
@@ -126,9 +145,12 @@ Corner radii observed: 2px, 4px, 6px, 8px, 16px. Use the smaller values for inpu
 ## Components
 
 - **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button (hover):** background shifts to `{colors.primary-hover}` — observed on the live site, use it for `:hover` instead of a computed darken.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
+- **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.
+- **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.
 
 ## Do's and Don'ts
 
@@ -145,3 +167,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#50617a) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--hds-space-core-radius-xs: 2px`, `--hds-space-core-radius-sm: 4px`, `--hds-space-core-radius-md: 6px`, `--hds-space-core-radius-lg: 16px`); spacing (`--hds-space-core-1: 1px`, `--hds-space-core-25: 2px`, `--hds-space-core-50: 4px`, `--hds-space-core-75: 6px`); fonts (`--hds-font-family`) — and the page paints these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

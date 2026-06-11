@@ -48,7 +48,7 @@ figcaption code{color:var(--muted);font-size:11px}
 <header>
   <div>
     <h1>Stripe | Financial Infrastructure to Grow Your Revenue</h1>
-    <div class="sub">DesignScan preview · <a href="https://stripe.com">https://stripe.com</a> · 2026-06-06</div>
+    <div class="sub">DesignScan preview · <a href="https://stripe.com">https://stripe.com</a> · 2026-06-11</div>
   </div>
   
 </header>
@@ -60,6 +60,10 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#ffffff"></div>
         <figcaption><b>on-primary</b><code>#ffffff</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#4032c8"></div>
+        <figcaption><b>primary-hover</b><code>#4032c8</code></figcaption>
       </figure>
 <figure class="swatch">
         <div class="chip" style="background:#ffffff"></div>
@@ -80,22 +84,30 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#ffffff"></div>
         <figcaption><b>on-accent-2</b><code>#ffffff</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#e5edf5"></div>
+        <figcaption><b>border</b><code>#e5edf5</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#f8fafd"></div>
+        <figcaption><b>muted-surface</b><code>#f8fafd</code></figcaption>
       </figure></div></section>
 <section><h2>Typography</h2><div class="type-list"><div class="type-row">
         <div class="type-meta"><b>display</b><span>48px · 300 · lh 1.1</span></div>
-        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:48px;font-weight:300;line-height:1.1;letter-spacing:-0.01em;">The quick brown fox jumps</div>
+        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:48px;font-weight:300;line-height:1.1;letter-spacing:-0.02em;">The quick brown fox jumps</div>
       </div>
 <div class="type-row">
         <div class="type-meta"><b>headline-lg</b><span>32px · 300 · lh 1.1</span></div>
-        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:32px;font-weight:300;line-height:1.1;letter-spacing:-0.01em;">The quick brown fox jumps</div>
+        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:32px;font-weight:300;line-height:1.1;letter-spacing:-0.02em;">The quick brown fox jumps</div>
       </div>
 <div class="type-row">
         <div class="type-meta"><b>headline-md</b><span>26px · 300 · lh 1.1</span></div>
-        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:26px;font-weight:300;line-height:1.1;letter-spacing:-0.01em;">The quick brown fox jumps</div>
+        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:26px;font-weight:300;line-height:1.1;letter-spacing:-0.02em;">The quick brown fox jumps</div>
       </div>
 <div class="type-row">
         <div class="type-meta"><b>headline-sm</b><span>22px · 300 · lh 1.1</span></div>
-        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:22px;font-weight:300;line-height:1.1;letter-spacing:-0.01em;">The quick brown fox jumps</div>
+        <div class="type-specimen" style="font-family:sohne-var, 'SF Pro Display', sans-serif;font-size:22px;font-weight:300;line-height:1.1;letter-spacing:-0.02em;">The quick brown fox jumps</div>
       </div>
 <div class="type-row">
         <div class="type-meta"><b>body-lg</b><span>16px · 400 · lh 1.4</span></div>
@@ -126,19 +138,27 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(23, 23, 23, 0.08) 0px 15px 35px 0px"></div><figcaption>level 3</figcaption></figure>
 <figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(23, 23, 23, 0.06) 0px 3px 6px 0px"></div><figcaption>level 4</figcaption></figure></div></section>
 <section><h2>Components</h2><div class="cmp-grid"><div class="cmp">
-    <span class="cmp-label">button-primary</span>
-    <button style="align-self:flex-start;background:#533afd;color:#ffffff;border:0;border-radius:6px;padding:12px calc(12px * 2);font:600 14px/1 sohne-var, 'SF Pro Display', sans-serif;cursor:pointer">Primary action</button>
+    <span class="cmp-label">button-primary · :hover #4032c8</span>
+    <button onmouseover="this.style.background='#4032c8'" onmouseout="this.style.background='#533afd'" style="align-self:flex-start;background:#533afd;color:#ffffff;border:0;border-radius:6px;padding:12px calc(12px * 2);font:600 14px/1 sohne-var, 'SF Pro Display', sans-serif;cursor:pointer">Primary action</button>
   </div>
 <div class="cmp">
-      <span class="cmp-label">surface · input · body-text</span>
-      <div style="background:#ffffff;color:#64748d;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:16px;font:400 14px/1.5 sohne-var, 'SF Pro Display', sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+      <span class="cmp-label">surface · input · body-text · border</span>
+      <div style="background:#ffffff;color:#64748d;border:1px solid #e5edf5;border-radius:8px;padding:16px;font:400 14px/1.5 sohne-var, 'SF Pro Display', sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.06)">
         <p style="margin:0 0 12px">Body text on the surface color — this is what reading copy looks like.</p>
-        <input placeholder="input field" style="background:#ffffff;color:#64748d;border:1px solid rgba(0,0,0,.12);border-radius:4px;padding:8px;font:400 14px/1 sohne-var, 'SF Pro Display', sans-serif;width:60%" />
+        <input placeholder="input field" style="background:#ffffff;color:#64748d;border:1px solid #e5edf5;border-radius:4px;padding:8px;font:400 14px/1 sohne-var, 'SF Pro Display', sans-serif;width:60%" />
       </div>
     </div>
 <div class="cmp">
+      <span class="cmp-label">divider</span>
+      <div style="height:1px;background:#e5edf5"></div>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">surface-muted</span>
+      <div style="background:#f8fafd;color:#64748d;border-radius:8px;padding:16px;font:400 14px/1.5 sohne-var, 'SF Pro Display', sans-serif">Subtle secondary surface — sidebars, sections, callouts.</div>
+    </div>
+<div class="cmp">
       <span class="cmp-label">link</span>
-      <div class="cmp-onsurface" style="background:#ffffff;border-color:rgba(0,0,0,.12)">
+      <div class="cmp-onsurface" style="background:#ffffff;border-color:#e5edf5">
         <a href="#" style="color:#50617a;font:400 14px/1.5 sohne-var, 'SF Pro Display', sans-serif">Inline link example →</a>
       </div>
     </div>

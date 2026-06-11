@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "url": "https://railway.app",
   "title": "Railway | The all-in-one intelligent cloud provider",
-  "fetchedAt": "2026-06-08T05:19:12.731Z",
+  "fetchedAt": "2026-06-11T01:35:02.143Z",
   "theme": "light",
   "colors": {
     "background": "#13111c",
@@ -10,14 +10,15 @@
     "primary": "#180d43",
     "border": "#33323e",
     "mutedSurface": "#1b2132",
+    "primaryHover": null,
     "palette": [
       {
         "hex": "#f7f7f8",
-        "count": 363
+        "count": 347
       },
       {
         "hex": "#ffffff",
-        "count": 22
+        "count": 38
       },
       {
         "hex": "#33323e",
@@ -130,5 +131,12 @@
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
     "rgb(204, 204, 204) 0px 0px 2px 2px",
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 0px 0px 1.5px inset"
-  ]
+  ],
+  "declared": {
+    "fontFamilies": {
+      "--font-inter": "'Inter', -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "--font-ibm-plex-serif": "'IBM Plex Serif', 'Inter', -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "--font-jetbrains-mono": "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace"
+    }
+  }
 }

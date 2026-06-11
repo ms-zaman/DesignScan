@@ -5,6 +5,7 @@ description: "Auto-extracted from https://vercel.com by DesignScan."
 colors:
   primary: "#171717"
   on-primary: "#ffffff"
+  primary-hover: "#383838"
   background: "#fafafa"
   text: "#4d4d4d"
   accent-1: "#666666"
@@ -57,6 +58,11 @@ components:
     textColor: "{colors.on-primary}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+  button-primary-hover:
+    backgroundColor: "{colors.primary-hover}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.md}"
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -81,12 +87,13 @@ components:
 
 ## Overview
 
-Auto-extracted from https://vercel.com by DesignScan on 2026-06-08. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://vercel.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
 - **primary (#171717):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+- **primary-hover (#383838):** the primary button background as observed on hover.
 - **background (#fafafa):** the base surface color behind most content.
 - **text (#4d4d4d):** the primary foreground / body-text color.
 - **accent-1 (#666666):** a supporting accent (used for links).
@@ -112,6 +119,7 @@ Corner radii observed: 2px, 4px, 6px. Use the smaller values for inputs and chip
 ## Components
 
 - **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button (hover):** background shifts to `{colors.primary-hover}` — observed on the live site, use it for `:hover` instead of a computed darken.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
@@ -131,3 +139,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#666666) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--geist-radius: 6px`); spacing (`--spacing: 4px`, `--geist-space-2x: 8px`, `--geist-gap-half: 12px`, `--geist-space-4x: 16px`); fonts (`--font-mono`, `--font-sans`) — and the page paints these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.
