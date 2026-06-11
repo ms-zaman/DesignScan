@@ -1,6 +1,6 @@
 {
   "name": "@designscan/extractor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "URL -> design tokens -> DESIGN.md. The extraction engine.",
   "type": "module",
   "license": "MIT",
