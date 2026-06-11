@@ -8,7 +8,7 @@ import {
   saturation,
   toHex,
 } from "./color.js";
-import type { DesignProfile, RawObservations } from "./types.js";
+import type { DesignProfile, HoverSample, RawObservations } from "./types.js";
 import { PROFILE_SCHEMA_VERSION } from "./types.js";
 
 const px = (s: string): number | null => {
@@ -874,16 +874,18 @@ function friendlyTransform(rest?: string, hov?: string): string | undefined {
   return hov;
 }
 
+// Works for hover AND pressed (:active) samples — both arrive as rest/state
+// pairs with the same mechanism fields, so one resolver serves both.
 function pickHoverInfo(
-  raw: RawObservations,
+  stateSamples: HoverSample[] | undefined,
   primary: string | null,
   background: string | null,
 ): HoverInfo {
-  if (!primary || !raw.buttonHovers?.length) return { color: null };
+  if (!primary || !stateSamples?.length) return { color: null };
   const bg = background ? parseColor(background) : null;
   const pageBg = bg && bg.a >= 0.99 ? bg : null;
 
-  for (const s of raw.buttonHovers) {
+  for (const s of stateSamples) {
     const rest = parseColor(s.restBg);
     if (!rest || rest.a < 0.9 || toHex(rest) !== primary) continue;
 
@@ -913,10 +915,12 @@ function pickHoverInfo(
     }
     if (color === primary) color = null;
 
+    // "none" counts when the rest state HAD a shadow — collapsing the shadow
+    // is the press signature of 3D buttons (posthog) and a real hover effect
+    // too. A none→none non-change stays excluded via the inequality check.
     const shadow =
       s.shadow !== undefined &&
       s.shadow !== (s.restShadow ?? "none") &&
-      s.shadow !== "none" &&
       s.shadow.length <= 300
         ? s.shadow
         : undefined;
@@ -927,12 +931,85 @@ function pickHoverInfo(
   return { color: null };
 }
 
+// ---- control geometry --------------------------------------------------------
+
+// Most frequent value wins; ties go to the smaller (a control scale's base
+// size, not its hero outlier).
+function modePx(values: number[]): number | undefined {
+  const count = new Map<number, number>();
+  for (const v of values) count.set(v, (count.get(v) ?? 0) + 1);
+  const best = [...count.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0] - b[0],
+  )[0];
+  return best?.[0];
+}
+
+const pxOf = (s: string | undefined): number | null => {
+  const n = Number.parseFloat(s ?? "");
+  return Number.isFinite(n) && n > 0 ? n : null;
+};
+
+// Sane single-line control heights — outside this it's a hero CTA banner or a
+// collapsed/decorative element, not the component's base geometry.
+const CONTROL_MIN_H = 16;
+const CONTROL_MAX_H = 96;
+
+// The real geometry of the page's controls. Buttons are filtered to the ones
+// wearing the resolved primary color — they're the `button-primary` the
+// DESIGN.md describes; ghost/nav/secondary buttons would skew the vote.
+// Inputs vote as one population (pages rarely mix input heights).
+function controlMetrics(
+  raw: RawObservations,
+  primary: string | null,
+): DesignProfile["controls"] {
+  const metric = (
+    fonts: number[],
+    heights: number[],
+  ): { fontSizePx?: number; heightPx?: number } | undefined => {
+    const fontSizePx = modePx(fonts);
+    const heightPx = modePx(
+      heights.filter((h) => h >= CONTROL_MIN_H && h <= CONTROL_MAX_H),
+    );
+    if (fontSizePx === undefined && heightPx === undefined) return undefined;
+    return {
+      ...(fontSizePx !== undefined ? { fontSizePx } : {}),
+      ...(heightPx !== undefined ? { heightPx } : {}),
+    };
+  };
+
+  const primaryButtons = primary
+    ? raw.buttons.filter((b) => {
+        const c = parseColor(b.bg);
+        return c && c.a >= 0.9 && toHex(c) === primary;
+      })
+    : [];
+  const button = metric(
+    primaryButtons
+      .map((b) => pxOf(b.fontSize))
+      .filter((n): n is number => n !== null),
+    primaryButtons
+      .map((b) => pxOf(b.height))
+      .filter((n): n is number => n !== null),
+  );
+
+  const inputs = raw.inputs ?? [];
+  const input = metric(
+    inputs.map((i) => pxOf(i.fontSize)).filter((n): n is number => n !== null),
+    inputs.map((i) => pxOf(i.height)).filter((n): n is number => n !== null),
+  );
+
+  if (!button && !input) return undefined;
+  return { ...(button ? { button } : {}), ...(input ? { input } : {}) };
+}
+
 export function normalize(url: string, raw: RawObservations): DesignProfile {
   const background = pickBackground(raw.bgArea);
   const surfaces = pickSurfaces(raw, background);
   const primary = pickPrimary(raw, background);
-  const hover = pickHoverInfo(raw, primary, background);
+  const hover = pickHoverInfo(raw.buttonHovers, primary, background);
+  const active = pickHoverInfo(raw.buttonActives, primary, background);
   const declared = mineDeclaredScales(raw);
+  const controls = controlMetrics(raw, primary);
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
@@ -946,6 +1023,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       border: surfaces.border,
       mutedSurface: surfaces.mutedSurface,
       primaryHover: hover.color,
+      primaryActive: active.color,
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },
     typography: {
@@ -975,7 +1053,17 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
           },
         }
       : {}),
+    ...(active.shadow || active.transform
+      ? {
+          primaryButtonActive: {
+            ...(active.shadow ? { shadow: active.shadow } : {}),
+            ...(active.transform ? { transform: active.transform } : {}),
+          },
+        }
+      : {}),
+    ...(raw.darkMechanism ? { darkMechanism: raw.darkMechanism } : {}),
     ...(declared ? { declared } : {}),
+    ...(controls ? { controls } : {}),
   };
 }
 

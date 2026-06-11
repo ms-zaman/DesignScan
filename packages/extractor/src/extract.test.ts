@@ -349,6 +349,119 @@ describe("extract (integration)", () => {
   );
 
   it(
+    "captures a button's :active shift by really pressing it (no click fires)",
+    async () => {
+      // The press lives on :active only — hover changes nothing — and the
+      // button is a link that would navigate on click: the press pass must
+      // read the pressed style without ever assembling a click.
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Press</title>
+  <style>
+    .btn { display: inline-block; background: rgb(10, 120, 60); color: rgb(255, 255, 255);
+           padding: 10px 20px; box-shadow: rgba(0, 0, 0, 0.4) 0px 4px 0px 0px; }
+    .btn:active { background: rgb(7, 90, 45); transform: translateY(4px); box-shadow: none; }
+  </style></head>
+  <body style="margin: 0">
+    <a class="btn" href="https://example.com/never-go-here">Press me</a>
+    <h1 style="font-size: 40px">Still here</h1>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      expect(raw.buttonActives).toHaveLength(1);
+      const s = raw.buttonActives?.[0];
+      expect(s?.restBg).toBe("rgb(10, 120, 60)");
+      expect(s?.bg).toBe("rgb(7, 90, 45)");
+      expect(s?.transform).toBe("matrix(1, 0, 0, 1, 0, 4)");
+      expect(s?.shadow).toBe("none");
+      // No hover sample — nothing changes on hover alone.
+      expect(raw.buttonHovers).toHaveLength(0);
+      // And the page never navigated away: the main-pass title stands.
+      expect(raw.title).toBe("Press");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "unlocks class-gated dark mode when the media query alone leaves the page light",
+    async () => {
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Gated dark</title>
+  <style>
+    body { background: rgb(255, 255, 255); color: rgb(17, 17, 17); }
+    html.dark body { background: rgb(13, 17, 23); color: rgb(230, 237, 243); }
+  </style></head>
+  <body><p style="padding: 20px">Hello</p></body>
+</html>`;
+      const raw = await extract(dataUrl(page), {
+        settleMs: 0,
+        colorScheme: "dark",
+      });
+      expect(raw.darkMechanism).toBe("class-dark");
+      // The walk observed the dark palette, not the light one.
+      expect(Object.keys(raw.bgArea)).toContain("rgb(13, 17, 23)");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "records prefers-color-scheme as the mechanism when the media query works",
+    async () => {
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Media dark</title>
+  <style>
+    body { background: rgb(255, 255, 255); }
+    @media (prefers-color-scheme: dark) { body { background: rgb(10, 10, 12); } }
+  </style></head>
+  <body><p style="padding: 20px">Hello</p></body>
+</html>`;
+      const raw = await extract(dataUrl(page), {
+        settleMs: 0,
+        colorScheme: "dark",
+      });
+      expect(raw.darkMechanism).toBe("prefers-color-scheme");
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
+    "measures button heights and samples text inputs (control geometry)",
+    async () => {
+      const page = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Controls</title></head>
+  <body style="margin: 0">
+    <button style="background: rgb(10, 120, 60); color: rgb(255, 255, 255); font-size: 14px; height: 40px; border: 0">Buy</button>
+    <form>
+      <input type="email" placeholder="you@example.com"
+        style="height: 36px; font-size: 14px; border-radius: 6px; box-sizing: border-box" />
+      <input type="checkbox" />
+      <input type="hidden" value="x" />
+    </form>
+  </body>
+</html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      // The button records its rendered height.
+      const btn = raw.buttons.find((b) => b.bg === "rgb(10, 120, 60)");
+      expect(btn?.height).toBe("40px");
+
+      // The email input is sampled with its geometry; checkbox/hidden are
+      // widget-y or unrendered and never qualify.
+      expect(raw.inputs).toHaveLength(1);
+      expect(raw.inputs?.[0]).toMatchObject({
+        height: "36px",
+        fontSize: "14px",
+        radius: "6px",
+      });
+    },
+    TEST_TIMEOUT,
+  );
+
+  it(
     "pierces open shadow roots to observe web-component UI",
     async () => {
       // The brand button and its colors live entirely inside an open shadow

@@ -83,6 +83,107 @@ export async function extract(
     }
     await page.waitForTimeout(settleMs); // let SPAs hydrate / fonts settle
 
+    // Dark captures: prefers-color-scheme emulation only works on sites that
+    // honour the media query. Many gate dark mode on a class/attribute on
+    // <html> instead (tailwind's `.dark`, github's data-color-mode) and stay
+    // light under emulation alone. If the page still paints light, try the
+    // common gates in order and KEEP the first one that visibly changes the
+    // page; revert the ones that do nothing. The applied gate is recorded so
+    // the emitters can tell agents which mechanism the site really uses.
+    let darkMechanism: RawObservations["darkMechanism"];
+    if (colorScheme === "dark") {
+      darkMechanism = await page.evaluate(() => {
+        // Canvas-canonicalized luminance: computed colors arrive in whatever
+        // space they were authored (tailwind v4 backgrounds are oklch(), not
+        // rgb()), and a regex parser would mis-read the page as unpainted.
+        // Painting the color onto a 1×1 canvas lets the browser do the
+        // conversion for every format it understands.
+        const cv = document.createElement("canvas");
+        cv.width = 1;
+        cv.height = 1;
+        const ctx = cv.getContext("2d", { willReadFrequently: true });
+        const lum = (s: string): number | null => {
+          if (!ctx || !s) return null;
+          ctx.clearRect(0, 0, 1, 1);
+          ctx.fillStyle = s;
+          ctx.fillRect(0, 0, 1, 1);
+          const d = ctx.getImageData(0, 0, 1, 1).data;
+          if (d[3] < 128) return null; // transparent — no signal
+          return (0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255;
+        };
+        // The page's painted background: body/html when they paint, else the
+        // nearest painted ancestor at the viewport centre — tailwind-style
+        // sites leave body transparent and theme a wrapper div instead.
+        const paintedBg = (): string => {
+          for (const el of [document.body, document.documentElement]) {
+            const bg = getComputedStyle(el).backgroundColor;
+            if (lum(bg) !== null) return bg;
+          }
+          let el: Element | null = document.elementFromPoint(
+            window.innerWidth / 2,
+            Math.min(window.innerHeight / 2, 400),
+          );
+          while (el) {
+            const bg = getComputedStyle(el).backgroundColor;
+            if (lum(bg) !== null) return bg;
+            el = el.parentElement;
+          }
+          return "rgb(255, 255, 255)"; // nothing painted = the document base
+        };
+        const pageLum = () => lum(paintedBg()) ?? 1;
+        if (pageLum() < 0.5) return "prefers-color-scheme";
+
+        const html = document.documentElement;
+        const snapshot = () =>
+          `${paintedBg()}|${getComputedStyle(document.body).color}|${
+            getComputedStyle(html).backgroundColor
+          }`;
+        const before = snapshot();
+        const attempts: [
+          "class-dark" | "data-theme-dark" | "data-color-mode-dark",
+          () => void,
+          () => void,
+        ][] = [
+          [
+            "class-dark",
+            () => html.classList.add("dark"),
+            () => html.classList.remove("dark"),
+          ],
+          [
+            "data-theme-dark",
+            () => html.setAttribute("data-theme", "dark"),
+            (
+              (prev) => () =>
+                prev === null
+                  ? html.removeAttribute("data-theme")
+                  : html.setAttribute("data-theme", prev)
+            )(html.getAttribute("data-theme")),
+          ],
+          [
+            "data-color-mode-dark",
+            () => html.setAttribute("data-color-mode", "dark"),
+            (
+              (prev) => () =>
+                prev === null
+                  ? html.removeAttribute("data-color-mode")
+                  : html.setAttribute("data-color-mode", prev)
+            )(html.getAttribute("data-color-mode")),
+          ],
+        ];
+        for (const [name, apply, revert] of attempts) {
+          apply();
+          if (snapshot() !== before) return name;
+          revert();
+        }
+        return undefined;
+      });
+      // A class/attribute gate swaps CSS custom properties — give var-driven
+      // repaints and lazy theme assets a beat before observing.
+      if (darkMechanism && darkMechanism !== "prefers-color-scheme") {
+        await page.waitForTimeout(250);
+      }
+    }
+
     const raw = await page.evaluate((limit: number) => {
       const colorCount: Record<string, number> = {};
       const textColorArea: Record<string, number> = {};
@@ -99,6 +200,7 @@ export async function extract(
       const shadows: Record<string, number> = {};
       const spacings: Record<string, number> = {};
       const buttons: any[] = [];
+      const inputs: any[] = [];
       const links: { color: string }[] = [];
       const lhHeading: Record<string, number> = {};
       const lhBody: Record<string, number> = {};
@@ -298,6 +400,23 @@ export async function extract(
             fontSize: cs.fontSize,
             weight: cs.fontWeight,
             padding: cs.padding,
+            // Rendered height (rect, not cs.height — which can be "auto").
+            height: `${Math.round(rect.height)}px`,
+          });
+        } else if (
+          // Text-entry controls: their height/font-size define the `input`
+          // component's real geometry. Submit/button inputs were claimed by
+          // looksButton above; widget-y types have no text-box geometry.
+          tag === "input" &&
+          !/^(checkbox|radio|range|hidden|file|color|image|reset)$/.test(
+            typeAttr ?? "",
+          ) &&
+          inputs.length < 20
+        ) {
+          inputs.push({
+            height: `${Math.round(rect.height)}px`,
+            fontSize: cs.fontSize,
+            radius: cs.borderTopLeftRadius,
           });
         } else if (tag === "a" && links.length < 50) {
           // Skip links inside code samples: syntax highlighting paints tokens in
@@ -326,6 +445,7 @@ export async function extract(
         shadows,
         spacings,
         buttons,
+        inputs,
         links,
         lhHeading,
         lhBody,
@@ -338,24 +458,30 @@ export async function extract(
     }, maxElements);
 
     raw.colorScheme = colorScheme;
-    raw.buttonHovers = await sampleHovers(page);
+    if (darkMechanism) raw.darkMechanism = darkMechanism;
+    const fx = await sampleInteractions(page);
+    raw.buttonHovers = fx.hovers;
+    raw.buttonActives = fx.actives;
     return raw;
   } finally {
     await browser.close();
   }
 }
 
-// Physically hover a handful of button-like elements and record any bg/text
-// color change — the only way to see :hover styles, since getComputedStyle
-// can't evaluate pseudo-class states that aren't active. Runs after the main
-// observation pass so side effects (menus opening, hover scrolling the
-// element into view) can't pollute the frequency maps. Best-effort by design:
-// any failure returns what was collected so far and never sinks the extraction.
-async function sampleHovers(
+// Physically hover — and then press — a handful of button-like elements and
+// record any computed-style change: the only way to see :hover/:active
+// styles, since getComputedStyle can't evaluate pseudo-class states that
+// aren't live. Runs after the main observation pass so side effects (menus
+// opening, hover scrolling the element into view) can't pollute the
+// frequency maps. Best-effort by design: any failure returns what was
+// collected so far and never sinks the extraction.
+async function sampleInteractions(
   page: import("playwright").Page,
-): Promise<HoverSample[]> {
+): Promise<{ hovers: HoverSample[]; actives: HoverSample[] }> {
   const samples: HoverSample[] = [];
+  const actives: HoverSample[] = [];
   const seen = new Set<string>();
+  const seenActive = new Set<string>();
   try {
     // Freeze transitions/animations first, otherwise the post-hover read sees
     // a mid-interpolation value (e.g. a 200ms ease still in flight), not the
@@ -363,6 +489,19 @@ async function sampleHovers(
     await page.addStyleTag({
       content:
         "*, *::before, *::after { transition: none !important; animation: none !important; }",
+    });
+    // The press pass releases the pointer OFF the element so no click should
+    // assemble at all — this capture-phase blocker is the seatbelt in case a
+    // site's own listeners fire on mousedown (nav drawers, SPA routers).
+    await page.evaluate(() => {
+      window.addEventListener(
+        "click",
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        true,
+      );
     });
     // The same looksButton logic as the main pass (duplicated because
     // evaluate bodies are serialized — they can't share an outer helper), and
@@ -440,6 +579,33 @@ async function sampleHovers(
           filter: cs.filter,
         };
       });
+
+      // Press while still hovering: :active computed values, read with the
+      // button held down. The pointer is then dragged off before release so
+      // down+up never assemble into a click (navigation/SPA routing).
+      let act: typeof hov | null = null;
+      try {
+        await page.mouse.down();
+        act = await h.evaluate((el: Element) => {
+          const cs = getComputedStyle(el);
+          return {
+            bg: cs.backgroundColor,
+            color: cs.color,
+            opacity: parseFloat(cs.opacity) || 1,
+            shadow: cs.boxShadow,
+            transform: cs.transform,
+            filter: cs.filter,
+          };
+        });
+      } catch {
+        // Press read failed (element detached mid-press) — hover data stands.
+      } finally {
+        try {
+          await page.mouse.move(2, 2);
+          await page.mouse.up();
+        } catch {}
+      }
+
       const changed =
         hov.bg !== rest.bg ||
         hov.color !== rest.color ||
@@ -447,27 +613,62 @@ async function sampleHovers(
         hov.shadow !== rest.shadow ||
         hov.transform !== rest.transform ||
         hov.filter !== rest.filter;
-      if (!changed) continue;
-      const key = JSON.stringify([rest, hov]);
-      if (seen.has(key)) continue; // same design hover-shifts identically
-      seen.add(key);
-      samples.push({
-        restBg: rest.bg,
-        restColor: rest.color,
-        bg: hov.bg,
-        color: hov.color,
-        restOpacity: rest.opacity,
-        opacity: hov.opacity,
-        restShadow: rest.shadow,
-        shadow: hov.shadow,
-        restTransform: rest.transform,
-        transform: hov.transform,
-        restFilter: rest.filter,
-        filter: hov.filter,
-      });
+      if (changed) {
+        const key = JSON.stringify([rest, hov]);
+        if (!seen.has(key)) {
+          seen.add(key);
+          samples.push({
+            restBg: rest.bg,
+            restColor: rest.color,
+            bg: hov.bg,
+            color: hov.color,
+            restOpacity: rest.opacity,
+            opacity: hov.opacity,
+            restShadow: rest.shadow,
+            shadow: hov.shadow,
+            restTransform: rest.transform,
+            transform: hov.transform,
+            restFilter: rest.filter,
+            filter: hov.filter,
+          });
+        }
+      }
+
+      // A press sample only counts when it adds something BEYOND hover —
+      // while pressed the pointer still hovers, so most sites' computed
+      // pressed state equals their hover state; recording those would just
+      // duplicate the hover token under an :active name.
+      const pressChanged =
+        act !== null &&
+        (act.bg !== hov.bg ||
+          act.color !== hov.color ||
+          Math.abs(act.opacity - hov.opacity) > 0.001 ||
+          act.shadow !== hov.shadow ||
+          act.transform !== hov.transform ||
+          act.filter !== hov.filter);
+      if (pressChanged && act && actives.length < 8) {
+        const key = JSON.stringify([rest, act]);
+        if (!seenActive.has(key)) {
+          seenActive.add(key);
+          actives.push({
+            restBg: rest.bg,
+            restColor: rest.color,
+            bg: act.bg,
+            color: act.color,
+            restOpacity: rest.opacity,
+            opacity: act.opacity,
+            restShadow: rest.shadow,
+            shadow: act.shadow,
+            restTransform: rest.transform,
+            transform: act.transform,
+            restFilter: rest.filter,
+            filter: act.filter,
+          });
+        }
+      }
     }
   } catch {
-    // Hover sampling is an enrichment, never a requirement.
+    // Hover/press sampling is an enrichment, never a requirement.
   }
-  return samples;
+  return { hovers: samples, actives };
 }

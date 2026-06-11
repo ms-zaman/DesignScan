@@ -120,6 +120,69 @@ export function scaleTokens(values: number[]): [string, string][] {
     .map((n, idx) => [SCALE[idx], `${n}px`] as [string, string]);
 }
 
+// A scale step enriched with the site's own name for it, when the site's
+// declared design system (profile.declared — mined from :root custom
+// properties and corroborated against painted values) publishes one. The
+// voted scale stays authoritative for WHICH values exist; declared only
+// contributes NAMES. Emitters that speak variable formats (css/w3c) prefer
+// the declared name so their output composes with the site's own vocabulary.
+export interface ScaleEntry {
+  px: number;
+  value: string; // "8px"
+  generic: string; // positional xs/sm/md/… name
+  declared?: string; // the site's custom-property name, e.g. "--radius-md"
+}
+
+export function scaleEntries(
+  values: number[],
+  declared?: Record<string, number>,
+): ScaleEntry[] {
+  // Invert declared (name -> px) to px -> name; shortest name wins (the
+  // canonical alias), lexicographic on ties for determinism.
+  const byPx = new Map<number, string>();
+  for (const [name, px] of Object.entries(declared ?? {})) {
+    const cur = byPx.get(px);
+    if (
+      !cur ||
+      name.length < cur.length ||
+      (name.length === cur.length && name < cur)
+    )
+      byPx.set(px, name);
+  }
+  return scaleTokens(values).map(([generic, value]) => {
+    const px = Number.parseFloat(value);
+    const declaredName = byPx.get(px);
+    return {
+      px,
+      value,
+      generic,
+      ...(declaredName ? { declared: declaredName } : {}),
+    };
+  });
+}
+
+// The site's own name for its primary font stack: the declared fontFamilies
+// entry whose first family matches the resolved stack's first family
+// (shortest name on ties). Null when the site declares no matching font var.
+export function declaredFontName(profile: DesignProfile): string | null {
+  const fams = profile.declared?.fontFamilies;
+  if (!fams) return null;
+  const first = (s: string) =>
+    (s.split(",")[0] ?? "")
+      .trim()
+      .replace(/^['"]|['"]$/g, "")
+      .toLowerCase();
+  const target = first(
+    profile.typography.fontStack || profile.typography.families[0] || "",
+  );
+  if (!target) return null;
+  const matches = Object.entries(fams)
+    .filter(([, stack]) => first(stack) === target)
+    .map(([name]) => name)
+    .sort((a, b) => a.length - b.length || a.localeCompare(b));
+  return matches[0] ?? null;
+}
+
 // The resolved color roles for one theme — the exact hexes generate.ts maps to
 // `primary`, `background`, etc. `null` means the role couldn't be filled (e.g. a
 // page with no second palette color has no accent-2).
@@ -129,6 +192,8 @@ export interface ColorRoles {
   // Observed hover shift of the primary button (null when none was seen).
   // Resolved upstream in normalize by physically hovering the button.
   primaryHover: string | null;
+  // Observed pressed (:active) shift — same provenance, really pressed.
+  primaryActive: string | null;
   background: string | null;
   text: string | null;
   accent1: string | null;
@@ -173,17 +238,21 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
     null;
 
   // Only meaningful when it belongs to the primary we actually resolved: if
-  // primary fell back through the palette (normalize's pick was null), the
-  // hover observed on a *different* button must not tag along.
-  const primaryHover =
-    profile.colors.primary === primary
-      ? (profile.colors.primaryHover ?? null)
-      : null;
+  // primary fell back through the palette (normalize's pick was null), a
+  // hover/press observed on a *different* button must not tag along.
+  const ownsStates = profile.colors.primary === primary;
+  const primaryHover = ownsStates
+    ? (profile.colors.primaryHover ?? null)
+    : null;
+  const primaryActive = ownsStates
+    ? (profile.colors.primaryActive ?? null)
+    : null;
 
   return {
     primary,
     onPrimary: onColor(primary),
     primaryHover,
+    primaryActive,
     background,
     text,
     accent1,
@@ -192,6 +261,113 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
     border: profile.colors.border ?? null,
     mutedSurface: profile.colors.mutedSurface ?? null,
   };
+}
+
+// ---- shadows ---------------------------------------------------------------
+// profile.shadows holds raw computed box-shadow strings (frequency-ranked, ≤4).
+// Computed values are noisy: Tailwind ring resets pad real shadows with
+// "rgba(0, 0, 0, 0) 0px 0px 0px 0px" placeholder layers, and some observed
+// stacks are entirely no-op. We strip invisible layers (transparent color or
+// zero geometry), drop shadows with nothing left, dedupe, and name the
+// survivors smallest→largest by visual footprint so every emitter presents
+// the same elevation scale.
+
+export interface ShadowLayer {
+  color: string; // the layer's color exactly as computed (rgba/oklab/color())
+  offsetX: number;
+  offsetY: number;
+  blur: number;
+  spread: number;
+  inset: boolean;
+}
+
+export interface ShadowToken {
+  name: string; // sm → xl, smallest visual footprint first
+  value: string; // cleaned CSS box-shadow (no-op layers removed)
+  layers: ShadowLayer[];
+}
+
+const SHADOW_SCALE = ["sm", "md", "lg", "xl"];
+
+// Split a multi-shadow value on top-level commas only — the color functions
+// inside each layer carry commas of their own.
+function splitShadowLayers(value: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let cur = "";
+  for (const ch of value) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    if (ch === "," && depth === 0) {
+      parts.push(cur.trim());
+      cur = "";
+    } else cur += ch;
+  }
+  if (cur.trim()) parts.push(cur.trim());
+  return parts;
+}
+
+// Computed box-shadow layers lead with a color function (Chromium
+// serialization), then 2–4 lengths: offset-x offset-y blur spread. Author-form
+// strings (color last, unitless zeros) parse too — lengths are read positionally
+// from whatever remains once the color is removed.
+function parseShadowLayer(text: string): ShadowLayer {
+  const colorMatch = text.match(/[a-z][a-z0-9-]*\([^()]*\)/i);
+  const color = colorMatch?.[0] ?? "";
+  const rest = colorMatch ? text.replace(colorMatch[0], " ") : text;
+  const lengths = rest
+    .split(/\s+/)
+    .filter((t) => /^-?(\d*\.)?\d+(px)?$/.test(t))
+    .map((t) => Number.parseFloat(t));
+  const [offsetX = 0, offsetY = 0, blur = 0, spread = 0] = lengths;
+  return {
+    color,
+    offsetX,
+    offsetY,
+    blur,
+    spread,
+    inset: /\binset\b/.test(rest),
+  };
+}
+
+// A layer paints nothing when its color is fully transparent or its geometry
+// is all zeros (no offset, no blur, no spread).
+function paintsSomething(l: ShadowLayer): boolean {
+  const c = parseColor(l.color);
+  if (c && c.a === 0) return false;
+  return l.offsetX !== 0 || l.offsetY !== 0 || l.blur !== 0 || l.spread !== 0;
+}
+
+// Visual footprint of a shadow = its most prominent layer. Negative spread
+// tightens rather than grows, so it doesn't count against the blur.
+function shadowFootprint(layers: ShadowLayer[]): number {
+  return Math.max(
+    ...layers.map(
+      (l) =>
+        l.blur +
+        Math.max(l.spread, 0) +
+        Math.max(Math.abs(l.offsetX), Math.abs(l.offsetY)),
+    ),
+  );
+}
+
+export function shadowTokens(profile: DesignProfile): ShadowToken[] {
+  const seen = new Set<string>();
+  const cleaned: { value: string; layers: ShadowLayer[] }[] = [];
+  for (const raw of profile.shadows) {
+    const kept = splitShadowLayers(raw)
+      .map((text) => ({ text, layer: parseShadowLayer(text) }))
+      .filter(({ layer }) => paintsSomething(layer));
+    if (!kept.length) continue;
+    const value = kept.map((k) => k.text).join(", ");
+    if (seen.has(value)) continue;
+    seen.add(value);
+    cleaned.push({ value, layers: kept.map((k) => k.layer) });
+  }
+  return cleaned
+    .sort((a, b) => shadowFootprint(a.layers) - shadowFootprint(b.layers))
+    .slice(0, SHADOW_SCALE.length)
+    .map((s, i) => ({ name: SHADOW_SCALE[i], ...s }));
 }
 
 // Whether a `prefers-color-scheme: dark` pass produced a *genuinely* different

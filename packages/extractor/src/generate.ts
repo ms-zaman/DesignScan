@@ -10,9 +10,31 @@ import {
   isDistinctDark,
   resolveColorRoles,
   scaleTokens,
+  shadowTokens,
+  type TypeLevel,
   typographyLevels,
 } from "./resolve.js";
 import type { DesignProfile } from "./types.js";
+
+// The typography level whose size matches an observed control font-size
+// (±1px for sub-pixel rendering). The control's size came from the same page
+// the scale was built from, so a miss means it was filtered as noise — in
+// that case no reference is emitted rather than a wrong one.
+function levelForSize(
+  levels: TypeLevel[],
+  px: number | undefined,
+): string | undefined {
+  if (px === undefined) return undefined;
+  let best: TypeLevel | undefined;
+  for (const l of levels) {
+    if (
+      Math.abs(l.size - px) <= 1 &&
+      (!best || Math.abs(l.size - px) < Math.abs(best.size - px))
+    )
+      best = l;
+  }
+  return best?.name;
+}
 
 const q = (s: string) => `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
@@ -28,6 +50,7 @@ function buildColorsAndComponents(
   profile: DesignProfile,
   rounded: [string, string][],
   spacing: [string, string][],
+  levels: TypeLevel[],
   bodyLevel: string | undefined,
   suffix = "",
 ) {
@@ -37,6 +60,7 @@ function buildColorsAndComponents(
     primary,
     onPrimary,
     primaryHover,
+    primaryActive,
     background,
     text,
     accent1,
@@ -60,14 +84,24 @@ function buildColorsAndComponents(
   const use = (name: string) => used.add(name);
   const lines: string[] = [];
 
+  // Observed control geometry: the typography level the control's real
+  // font-size maps onto, and its rendered height. Only present when the
+  // extraction measured them — nothing here is a convention guess.
+  const btnLevel = levelForSize(levels, profile.controls?.button?.fontSizePx);
+  const btnHeight = profile.controls?.button?.heightPx;
+  const inputLevel = levelForSize(levels, profile.controls?.input?.fontSizePx);
+  const inputHeight = profile.controls?.input?.heightPx;
+
   // Primary button — always present (spec requires a `primary` color).
   lines.push(`  ${cn("button-primary")}:`);
   lines.push(`    backgroundColor: "${ref("primary")}"`);
   use("primary");
   lines.push(`    textColor: "${ref("on-primary")}"`);
   use("on-primary");
+  if (btnLevel) lines.push(`    typography: "{typography.${btnLevel}}"`);
   if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
   if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
+  if (btnHeight) lines.push(`    height: ${btnHeight}px`);
 
   // Hover variant — only when the site was *observed* hover-shifting its
   // primary button (extract.ts physically hovers it). Mirrors button-primary
@@ -78,8 +112,23 @@ function buildColorsAndComponents(
     lines.push(`    backgroundColor: "${ref("primary-hover")}"`);
     use("primary-hover");
     lines.push(`    textColor: "${ref("on-primary")}"`);
+    if (btnLevel) lines.push(`    typography: "{typography.${btnLevel}}"`);
     if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
     if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
+    if (btnHeight) lines.push(`    height: ${btnHeight}px`);
+  }
+
+  // Pressed variant — same provenance as hover: only when the site was
+  // *observed* shifting the primary button under a real press (:active).
+  if (primaryActive) {
+    lines.push(`  ${cn("button-primary-active")}:`);
+    lines.push(`    backgroundColor: "${ref("primary-active")}"`);
+    use("primary-active");
+    lines.push(`    textColor: "${ref("on-primary")}"`);
+    if (btnLevel) lines.push(`    typography: "{typography.${btnLevel}}"`);
+    if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
+    if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
+    if (btnHeight) lines.push(`    height: ${btnHeight}px`);
   }
 
   if (background && text) {
@@ -94,8 +143,10 @@ function buildColorsAndComponents(
     lines.push(`  ${cn("input")}:`);
     lines.push(`    backgroundColor: "${ref("background")}"`);
     lines.push(`    textColor: "${ref("text")}"`);
+    if (inputLevel) lines.push(`    typography: "{typography.${inputLevel}}"`);
     if (roundedSm) lines.push(`    rounded: "{rounded.${roundedSm}}"`);
     if (spacingSm) lines.push(`    padding: "{spacing.${spacingSm}}"`);
+    if (inputHeight) lines.push(`    height: ${inputHeight}px`);
   }
 
   if (text && bodyLevel) {
@@ -149,6 +200,7 @@ function buildColorsAndComponents(
     ["primary", primary],
     ["on-primary", onPrimary],
     ["primary-hover", primaryHover],
+    ["primary-active", primaryActive],
     ["background", background],
     ["text", text],
     ["accent-1", accent1],
@@ -161,13 +213,15 @@ function buildColorsAndComponents(
     .filter(([name, hex]) => hex && used.has(name))
     .map(([name, hex]) => [cn(name), hex] as [string, string]);
 
-  return { colors, componentLines: lines, roundedMd };
+  return { colors, componentLines: lines, roundedMd, btnLevel, btnHeight };
 }
 
 const COLOR_LABEL: Record<string, string> = {
   primary: "the dominant brand/accent color, used for primary actions",
   "on-primary": "the readable foreground used on primary surfaces",
   "primary-hover": "the primary button background as observed on hover",
+  "primary-active":
+    "the primary button background as observed while pressed (:active)",
   background: "the base surface color behind most content",
   text: "the primary foreground / body-text color",
   "accent-1": "a supporting accent (used for links)",
@@ -185,17 +239,14 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   const levels = typographyLevels(profile);
   const rounded = scaleTokens(profile.radiusScalePx);
   const spacing = scaleTokens(profile.spacingScalePx);
+  const shadows = shadowTokens(profile);
   const bodyLevel =
     levels.find((l) => l.name === "body")?.name ??
     levels.find((l) => l.size >= 14 && l.size <= 18)?.name ??
     levels[levels.length - 1]?.name;
 
-  const { colors, componentLines, roundedMd } = buildColorsAndComponents(
-    profile,
-    rounded,
-    spacing,
-    bodyLevel,
-  );
+  const { colors, componentLines, roundedMd, btnLevel, btnHeight } =
+    buildColorsAndComponents(profile, rounded, spacing, levels, bodyLevel);
   // Only emit a dark block when the dark pass is genuinely distinct (see
   // isDistinctDark) — otherwise we'd bloat the file with duplicate tokens and
   // imply a dark theme that doesn't exist. The dark theme reuses the shared
@@ -203,7 +254,14 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   // "-dark").
   const distinctDark = isDistinctDark(profile, dark);
   const darkBlock = distinctDark
-    ? buildColorsAndComponents(dark, rounded, spacing, bodyLevel, "-dark")
+    ? buildColorsAndComponents(
+        dark,
+        rounded,
+        spacing,
+        levels,
+        bodyLevel,
+        "-dark",
+      )
     : null;
   const cmap = Object.fromEntries(colors);
   const themeNote = darkBlock
@@ -250,6 +308,15 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     for (const [k, v] of spacing) fm.push(`  ${k}: ${v}`);
   }
 
+  // Data-only group: the alpha spec has no shadow component sub-token and
+  // `{shadows.*}` references don't resolve in the linter, but extra top-level
+  // token groups lint clean — so the cleaned elevation scale ships as values
+  // agents read directly (the Elevation section explains how to apply them).
+  if (shadows.length) {
+    fm.push("shadows:");
+    for (const s of shadows) fm.push(`  ${s.name}: ${q(s.value)}`);
+  }
+
   fm.push("components:");
   fm.push(...componentLines);
   if (darkBlock) fm.push(...darkBlock.componentLines);
@@ -273,11 +340,24 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     body.push(`- **${name} (${hex}):** ${label}.`);
   }
   if (darkBlock) {
+    const gateLabel: Record<string, string> = {
+      "class-dark": '`<html class="dark">`',
+      "data-theme-dark": '`<html data-theme="dark">`',
+      "data-color-mode-dark": '`<html data-color-mode="dark">`',
+    };
+    const gate = dark?.darkMechanism
+      ? gateLabel[dark.darkMechanism]
+      : undefined;
     body.push("");
     body.push(
-      "**Dark theme.** The same roles captured under " +
-        "`prefers-color-scheme: dark`, exposed as parallel `*-dark` tokens (with " +
-        "matching `*-dark` component variants):",
+      gate
+        ? `**Dark theme.** This site gates dark mode on ${gate} — it ignores ` +
+            "`prefers-color-scheme`, so replicate that gate (the palette below " +
+            "was captured by applying it). Exposed as parallel `*-dark` tokens " +
+            "(with matching `*-dark` component variants):"
+        : "**Dark theme.** The same roles captured under " +
+            "`prefers-color-scheme: dark`, exposed as parallel `*-dark` tokens (with " +
+            "matching `*-dark` component variants):",
     );
     for (const [name, hex] of darkBlock.colors) {
       const label =
@@ -323,11 +403,24 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   body.push("");
   body.push("## Elevation & Depth");
   body.push("");
-  body.push(
-    profile.shadows.length
-      ? `Depth is conveyed with ${profile.shadows.length} shadow level(s) observed on the page.`
-      : "The page relies on flat surfaces and color contrast rather than shadows.",
-  );
+  if (shadows.length) {
+    body.push(
+      `Depth is conveyed with ${shadows.length} shadow level(s) observed on the page, ` +
+        "smallest to largest (see the `shadows` tokens in the front matter):",
+    );
+    body.push("");
+    for (const s of shadows) body.push(`- **${s.name}:** \`${s.value}\``);
+    body.push("");
+    body.push(
+      "_Apply these as `box-shadow` — the smaller levels on resting cards and " +
+        "inputs, the larger on overlays (dropdowns, modals). Don't invent " +
+        "intermediate shadows; this is the page's whole elevation vocabulary._",
+    );
+  } else {
+    body.push(
+      "The page relies on flat surfaces and color contrast rather than shadows.",
+    );
+  }
 
   if (rounded.length) {
     body.push("");
@@ -346,6 +439,8 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     "- **Primary button:** filled with the primary color (`{colors.primary}`) and " +
       "`{colors.on-primary}` text" +
       (roundedMd ? `, rounded to \`{rounded.${roundedMd}}\`` : "") +
+      (btnLevel ? `, set in \`{typography.${btnLevel}}\`` : "") +
+      (btnHeight ? `, ${btnHeight}px tall as observed` : "") +
       ".",
   );
   if (cmap["primary-hover"]) {
@@ -353,6 +448,25 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
       "- **Primary button (hover):** background shifts to `{colors.primary-hover}` — " +
         "observed on the live site, use it for `:hover` instead of a computed darken.",
     );
+  }
+  if (cmap["primary-active"]) {
+    body.push(
+      "- **Primary button (pressed):** background shifts to `{colors.primary-active}` — " +
+        "observed by really pressing the live button, use it for `:active`.",
+    );
+  }
+  if (profile.primaryButtonActive) {
+    const fx = profile.primaryButtonActive;
+    const bits = [
+      ...(fx.transform ? [`moves \`${fx.transform}\``] : []),
+      ...(fx.shadow ? [`box-shadow becomes \`${fx.shadow}\``] : []),
+    ];
+    if (bits.length) {
+      body.push(
+        `- **Primary button (pressed, micro-interaction):** ${bits.join("; ")} — ` +
+          "the press physically reshapes the button, not just its color.",
+      );
+    }
   }
   if (cmap.background && cmap.text) {
     body.push(

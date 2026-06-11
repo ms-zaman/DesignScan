@@ -25,6 +25,9 @@ export interface RawObservations {
   shadows: Record<string, number>;
   spacings: Record<string, number>;
   buttons: ButtonSample[];
+  // Text-entry controls observed on the page (text-like <input> elements).
+  // Optional: profiles captured before schema 1.5 simply skip it.
+  inputs?: InputSample[];
   links: { color: string }[];
   // Per-role aggregates so line-height / weight / letter-spacing can be assigned
   // per heading vs body instead of guessed. Optional: older callers may omit.
@@ -52,6 +55,19 @@ export interface RawObservations {
   // mid-animation). Only elements whose bg/text color changed are recorded.
   // Optional: profiles captured before this field simply skip it.
   buttonHovers?: HoverSample[];
+  // Pressed (:active) deltas observed by really holding the pointer down on
+  // the same button-like elements (released off-element so no click fires).
+  // Same shape as hovers — rest vs pressed. Optional (schema 1.5).
+  buttonActives?: HoverSample[];
+  // How the dark palette was actually unlocked when this was a dark-scheme
+  // capture: the prefers-color-scheme emulation, or a class/attribute gate we
+  // applied because the media query alone left the page light. Absent when
+  // the page never darkened (or for light captures). Optional (schema 1.5).
+  darkMechanism?:
+    | "prefers-color-scheme"
+    | "class-dark"
+    | "data-theme-dark"
+    | "data-color-mode-dark";
 }
 
 // A before/after pair from physically hovering one button-like element.
@@ -81,12 +97,24 @@ export interface ButtonSample {
   fontSize: string;
   weight: string;
   padding: string;
+  // Rendered box height as a px string. Optional: samples captured before
+  // schema 1.5 lack it.
+  height?: string;
+}
+
+// A text-entry control (text-like <input>) — the geometry source for the
+// `input` component's height/typography. Optional in RawObservations:
+// fixtures captured before schema 1.5 lack the array entirely.
+export interface InputSample {
+  height: string;
+  fontSize: string;
+  radius: string;
 }
 
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.4";
+export const PROFILE_SCHEMA_VERSION = "1.5";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -111,6 +139,8 @@ export interface DesignProfile {
     // really hovering it (null when no button hover-shifts from the primary).
     // Optional for back-compat with profiles captured before schema 1.4.
     primaryHover?: string | null;
+    // Same for :active — observed by really pressing the button (schema 1.5).
+    primaryActive?: string | null;
     palette: { hex: string; count: number }[];
   };
   typography: {
@@ -140,6 +170,13 @@ export interface DesignProfile {
   // properties, so they surface as agentNotes prose + the preview's real
   // hover instead of tokens. Optional for back-compat (schema 1.4).
   primaryButtonHover?: { shadow?: string; transform?: string };
+  // Same micro-interaction pair for :active — posthog's 3D press (shadow
+  // collapse + translateY) lives here, not on hover. Optional (schema 1.5).
+  primaryButtonActive?: { shadow?: string; transform?: string };
+  // How the dark palette was unlocked for a dark capture (see
+  // RawObservations.darkMechanism). Lets the prose tell agents to replicate
+  // the site's real gating (class vs media query). Optional (schema 1.5).
+  darkMechanism?: RawObservations["darkMechanism"];
   // The site's own declared scale tokens, mined from :root/body custom
   // properties and corroborated against what the page actually painted (a
   // declared-but-unused theme var never qualifies). Provenance, not a
@@ -150,5 +187,15 @@ export interface DesignProfile {
     radius?: Record<string, number>; // var name -> px
     spacing?: Record<string, number>; // var name -> px
     fontFamilies?: Record<string, string>; // var name -> family stack
+  };
+  // Observed control geometry — the modal font-size/height of the buttons that
+  // wear the resolved primary color, and of the page's text inputs. Lets the
+  // emitters cross-reference a real typography level and a real height on
+  // button-primary/input instead of leaving agents to guess. Fields appear
+  // only when observed (heights need schema-1.5 captures; font sizes also
+  // resolve from older samples). Optional for back-compat (schema 1.5).
+  controls?: {
+    button?: { fontSizePx?: number; heightPx?: number };
+    input?: { fontSizePx?: number; heightPx?: number };
   };
 }

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveColorRoles } from "./resolve.js";
+import { resolveColorRoles, shadowTokens } from "./resolve.js";
 import type { DesignProfile } from "./types.js";
+
+// shadowTokens only reads profile.shadows.
+const withShadows = (...shadows: string[]): DesignProfile =>
+  ({ shadows }) as DesignProfile;
 
 // resolveColorRoles only reads profile.colors, so build a minimal profile with
 // just the colors block and assert on role assignment.
@@ -75,5 +79,85 @@ describe("resolveColorRoles – accent contrast guard", () => {
     // No contrast reference -> first two palette extras, unchanged behavior.
     expect(roles.accent1).toBe("#000000");
     expect(roles.accent2).toBe("#9198a1");
+  });
+});
+
+describe("shadowTokens – cleaning, naming, ordering", () => {
+  it("strips fully-transparent and zero-geometry layers (Tailwind ring resets)", () => {
+    // tailwindcss.com: real inset ring buried in rgba(0,0,0,0) placeholder layers.
+    const tokens = shadowTokens(
+      withShadows(
+        "rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      ),
+    );
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0].value).toBe(
+      "oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px inset",
+    );
+    expect(tokens[0].layers).toEqual([
+      {
+        color: "oklab(0.129999 -0.00404751 -0.027702 / 0.1)",
+        offsetX: 0,
+        offsetY: 0,
+        blur: 0,
+        spread: 1,
+        inset: true,
+      },
+    ]);
+  });
+
+  it("drops a shadow whose every layer is a no-op (supabase placeholder stack)", () => {
+    const noop = Array(5).fill("rgba(0, 0, 0, 0) 0px 0px 0px 0px").join(", ");
+    expect(shadowTokens(withShadows(noop))).toHaveLength(0);
+  });
+
+  it("drops a transparent-color shadow even with non-zero geometry (github inset)", () => {
+    const tokens = shadowTokens(
+      withShadows(
+        "rgba(209, 217, 224, 0.25) 0px 0px 0px 1px, rgba(37, 41, 46, 0.12) 0px 6px 18px 0px",
+        "rgba(255, 255, 255, 0) 0px 0px 0px 1px inset",
+      ),
+    );
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0].name).toBe("sm");
+  });
+
+  it("orders by visual footprint and names sm→xl (frequency order discarded)", () => {
+    // stripe-like: frequency-ranked input arrives big-first; the scale must
+    // come out smallest-first regardless.
+    const tokens = shadowTokens(
+      withShadows(
+        "rgba(50, 50, 93, 0.25) 0px 30px 60px -10px",
+        "rgba(23, 23, 23, 0.06) 0px 3px 6px 0px",
+        "rgba(23, 23, 23, 0.08) 0px 15px 35px 0px",
+      ),
+    );
+    expect(tokens.map((t) => t.name)).toEqual(["sm", "md", "lg"]);
+    expect(tokens[0].value).toBe("rgba(23, 23, 23, 0.06) 0px 3px 6px 0px");
+    expect(tokens[2].value).toBe("rgba(50, 50, 93, 0.25) 0px 30px 60px -10px");
+  });
+
+  it("dedupes shadows that clean to the same value", () => {
+    const real = "rgba(0, 0, 0, 0.12) 0px 1px 2px 0px";
+    const tokens = shadowTokens(
+      withShadows(real, `rgba(0, 0, 0, 0) 0px 0px 0px 0px, ${real}`),
+    );
+    expect(tokens).toHaveLength(1);
+  });
+
+  it("parses exotic color spaces without dropping real layers", () => {
+    // netlify: color(srgb …) layers are visible shadows, not noise.
+    const tokens = shadowTokens(
+      withShadows(
+        "color(srgb 0 0 0 / 0.07) 0px 16px 24px 0px, color(srgb 0 0 0 / 0) 0px 6px 30px 0px",
+      ),
+    );
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0].layers).toHaveLength(1);
+    expect(tokens[0].layers[0].blur).toBe(24);
+  });
+
+  it("returns an empty scale for a shadowless page", () => {
+    expect(shadowTokens(withShadows())).toEqual([]);
   });
 });

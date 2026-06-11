@@ -16,7 +16,9 @@ import {
   type ColorRoles,
   isDistinctDark,
   resolveColorRoles,
+  type ShadowToken,
   scaleTokens,
+  shadowTokens,
   type TypeLevel,
   typographyLevels,
 } from "./resolve.js";
@@ -57,6 +59,7 @@ function colorsSection(roles: ColorRoles): string {
     ["primary", roles.primary],
     ["on-primary", roles.onPrimary],
     ["primary-hover", roles.primaryHover],
+    ["primary-active", roles.primaryActive],
     ["background", roles.background],
     ["text", roles.text],
     ["accent-1", roles.accent1],
@@ -118,13 +121,15 @@ function scaleSection(
   return `<section><h2>${title}</h2><div class="scale-row">${items}</div></section>`;
 }
 
-function shadowSection(shadows: string[]): string {
+// Renders the same cleaned + named scale the DESIGN.md `shadows:` block and
+// the css/w3c emitters carry, so the proof sheet labels match the tokens.
+function shadowSection(shadows: ShadowToken[]): string {
   if (!shadows.length)
     return `<section><h2>Elevation</h2><p class="muted">No shadows observed — the page relies on flat surfaces.</p></section>`;
   const cards = shadows
     .map(
-      (s, i) =>
-        `<figure class="shadow-item"><div class="shadow-box" style="box-shadow:${esc(s)}"></div><figcaption>level ${i + 1}</figcaption></figure>`,
+      (s) =>
+        `<figure class="shadow-item"><div class="shadow-box" style="box-shadow:${esc(s.value)}"></div><figcaption><b>${s.name}</b></figcaption></figure>`,
     )
     .join("\n");
   return `<section><h2>Elevation</h2><div class="shadow-row">${cards}</div></section>`;
@@ -138,6 +143,8 @@ function componentsSection(
   spacing: [string, string][],
   bodyLevel: TypeLevel | undefined,
   hoverFx?: { shadow?: string; transform?: string },
+  activeFx?: { shadow?: string; transform?: string },
+  controls?: DesignProfile["controls"],
 ): string {
   const pick = (entries: [string, string][], preferred: string, idx: number) =>
     entries.find(([k]) => k === preferred)?.[1] ??
@@ -151,6 +158,20 @@ function componentsSection(
   const pSm = pick(spacing, "sm", 0);
   const bodyFont = fontStack(bodyLevel?.family);
   const bodySize = bodyLevel ? `${bodyLevel.size}px` : "14px";
+  // Observed control geometry (schema 1.5): paint the real button/input
+  // font-size and height so the specimen matches the DESIGN.md component spec.
+  const btnSize = controls?.button?.fontSizePx
+    ? `${controls.button.fontSizePx}px`
+    : bodySize;
+  const btnH = controls?.button?.heightPx
+    ? `height:${controls.button.heightPx}px;box-sizing:border-box;`
+    : "";
+  const inputSize = controls?.input?.fontSizePx
+    ? `${controls.input.fontSizePx}px`
+    : bodySize;
+  const inputH = controls?.input?.heightPx
+    ? `height:${controls.input.heightPx}px;box-sizing:border-box;`
+    : "";
   // Real hairline color when extracted; a faint neutral otherwise so the card
   // edge still reads.
   const brd = roles.border ?? "rgba(0,0,0,.12)";
@@ -184,9 +205,45 @@ function componentsSection(
   const hover = overParts.length
     ? ` onmouseover="${esc(overParts.join(";"))}" onmouseout="${esc(outParts.join(";"))}"`
     : "";
+
+  // Pressed (:active) — mirrors the hover wiring. mouseup restores the hover
+  // state (the pointer is still over the button when it's released).
+  const downParts: string[] = [];
+  const upParts: string[] = [];
+  const restoreBg = roles.primaryHover ?? roles.primary;
+  if (roles.primaryActive) {
+    downParts.push(`this.style.background='${roles.primaryActive}'`);
+    upParts.push(`this.style.background='${restoreBg}'`);
+  }
+  if (activeFx?.shadow) {
+    downParts.push(`this.style.boxShadow='${activeFx.shadow}'`);
+    upParts.push(
+      hoverFx?.shadow
+        ? `this.style.boxShadow='${hoverFx.shadow}'`
+        : `this.style.boxShadow=''`,
+    );
+  }
+  if (activeFx?.transform) {
+    downParts.push(`this.style.transform='${activeFx.transform}'`);
+    upParts.push(
+      hoverFx?.transform
+        ? `this.style.transform='${hoverFx.transform}'`
+        : `this.style.transform=''`,
+    );
+  }
+  const press = downParts.length
+    ? ` onmousedown="${esc(downParts.join(";"))}" onmouseup="${esc(upParts.join(";"))}"`
+    : "";
+
+  const stateLabels = [
+    roles.primaryHover ? ` · :hover ${esc(roles.primaryHover)}` : "",
+    roles.primaryActive || downParts.length
+      ? ` · :active${roles.primaryActive ? ` ${esc(roles.primaryActive)}` : ""}`
+      : "",
+  ].join("");
   parts.push(`<div class="cmp">
-    <span class="cmp-label">button-primary${roles.primaryHover ? ` · :hover ${esc(roles.primaryHover)}` : ""}</span>
-    <button${hover} style="align-self:flex-start;background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${bodySize}/1 ${bodyFont};cursor:pointer">Primary action</button>
+    <span class="cmp-label">button-primary${stateLabels}</span>
+    <button${hover}${press} style="align-self:flex-start;background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${btnSize}/1 ${bodyFont};${btnH}cursor:pointer">Primary action</button>
   </div>`);
 
   // surface / card + input + body-text (need background & text); card edge and
@@ -196,7 +253,7 @@ function componentsSection(
       <span class="cmp-label">surface · input · body-text${roles.border ? " · border" : ""}</span>
       <div style="background:${esc(roles.background)};color:${esc(roles.text)};border:1px solid ${esc(brd)};border-radius:${rLg};padding:${pLg};font:400 ${bodySize}/1.5 ${bodyFont};box-shadow:0 1px 3px rgba(0,0,0,.06)">
         <p style="margin:0 0 ${pMd}">Body text on the surface color — this is what reading copy looks like.</p>
-        <input placeholder="input field" style="background:${esc(roles.background)};color:${esc(roles.text)};border:1px solid ${esc(brd)};border-radius:${rSm};padding:${pSm};font:400 ${bodySize}/1 ${bodyFont};width:60%" />
+        <input placeholder="input field" style="background:${esc(roles.background)};color:${esc(roles.text)};border:1px solid ${esc(brd)};border-radius:${rSm};padding:${pSm};font:400 ${inputSize}/1 ${bodyFont};${inputH}width:60%" />
       </div>
     </div>`);
   }
@@ -252,13 +309,15 @@ function themeContent(profile: DesignProfile): string {
     typographySection(levels),
     scaleSection("Spacing", spacing, "spacing"),
     scaleSection("Radius", rounded, "radius"),
-    shadowSection(profile.shadows),
+    shadowSection(shadowTokens(profile)),
     componentsSection(
       roles,
       rounded,
       spacing,
       bodyLevel,
       profile.primaryButtonHover,
+      profile.primaryButtonActive,
+      profile.controls,
     ),
   ].join("\n");
 }

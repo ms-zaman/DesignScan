@@ -1272,3 +1272,145 @@ describe("normalize – hover mechanisms beyond a bg swap", () => {
     expect(profile.primaryButtonHover).toBeUndefined();
   });
 });
+
+describe("normalize – control geometry (controls)", () => {
+  // A saturated red button vote so pickPrimary resolves #e60012 — control
+  // metrics must then come from THOSE buttons only.
+  const PRIMARY = "rgb(230, 0, 18)";
+
+  it("takes the modal font-size/height of the primary-colored buttons only", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        buttons: [
+          button({ bg: PRIMARY, fontSize: "14px", height: "40px" }),
+          button({ bg: PRIMARY, fontSize: "14px", height: "40px" }),
+          // Hero CTA outlier on the same primary — outvoted, not averaged.
+          button({ bg: PRIMARY, fontSize: "18px", height: "64px" }),
+          // Ghost/nav button in another color must not vote at all.
+          button({ bg: "rgb(0, 0, 0)", fontSize: "11px", height: "24px" }),
+          button({ bg: "rgb(0, 0, 0)", fontSize: "11px", height: "24px" }),
+          button({ bg: "rgb(0, 0, 0)", fontSize: "11px", height: "24px" }),
+        ],
+      }),
+    );
+    expect(profile.colors.primary).toBe("#e60012");
+    expect(profile.controls?.button).toEqual({ fontSizePx: 14, heightPx: 40 });
+  });
+
+  it("rejects implausible control heights but keeps the font-size", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        buttons: [
+          // A full-bleed "button" banner: height is noise, font-size is real.
+          button({ bg: PRIMARY, fontSize: "14px", height: "320px" }),
+        ],
+      }),
+    );
+    expect(profile.controls?.button).toEqual({ fontSizePx: 14 });
+  });
+
+  it("derives input geometry from the sampled text inputs", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        inputs: [
+          { height: "36px", fontSize: "14px", radius: "6px" },
+          { height: "36px", fontSize: "14px", radius: "6px" },
+          { height: "48px", fontSize: "16px", radius: "6px" },
+        ],
+      }),
+    );
+    expect(profile.controls?.input).toEqual({ fontSizePx: 14, heightPx: 36 });
+  });
+
+  it("omits controls entirely when nothing was observed (old fixtures)", () => {
+    const profile = normalize("u", raw());
+    expect(profile.controls).toBeUndefined();
+  });
+
+  it("survives height-less button samples from pre-1.5 captures", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        bgArea: { "rgb(255, 255, 255)": 1_000_000 },
+        buttons: [button({ bg: PRIMARY, fontSize: "14px" })],
+      }),
+    );
+    expect(profile.controls?.button).toEqual({ fontSizePx: 14 });
+  });
+});
+
+describe("normalize – pressed (:active) state", () => {
+  const base = () =>
+    raw({
+      bgArea: { "rgb(255, 255, 255)": 50000 },
+      buttons: [button({ bg: "rgb(220, 20, 60)" })],
+    });
+  const sample = (over: Partial<import("./types.js").HoverSample>) => ({
+    restBg: "rgb(220, 20, 60)",
+    restColor: "rgb(255, 255, 255)",
+    bg: "rgb(220, 20, 60)",
+    color: "rgb(255, 255, 255)",
+    ...over,
+  });
+
+  it("resolves primaryActive from a pressed bg swap on the primary button", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonActives: [sample({ bg: "rgb(180, 10, 40)" })],
+      }),
+    );
+    expect(profile.colors.primaryActive).toBe("#b40a28");
+    expect(profile.primaryButtonActive).toBeUndefined();
+  });
+
+  it("captures the press micro-interaction (posthog's 3D collapse)", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonActives: [
+          sample({
+            restShadow: "rgba(0, 0, 0, 0.4) 0px 4px 0px 0px",
+            shadow: "none",
+            restTransform: "none",
+            transform: "matrix(1, 0, 0, 1, 0, 4)",
+          }),
+        ],
+      }),
+    );
+    // No color change -> no primaryActive token, but the fx pair survives —
+    // including the shadow COLLAPSE (rest had one, pressed has none).
+    expect(profile.colors.primaryActive).toBeNull();
+    expect(profile.primaryButtonActive?.transform).toBe("translateY(4px)");
+    expect(profile.primaryButtonActive?.shadow).toBe("none");
+  });
+
+  it("ignores presses observed on non-primary buttons", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        ...base(),
+        buttonActives: [
+          sample({ restBg: "rgb(0, 0, 0)", bg: "rgb(40, 40, 40)" }),
+        ],
+      }),
+    );
+    expect(profile.colors.primaryActive).toBeNull();
+  });
+
+  it("passes the dark-unlock mechanism through to the profile", () => {
+    const profile = normalize(
+      "u",
+      raw({ colorScheme: "dark", darkMechanism: "class-dark" }),
+    );
+    expect(profile.darkMechanism).toBe("class-dark");
+    expect(normalize("u", raw()).darkMechanism).toBeUndefined();
+  });
+});

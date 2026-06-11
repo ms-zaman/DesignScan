@@ -10,7 +10,9 @@
     "css",
     "playwright",
     "extractor",
-    "design-system"
+    "design-system",
+    "mcp",
+    "mcp-server"
   ],
   "repository": {
     "type": "git",
@@ -51,8 +53,10 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "commander": "^12.1.0",
-    "playwright": "^1.48.0"
+    "playwright": "^1.48.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.7.0",

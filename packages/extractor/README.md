@@ -71,6 +71,9 @@ pnpm extract stripe.com --format css --out out/stripe.tokens.css
 pnpm extract linear.app --theme dark --md --out out/linear.dark.DESIGN.md
 
 # both = merge light + dark into one DESIGN.md (parallel *-dark tokens)
+# dark first emulates prefers-color-scheme; if the page stays light it tries
+# the common gates (<html class="dark">, data-theme, data-color-mode) and
+# records which one the site really uses
 pnpm extract vercel.com --theme both --md --out out/vercel.DESIGN.md
 
 # --preview = also emit a self-contained HTML proof sheet beside the file
@@ -87,6 +90,29 @@ pnpm extract vercel.com --headful
 Load failures (unreachable host, timeout, a site refusing automated browsers)
 exit non-zero with a short, actionable message rather than a raw stack trace.
 
+## MCP server (for coding agents)
+
+`designscan mcp` runs the extractor as an [MCP](https://modelcontextprotocol.io)
+server over stdio, exposing one tool — `get_design_tokens(url, format?, theme?,
+timeoutMs?)` — so an agent can pull live tokens for any URL mid-task
+("restyle this app like stripe.com"). `format` matches the CLI:
+`md` (default, DESIGN.md) | `w3c` | `css` | `json`.
+
+```jsonc
+// e.g. Claude Code: .mcp.json
+{
+  "mcpServers": {
+    "designscan": {
+      "command": "npx",
+      "args": ["-y", "@designscan/extractor", "mcp"]
+    }
+  }
+}
+```
+
+Extraction-quality warnings (bot challenge, near-empty render) ride along in
+the tool result, so the agent knows when not to trust the tokens.
+
 ## Files
 
 | File | Role |
@@ -99,6 +125,8 @@ exit non-zero with a short, actionable message rather than a raw stack trace.
 | `src/preview.ts`   | `DesignProfile` → self-contained HTML proof sheet (`--preview`) |
 | `src/color.ts`     | rgb/hex parsing, luminance, saturation, neutral test |
 | `src/types.ts`     | `RawObservations` and `DesignProfile` shapes |
+| `src/formats.ts`   | `DesignProfile` → W3C Design Tokens JSON / CSS custom properties (+ shared `emit()`) |
+| `src/mcp.ts`       | `designscan mcp` — MCP server over stdio (`get_design_tokens` tool) |
 | `src/cli.ts`       | `designscan <url>` command |
 
 ## Roadmap (what's next)

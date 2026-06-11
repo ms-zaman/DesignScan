@@ -219,6 +219,132 @@ describe("generate – scales & references", () => {
   });
 });
 
+describe("generate – primary-active (observed pressed state)", () => {
+  it("emits the token, the component variant, and the prose bullet", () => {
+    const md = generate(
+      profile({
+        colors: {
+          background: "#ffffff",
+          text: "#222222",
+          primary: "#1a73e8",
+          primaryActive: "#1059b8",
+          palette: [{ hex: "#1a73e8", count: 9 }],
+        },
+      }),
+    );
+    expect(md).toContain('primary-active: "#1059b8"');
+    expect(md).toContain("button-primary-active:");
+    expect(md).toContain("`{colors.primary-active}`");
+    expect(md).toContain("use it for `:active`");
+  });
+
+  it("describes the press micro-interaction when the button reshapes", () => {
+    const md = generate(
+      profile({
+        primaryButtonActive: { shadow: "none", transform: "translateY(4px)" },
+      }),
+    );
+    expect(md).toContain("moves `translateY(4px)`");
+    expect(md).toContain("box-shadow becomes `none`");
+  });
+
+  it("notes the real dark gate when the dark pass was class-unlocked", () => {
+    const light = profile();
+    const dark = profile({
+      theme: "dark",
+      darkMechanism: "class-dark",
+      colors: {
+        background: "#0d1117",
+        text: "#e6edf3",
+        primary: "#3fb950",
+        palette: [{ hex: "#3fb950", count: 9 }],
+      },
+    });
+    const md = generate(light, dark);
+    expect(md).toContain('gates dark mode on `<html class="dark">`');
+    expect(md).not.toContain(
+      "The same roles captured under `prefers-color-scheme: dark`",
+    );
+  });
+});
+
+describe("generate – control geometry on components", () => {
+  it("cross-references the observed button typography level and height", () => {
+    const md = generate(
+      profile({
+        controls: {
+          button: { fontSizePx: 14, heightPx: 40 },
+          input: { fontSizePx: 16, heightPx: 36 },
+        },
+      }),
+    );
+    // 14px maps onto the "body" level, 16px onto "body-lg" (fixture scale).
+    expect(md).toMatch(
+      /button-primary:\n(\s{4}.+\n)*\s{4}typography: "\{typography\.body\}"/,
+    );
+    expect(md).toMatch(/button-primary:\n(\s{4}.+\n)*\s{4}height: 40px/);
+    expect(md).toMatch(
+      /\n {2}input:\n(\s{4}.+\n)*\s{4}typography: "\{typography\.body-lg\}"/,
+    );
+    expect(md).toMatch(/\n {2}input:\n(\s{4}.+\n)*\s{4}height: 36px/);
+    expect(md).toContain("set in `{typography.body}`, 40px tall as observed");
+  });
+
+  it("emits no typography ref when the control size missed the page scale", () => {
+    const md = generate(
+      profile({ controls: { button: { fontSizePx: 10, heightPx: 40 } } }),
+    );
+    // 10px was filtered from the typography scale as noise (and is >1px from
+    // the 12px label level) — a wrong ref would be worse than none. Height is
+    // independent and still real.
+    expect(md).not.toMatch(/button-primary:\n(\s{4}.+\n)*\s{4}typography:/);
+    expect(md).toMatch(/button-primary:\n(\s{4}.+\n)*\s{4}height: 40px/);
+  });
+
+  it("emits neither without observed controls (pre-1.5 profiles)", () => {
+    const md = generate(profile());
+    expect(md).not.toMatch(/button-primary:\n(\s{4}.+\n)*\s{4}typography:/);
+    expect(md).not.toMatch(/button-primary:\n(\s{4}.+\n)*\s{4}height:/);
+  });
+});
+
+describe("generate – shadows", () => {
+  const SHADOWS = [
+    "rgba(50, 50, 93, 0.25) 0px 30px 60px -10px",
+    "rgba(23, 23, 23, 0.06) 0px 3px 6px 0px",
+  ];
+
+  it("emits the cleaned scale as a shadows front-matter block, smallest first", () => {
+    const fm = frontMatter(generate(profile({ shadows: SHADOWS })));
+    expect(fm).toMatch(
+      /shadows:\n\s{2}sm: "rgba\(23, 23, 23, 0\.06\) 0px 3px 6px 0px"\n\s{2}md: "rgba\(50, 50, 93, 0\.25\) 0px 30px 60px -10px"/,
+    );
+  });
+
+  it("lists each level with its literal value in the Elevation section", () => {
+    const md = generate(profile({ shadows: SHADOWS }));
+    expect(md).toContain("- **sm:** `rgba(23, 23, 23, 0.06) 0px 3px 6px 0px`");
+    expect(md).toContain(
+      "- **md:** `rgba(50, 50, 93, 0.25) 0px 30px 60px -10px`",
+    );
+  });
+
+  it("never references {shadows.*} — the spec has no such token group", () => {
+    // Verified against @google/design.md 0.2.0: a shadows: data block lints
+    // clean, but any {shadows.x} reference is a lint ERROR. Guard the contract.
+    const md = generate(profile({ shadows: SHADOWS }));
+    expect(md).not.toContain("{shadows.");
+  });
+
+  it("omits the block and keeps the flat-surfaces prose when nothing survives cleaning", () => {
+    const md = generate(
+      profile({ shadows: ["rgba(0, 0, 0, 0) 0px 0px 0px 0px"] }),
+    );
+    expect(md).not.toContain("shadows:");
+    expect(md).toContain("flat surfaces");
+  });
+});
+
 describe("generate – typography fidelity", () => {
   it("drops sub-12px sizes as noise", () => {
     const md = generate(

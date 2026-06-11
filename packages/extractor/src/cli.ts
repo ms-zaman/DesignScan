@@ -3,8 +3,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Command } from "commander";
 import { extract } from "./extract.js";
-import { cssVars, w3cTokens } from "./formats.js";
-import { generate } from "./generate.js";
+import { emit, OUTPUT_FORMATS, type OutputFormat } from "./formats.js";
+import { runMcpServer } from "./mcp.js";
 import { normalize, profileWarnings } from "./normalize.js";
 import { preview } from "./preview.js";
 
@@ -22,6 +22,21 @@ function previewPath(out: string | undefined, target: string): string {
 }
 
 const program = new Command();
+
+// `designscan mcp` — run as an MCP server over stdio so coding agents
+// (Claude Code, Cursor, …) can call the extraction as a tool. Registered as a
+// subcommand: commander routes a literal first arg of "mcp" here, anything
+// else (URLs) falls through to the default extract action below.
+program
+  .command("mcp")
+  .description(
+    "run as an MCP (Model Context Protocol) server over stdio, exposing " +
+      "get_design_tokens(url, format, theme) to coding agents",
+  )
+  .action(async () => {
+    await runMcpServer();
+    // Keep the process alive for the transport; it exits when stdin closes.
+  });
 
 program
   .name("designscan")
@@ -71,10 +86,12 @@ program
     }
 
     // --md predates --format and stays as a shorthand for it.
-    const format = opts.md ? "md" : String(opts.format).toLowerCase();
-    if (!["json", "md", "w3c", "css"].includes(format)) {
+    const format = (
+      opts.md ? "md" : String(opts.format).toLowerCase()
+    ) as OutputFormat;
+    if (!OUTPUT_FORMATS.includes(format)) {
       throw new Error(
-        `invalid --format "${opts.format}" (expected: json | md | w3c | css)`,
+        `invalid --format "${opts.format}" (expected: ${OUTPUT_FORMATS.join(" | ")})`,
       );
     }
 
@@ -105,26 +122,14 @@ program
 
     // Every emitter takes (light, dark?) and decides for itself whether the
     // dark pass is distinct enough to include (they all share isDistinctDark).
-    // The raw-profile JSON keeps its historical {light, dark} envelope.
-    const output =
-      format === "md"
-        ? generate(profile, dark)
-        : format === "w3c"
-          ? w3cTokens(profile, dark)
-          : format === "css"
-            ? cssVars(profile, dark)
-            : JSON.stringify(
-                dark ? { light: profile, dark } : profile,
-                null,
-                2,
-              );
+    const output = emit(format, profile, dark);
 
     if (opts.out) {
       await mkdir(dirname(opts.out), { recursive: true });
       await writeFile(opts.out, output, "utf8");
       process.stderr.write(`✓ wrote ${opts.out}\n`);
     } else {
-      process.stdout.write(output + (format === "json" ? "\n" : ""));
+      process.stdout.write(output);
     }
 
     if (opts.preview) {
