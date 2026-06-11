@@ -61,12 +61,16 @@ spacing:
   xl: 20px
   2xl: 24px
   3xl: 32px
+shadows:
+  sm: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.label}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 26px
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -75,8 +79,10 @@ components:
   input:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
+    typography: "{typography.body}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm}"
+    height: 36px
   body-text:
     textColor: "{colors.text}"
     typography: "{typography.body}"
@@ -117,7 +123,11 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 32px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 2 shadow level(s) observed on the page.
+Depth is conveyed with 1 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 
@@ -125,7 +135,7 @@ Corner radii observed: 6px, 8px, 12px, 16px. Use the smaller values for inputs a
 
 ## Components
 
-- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`, set in `{typography.label}`, 26px tall as observed.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.

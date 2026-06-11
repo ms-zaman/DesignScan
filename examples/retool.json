@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://retool.com",
   "title": "Retool | Build internal software better, with AI.",
-  "fetchedAt": "2026-06-11T01:35:56.183Z",
+  "fetchedAt": "2026-06-11T09:28:24.256Z",
   "theme": "light",
   "colors": {
     "background": "#151515",
@@ -11,6 +11,7 @@
     "border": "#433e38",
     "mutedSurface": "#242424",
     "primaryHover": "#4b81bf",
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#e9ebdf",
@@ -119,6 +120,12 @@
     "fontFamilies": {
       "--font-saans": "\"saansFont\", \"saansFont Fallback\"",
       "--font-px-grotesk": "\"pxGroteskFont\", \"pxGroteskFont Fallback\""
+    }
+  },
+  "controls": {
+    "button": {
+      "fontSizePx": 16,
+      "heightPx": 36
     }
   }
 }

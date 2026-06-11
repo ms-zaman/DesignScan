@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://tailwindcss.com",
   "title": "Tailwind CSS - Rapidly build modern websites without ever leaving your HTML.",
-  "fetchedAt": "2026-06-11T01:37:16.435Z",
+  "fetchedAt": "2026-06-11T09:29:12.313Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -11,6 +11,7 @@
     "border": "#ddd6ff",
     "mutedSurface": "#fefce8",
     "primaryHover": null,
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#030712",
@@ -26,7 +27,7 @@
       },
       {
         "hex": "#74d4ff",
-        "count": 48
+        "count": 51
       },
       {
         "hex": "#fb64b6",
@@ -118,6 +119,7 @@
   ],
   "radiusScalePx": [
     4,
+    6,
     8,
     12,
     16,
@@ -133,6 +135,7 @@
   "declared": {
     "radius": {
       "--radius-sm": 4,
+      "--radius-md": 6,
       "--radius-lg": 8,
       "--radius-xl": 12,
       "--radius-2xl": 16,
@@ -147,6 +150,16 @@
       "--font-sans": "\"inter\", \"inter Fallback\", system-ui",
       "--font-inter": "\"inter\", \"inter Fallback\"",
       "--font-plex-mono": "\"plexMono\", \"plexMono Fallback\""
+    }
+  },
+  "controls": {
+    "button": {
+      "fontSizePx": 14,
+      "heightPx": 40
+    },
+    "input": {
+      "fontSizePx": 16,
+      "heightPx": 24
     }
   }
 }

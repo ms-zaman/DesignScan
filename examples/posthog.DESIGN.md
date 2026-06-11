@@ -55,12 +55,17 @@ spacing:
   xl: 20px
   2xl: 24px
   3xl: 32px
+shadows:
+  sm: "rgba(255, 255, 255, 0.4) 0px 0px 6px 2px"
+  md: "rgba(0, 0, 0, 0.25) 0px 25px 50px -12px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 30px
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -117,7 +122,12 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 32px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 2 shadow level(s) observed on the page.
+Depth is conveyed with 2 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `rgba(255, 255, 255, 0.4) 0px 0px 6px 2px`
+- **md:** `rgba(0, 0, 0, 0.25) 0px 25px 50px -12px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 
@@ -125,7 +135,8 @@ Corner radii observed: 2px, 4px, 6px, 8px. Use the smaller values for inputs and
 
 ## Components
 
-- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`, set in `{typography.body}`, 30px tall as observed.
+- **Primary button (pressed, micro-interaction):** moves `translateY(-1.5px)` — the press physically reshapes the button, not just its color.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
@@ -144,6 +155,7 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Headings:** the `text` token (#374151) sits at 10.3:1 on `background` — fine for body copy, but it reads muted at display sizes. For large headings use `accent-2` (#111827, 17.7:1) to keep visual hierarchy. Reserve `text` for paragraph and UI copy.
 - **Fonts:** the brand face `IBM Plex Sans Variable` likely isn't installed locally. Use the full stack `"IBM Plex Sans Variable", "IBM Plex Sans", -apple-system, system-ui, "avenir next", avenir, "segoe ui", "helvetica neue", helvetica, Ubuntu, roboto, noto, arial, sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
 - **Primary actions:** `primary` (#eb9d2a) with `on-primary` (#111111) text is 8.4:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Primary button hover:** observed on the live site, the button also moves (`transform: translateY(-3px)`) on `:hover` (its background color does not change). Reproduce this for fidelity.
 - **Links:** use `accent-1` (#4d4f46) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.

@@ -52,17 +52,25 @@ spacing:
   xl: 24px
   2xl: 32px
   3xl: 40px
+shadows:
+  sm: "rgb(235, 235, 235) 0px 0px 0px 1px"
+  md: "rgba(0, 0, 0, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 2px 2px 0px, rgb(250, 250, 250) 0px 0px 0px 1px"
+  lg: "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 114, 245) 0px 0px 0px 4px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 32px
   button-primary-hover:
     backgroundColor: "{colors.primary-hover}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 32px
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -110,7 +118,13 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 40px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 4 shadow level(s) observed on the page.
+Depth is conveyed with 3 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `rgb(235, 235, 235) 0px 0px 0px 1px`
+- **md:** `rgba(0, 0, 0, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 2px 2px 0px, rgb(250, 250, 250) 0px 0px 0px 1px`
+- **lg:** `rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 114, 245) 0px 0px 0px 4px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 
@@ -118,7 +132,7 @@ Corner radii observed: 2px, 4px, 6px. Use the smaller values for inputs and chip
 
 ## Components
 
-- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`, set in `{typography.body}`, 32px tall as observed.
 - **Primary button (hover):** background shifts to `{colors.primary-hover}` — observed on the live site, use it for `:hover` instead of a computed darken.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.

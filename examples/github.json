@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://github.com",
   "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
-  "fetchedAt": "2026-06-11T01:33:13.952Z",
+  "fetchedAt": "2026-06-11T09:24:42.808Z",
   "theme": "light",
   "colors": {
     "background": "#0d1117",
@@ -11,6 +11,7 @@
     "border": "#484f58",
     "mutedSurface": null,
     "primaryHover": "#077124",
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#000000",
@@ -158,6 +159,16 @@
       "--fontStack-system": "\"Mona Sans VF\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
       "--brand-body-fontFamily": "\"Mona Sans\", \"MonaSansFallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
       "--brand-fontStack-monospace": "\"Mona Sans Mono\", monospace"
+    }
+  },
+  "controls": {
+    "button": {
+      "fontSizePx": 16,
+      "heightPx": 48
+    },
+    "input": {
+      "fontSizePx": 16,
+      "heightPx": 41
     }
   }
 }

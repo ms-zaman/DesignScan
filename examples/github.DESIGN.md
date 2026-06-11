@@ -69,17 +69,23 @@ spacing:
   xl: 20px
   2xl: 24px
   3xl: 32px
+shadows:
+  sm: "rgba(209, 217, 224, 0.25) 0px 0px 0px 1px, rgba(37, 41, 46, 0.04) 0px 6px 12px -3px, rgba(37, 41, 46, 0.12) 0px 6px 18px 0px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.body-lg}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 48px
   button-primary-hover:
     backgroundColor: "{colors.primary-hover}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.body-lg}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 48px
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -88,8 +94,10 @@ components:
   input:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
+    typography: "{typography.body-lg}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm}"
+    height: 41px
   body-text:
     textColor: "{colors.text}"
     typography: "{typography.body}"
@@ -131,7 +139,11 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 32px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 2 shadow level(s) observed on the page.
+Depth is conveyed with 1 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `rgba(209, 217, 224, 0.25) 0px 0px 0px 1px, rgba(37, 41, 46, 0.04) 0px 6px 12px -3px, rgba(37, 41, 46, 0.12) 0px 6px 18px 0px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 
@@ -139,7 +151,7 @@ Corner radii observed: 6px, 8px, 12px, 16px, 24px, 60px. Use the smaller values 
 
 ## Components
 
-- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`, set in `{typography.body-lg}`, 48px tall as observed.
 - **Primary button (hover):** background shifts to `{colors.primary-hover}` — observed on the live site, use it for `:hover` instead of a computed darken.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.

@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://posthog.com",
   "title": "PostHog – We make dev tools for product engineers",
-  "fetchedAt": "2026-06-11T01:34:23.190Z",
+  "fetchedAt": "2026-06-11T09:26:58.750Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -11,6 +11,7 @@
     "border": "#bfc1b7",
     "mutedSurface": "#eeefe9",
     "primaryHover": null,
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#374151",
@@ -125,5 +126,17 @@
   "shadows": [
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.25) 0px 25px 50px -12px",
     "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.4) 0px 0px 6px 2px"
-  ]
+  ],
+  "primaryButtonHover": {
+    "transform": "translateY(-3px)"
+  },
+  "primaryButtonActive": {
+    "transform": "translateY(-1.5px)"
+  },
+  "controls": {
+    "button": {
+      "fontSizePx": 15,
+      "heightPx": 30
+    }
+  }
 }

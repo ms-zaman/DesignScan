@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://vercel.com",
   "title": "Vercel: Build and deploy the best web experiences with the AI Cloud",
-  "fetchedAt": "2026-06-11T01:37:35.172Z",
+  "fetchedAt": "2026-06-11T09:29:40.728Z",
   "theme": "light",
   "colors": {
     "background": "#fafafa",
@@ -11,6 +11,7 @@
     "border": null,
     "mutedSurface": null,
     "primaryHover": "#383838",
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#171717",
@@ -115,6 +116,12 @@
     "fontFamilies": {
       "--font-mono": "\"geistMonoFont\", ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Liberation Mono, DejaVu Sans Mono, Courier New, monospace, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol",
       "--font-sans": "\"Geist\", Arial, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol"
+    }
+  },
+  "controls": {
+    "button": {
+      "fontSizePx": 14,
+      "heightPx": 32
     }
   }
 }

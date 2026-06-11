@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://netlify.com",
   "title": "Push your ideas to the web | Netlify",
-  "fetchedAt": "2026-06-11T01:33:53.824Z",
+  "fetchedAt": "2026-06-11T09:26:33.252Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -11,6 +11,7 @@
     "border": "#e9ebed",
     "mutedSurface": "#f6f6f7",
     "primaryHover": null,
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#89ddff",
@@ -159,6 +160,12 @@
       "--font-heading": "\"Figtree\", system-ui, \"Helvetica\", sans-serif",
       "--font-primary": "\"Instrument Sans\", system-ui, \"Helvetica\", sans-serif",
       "--font-monospace": "\"Martian Mono\", ui-monospace, \"Cascadia Code\", \"Source Code Pro\", \"Menlo\", \"Consolas\", \"DejaVu Sans Mono\", monospace"
+    }
+  },
+  "controls": {
+    "input": {
+      "fontSizePx": 16,
+      "heightPx": 42
     }
   }
 }

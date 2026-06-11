@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://stripe.com",
   "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
-  "fetchedAt": "2026-06-11T01:36:54.211Z",
+  "fetchedAt": "2026-06-11T09:28:48.170Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -11,6 +11,7 @@
     "border": "#e5edf5",
     "mutedSurface": "#f8fafd",
     "primaryHover": "#4032c8",
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#50617a",
@@ -151,6 +152,12 @@
     },
     "fontFamilies": {
       "--hds-font-family": "\"sohne-var\",\"SF Pro Display\",sans-serif"
+    }
+  },
+  "controls": {
+    "button": {
+      "fontSizePx": 16,
+      "heightPx": 48
     }
   }
 }

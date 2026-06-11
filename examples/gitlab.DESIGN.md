@@ -74,6 +74,11 @@ spacing:
   xl: 24px
   2xl: 32px
   3xl: 48px
+shadows:
+  sm: "rgba(0, 0, 0, 0.06) 0px 1px 3px 0px"
+  md: "rgba(0, 0, 0, 0.08) 0px -4px 20px 0px"
+  lg: "rgba(0, 0, 0, 0.12) 0px 0px 24px 0px"
+  xl: "rgba(0, 0, 0, 0.01) 0px 52px 21px 0px, rgba(0, 0, 0, 0.03) 0px 29px 17px 0px, rgba(0, 0, 0, 0.04) 0px 13px 13px 0px, rgba(0, 0, 0, 0.05) 0px 3px 7px 0px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -136,7 +141,14 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 48px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 4 shadow level(s) observed on the page.
+Depth is conveyed with 4 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `rgba(0, 0, 0, 0.06) 0px 1px 3px 0px`
+- **md:** `rgba(0, 0, 0, 0.08) 0px -4px 20px 0px`
+- **lg:** `rgba(0, 0, 0, 0.12) 0px 0px 24px 0px`
+- **xl:** `rgba(0, 0, 0, 0.01) 0px 52px 21px 0px, rgba(0, 0, 0, 0.03) 0px 29px 17px 0px, rgba(0, 0, 0, 0.04) 0px 13px 13px 0px, rgba(0, 0, 0, 0.05) 0px 3px 7px 0px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 

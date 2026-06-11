@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.5",
   "url": "https://railway.app",
   "title": "Railway | The all-in-one intelligent cloud provider",
-  "fetchedAt": "2026-06-11T01:35:02.143Z",
+  "fetchedAt": "2026-06-11T09:28:05.825Z",
   "theme": "light",
   "colors": {
     "background": "#13111c",
@@ -11,14 +11,15 @@
     "border": "#33323e",
     "mutedSurface": "#1b2132",
     "primaryHover": null,
+    "primaryActive": null,
     "palette": [
       {
         "hex": "#f7f7f8",
-        "count": 347
+        "count": 363
       },
       {
         "hex": "#ffffff",
-        "count": 38
+        "count": 22
       },
       {
         "hex": "#33323e",

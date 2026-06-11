@@ -50,11 +50,12 @@ typography:
     lineHeight: 1.5
 rounded:
   xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 16px
-  xl: 24px
-  2xl: 32px
+  sm: 6px
+  md: 8px
+  lg: 12px
+  xl: 16px
+  2xl: 24px
+  3xl: 32px
   full: 9999px
 spacing:
   xs: 4px
@@ -64,12 +65,19 @@ spacing:
   xl: 24px
   2xl: 32px
   3xl: 40px
+shadows:
+  sm: "oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px inset"
+  md: "oklab(0.999994 0.0000455678 0.0000200868 / 0.05) 0px 0px 0px 1px inset"
+  lg: "oklab(0.999994 0.0000455678 0.0000200868 / 0.1) 0px 0px 0px 1px inset"
+  xl: "oklab(0.999994 0.0000455678 0.0000200868 / 0.2) 0px 0px 0px 1px inset, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.label}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
+    height: 40px
   surface:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
@@ -78,8 +86,10 @@ components:
   input:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
+    typography: "{typography.body-lg}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm}"
+    height: 24px
   body-text:
     textColor: "{colors.text}"
     typography: "{typography.title-18}"
@@ -126,15 +136,22 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 40px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 4 shadow level(s) observed on the page.
+Depth is conveyed with 4 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px inset`
+- **md:** `oklab(0.999994 0.0000455678 0.0000200868 / 0.05) 0px 0px 0px 1px inset`
+- **lg:** `oklab(0.999994 0.0000455678 0.0000200868 / 0.1) 0px 0px 0px 1px inset`
+- **xl:** `oklab(0.999994 0.0000455678 0.0000200868 / 0.2) 0px 0px 0px 1px inset, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 
-Corner radii observed: 4px, 8px, 12px, 16px, 24px, 32px. Use the smaller values for inputs and chips, larger for cards and surfaces.
+Corner radii observed: 4px, 6px, 8px, 12px, 16px, 24px, 32px. Use the smaller values for inputs and chips, larger for cards and surfaces.
 
 ## Components
 
-- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`, set in `{typography.label}`, 40px tall as observed.
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
@@ -155,4 +172,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#4a5565) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
-- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-sm: 4px`, `--radius-lg: 8px`, `--radius-xl: 12px`, `--radius-2xl: 16px`); spacing (`--spacing: 4px`); fonts (`--font-mono`, `--font-sans`, `--font-inter`) — and the page paints these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-sm: 4px`, `--radius-md: 6px`, `--radius-lg: 8px`, `--radius-xl: 12px`); spacing (`--spacing: 4px`); fonts (`--font-mono`, `--font-sans`, `--font-inter`) — and the page paints these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

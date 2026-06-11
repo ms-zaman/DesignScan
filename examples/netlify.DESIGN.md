@@ -74,6 +74,10 @@ spacing:
   xl: 24px
   2xl: 32px
   3xl: 48px
+shadows:
+  sm: "rgb(128, 128, 128) 0px 0px 5px 0px"
+  md: "color(srgb 0 0 0 / 0.25) 0px 4px 12px 0px"
+  lg: "color(srgb 0 0 0 / 0.07) 0px 16px 24px 0px, color(srgb 0 0 0 / 0.06) 0px 6px 30px 0px, color(srgb 0 0 0 / 0.1) 0px 8px 10px 0px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -88,8 +92,10 @@ components:
   input:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
+    typography: "{typography.body-lg}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm}"
+    height: 42px
   body-text:
     textColor: "{colors.text}"
     typography: "{typography.body}"
@@ -136,7 +142,13 @@ Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 48px — 
 
 ## Elevation & Depth
 
-Depth is conveyed with 4 shadow level(s) observed on the page.
+Depth is conveyed with 3 shadow level(s) observed on the page, smallest to largest (see the `shadows` tokens in the front matter):
+
+- **sm:** `rgb(128, 128, 128) 0px 0px 5px 0px`
+- **md:** `color(srgb 0 0 0 / 0.25) 0px 4px 12px 0px`
+- **lg:** `color(srgb 0 0 0 / 0.07) 0px 16px 24px 0px, color(srgb 0 0 0 / 0.06) 0px 6px 30px 0px, color(srgb 0 0 0 / 0.1) 0px 8px 10px 0px`
+
+_Apply these as `box-shadow` — the smaller levels on resting cards and inputs, the larger on overlays (dropdowns, modals). Don't invent intermediate shadows; this is the page's whole elevation vocabulary._
 
 ## Shapes
 
