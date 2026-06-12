@@ -170,4 +170,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#ffffff) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
-- **Declared tokens:** the site publishes its design scale as CSS custom properties — fonts (`--font-inter`, `--font-ibm-plex-serif`, `--font-jetbrains-mono`) — and the page paints these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — fonts (`--font-inter`, `--font-ibm-plex-serif`, `--font-jetbrains-mono`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.
