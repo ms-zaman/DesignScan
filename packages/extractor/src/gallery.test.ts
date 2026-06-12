@@ -125,6 +125,25 @@ describe("galleryHtml", () => {
     expect(html).not.toContain("<script>alert(1)</script>");
     expect(html).toContain("&lt;script&gt;");
   });
+
+  it("carries the landing sections: quick start, how it works, MCP", () => {
+    const html = galleryHtml(entries);
+    // The page must explain itself, not just list cards (it's the public
+    // front door): runnable command, pipeline explanation, agent setup.
+    expect(html).toContain("Quick start");
+    expect(html).toContain(
+      "npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md",
+    );
+    expect(html).toContain("How it works");
+    expect(html).toContain("mcpServers");
+    expect(html).toContain('href="#corpus"');
+    expect(html).toContain('id="corpus"');
+    // Project links for the people who land here first.
+    expect(html).toContain("https://github.com/ms-zaman/DesignScan");
+    expect(html).toContain(
+      "https://www.npmjs.com/package/@designscan/extractor",
+    );
+  });
 });
 
 describe("galleryMarkdown", () => {
