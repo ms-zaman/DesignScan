@@ -28,6 +28,149 @@ export function navError(url: string, err: unknown): string {
   return `Failed to load ${url}: ${msg}`;
 }
 
+// --- media breakpoints -------------------------------------------------------
+// The page's @media conditions reach us two ways: conditionText strings from
+// the in-page CSSOM walk (readable sheets), and raw CSS text fetched from the
+// Node side for sheets the browser refuses to expose (cross-origin without
+// CORS headers — page.request has no such restriction). Both funnel into the
+// parsers below, which therefore live OUTSIDE page.evaluate and stay
+// unit-testable.
+
+// Every @media prelude in a stylesheet's text. Only the condition matters, so
+// nested blocks need no brace matching — preludes end at the first `{`.
+export function mediaConditionsFromCss(css: string): string[] {
+  const out: string[] = [];
+  const re = /@media\s+([^{;]+)\{/g;
+  let m = re.exec(css);
+  while (m !== null) {
+    out.push(m[1].trim());
+    m = re.exec(css);
+  }
+  return out;
+}
+
+// Media-query lengths resolve against the *initial* font size (16px), never
+// the page's root font-size — the 62.5% trick does not apply inside @media.
+const MEDIA_EM_PX = 16;
+
+// Width boundaries gated on by a set of @media conditions, as integer px ->
+// number of conditions naming that boundary. Both the classic and the range
+// syntax are read, and desktop-first conditions are folded onto the
+// mobile-first boundary they imply: `max-width: 767px` (and Bootstrap's
+// `max-width: 767.98px`) both mean "the 768 breakpoint", so integer
+// max-widths get +1 and fractional ones round up. A strict `width < 768px`
+// already names the boundary itself.
+export function breakpointsFromConditions(
+  conditions: string[],
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  const bump = (bp: number) => {
+    const r = Math.round(bp);
+    if (r > 0) out[String(r)] = (out[String(r)] || 0) + 1;
+  };
+  const px = (v: string, unit: string) =>
+    unit === "px" ? parseFloat(v) : parseFloat(v) * MEDIA_EM_PX;
+  const maxBoundary = (v: number) =>
+    Number.isInteger(v) ? v + 1 : Math.ceil(v);
+
+  const classic = /\(\s*(min|max)-width\s*:\s*([\d.]+)(px|em|rem)\s*\)/gi;
+  // Range syntax, both spellings: `(width >= 48em)` and `(48em <= width)`.
+  const range =
+    /\(\s*(?:width\s*(<=|>=|<|>)\s*([\d.]+)(px|em|rem)|([\d.]+)(px|em|rem)\s*(<=|>=|<|>)\s*width)\s*\)/gi;
+
+  for (const cond of conditions) {
+    classic.lastIndex = 0;
+    range.lastIndex = 0;
+    let m = classic.exec(cond);
+    while (m !== null) {
+      const v = px(m[2], m[3]);
+      bump(m[1].toLowerCase() === "min" ? v : maxBoundary(v));
+      m = classic.exec(cond);
+    }
+    m = range.exec(cond);
+    while (m !== null) {
+      // Normalize the reversed spelling (`768px >= width` means `width <= 768px`).
+      const flip: Record<string, string> = {
+        "<=": ">=",
+        ">=": "<=",
+        "<": ">",
+        ">": "<",
+      };
+      const op = m[1] ?? flip[m[6]];
+      const v = px(m[2] ?? m[4], m[3] ?? m[5]);
+      if (op === ">=" || op === ">") bump(v);
+      else if (op === "<")
+        bump(v); // strict: the boundary itself
+      else bump(maxBoundary(v)); // <=
+      m = range.exec(cond);
+    }
+  }
+  return out;
+}
+
+// CSSOM walk + cross-origin fallback. Best-effort by design: stylesheet
+// access is an enrichment, never a requirement.
+async function collectMediaBreakpoints(
+  page: import("playwright").Page,
+): Promise<Record<string, number>> {
+  try {
+    const { conditions, unreadable } = await page.evaluate(() => {
+      const conditions: string[] = [];
+      const unreadable: string[] = [];
+      // Any grouping rule (@media/@supports/@layer) exposes cssRules; @media
+      // and @import additionally expose a MediaList. Reading cssRules of a
+      // cross-origin imported sheet throws — record its href for the Node
+      // side to fetch instead.
+      const walk = (rules: CSSRuleList) => {
+        for (const rule of rules) {
+          if (conditions.length >= 800) return;
+          const mediaText = (rule as CSSMediaRule).media?.mediaText;
+          if (mediaText) conditions.push(mediaText);
+          try {
+            const inner =
+              (rule as CSSGroupingRule).cssRules ??
+              (rule as CSSImportRule).styleSheet?.cssRules;
+            if (inner) walk(inner);
+          } catch {
+            const href = (rule as CSSImportRule).href;
+            if (href) unreadable.push(href);
+          }
+        }
+      };
+      for (const sheet of document.styleSheets) {
+        try {
+          walk(sheet.cssRules);
+        } catch {
+          if (sheet.href) unreadable.push(sheet.href);
+        }
+      }
+      // Resolve relative @import hrefs against the page; dedupe; keep sane.
+      const abs = unreadable
+        .map((h) => {
+          try {
+            return new URL(h, document.baseURI).href;
+          } catch {
+            return null;
+          }
+        })
+        .filter((h): h is string => h !== null);
+      return { conditions, unreadable: [...new Set(abs)].slice(0, 12) };
+    });
+    for (const href of unreadable) {
+      try {
+        const resp = await page.request.get(href, { timeout: 8000 });
+        if (resp.ok())
+          conditions.push(...mediaConditionsFromCss(await resp.text()));
+      } catch {
+        // Sheet unreachable from Node too — skip it.
+      }
+    }
+    return breakpointsFromConditions(conditions);
+  } catch {
+    return {};
+  }
+}
+
 export async function extract(
   url: string,
   opts: ExtractOptions = {},
@@ -199,6 +342,7 @@ export async function extract(
       const borderColors: Record<string, number> = {};
       const shadows: Record<string, number> = {};
       const spacings: Record<string, number> = {};
+      const containerWidths: Record<string, number> = {};
       const buttons: any[] = [];
       const inputs: any[] = [];
       const links: { color: string }[] = [];
@@ -373,6 +517,34 @@ export async function extract(
           if (p && p !== "0px") bump(spacings, p);
         }
 
+        // Centered content wrappers: an authored max-width plus symmetric
+        // side gutters is the page saying "this is the content column".
+        // Weighted by element height so the page-long main container outvotes
+        // a centered hero band; the width floor keeps centered widgets
+        // (modals, toasts) out. Gaps are measured against clientWidth (the
+        // area centering really happens in — innerWidth includes the
+        // scrollbar and would skew the symmetry test).
+        const mwRaw = cs.maxWidth;
+        if (mwRaw?.endsWith("px")) {
+          const mw = parseFloat(mwRaw);
+          const vw = document.documentElement.clientWidth;
+          const gapL = rect.left;
+          const gapR = vw - rect.right;
+          if (
+            mw >= 600 &&
+            mw <= 1920 &&
+            rect.width >= 400 &&
+            gapL > 8 &&
+            Math.abs(gapL - gapR) <= 2
+          ) {
+            bump(
+              containerWidths,
+              String(Math.round(mw)),
+              Math.max(1, Math.round(rect.height)),
+            );
+          }
+        }
+
         const tag = el.tagName.toLowerCase();
         const roleAttr = el.getAttribute("role");
         const cls = typeof el.className === "string" ? el.className : "";
@@ -444,6 +616,7 @@ export async function extract(
         borderColors,
         shadows,
         spacings,
+        containerWidths,
         buttons,
         inputs,
         links,
@@ -459,6 +632,8 @@ export async function extract(
 
     raw.colorScheme = colorScheme;
     if (darkMechanism) raw.darkMechanism = darkMechanism;
+    const breakpoints = await collectMediaBreakpoints(page);
+    if (Object.keys(breakpoints).length) raw.mediaBreakpoints = breakpoints;
     const fx = await sampleInteractions(page);
     raw.buttonHovers = fx.hovers;
     raw.buttonActives = fx.actives;

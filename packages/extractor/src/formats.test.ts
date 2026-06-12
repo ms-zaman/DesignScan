@@ -268,3 +268,39 @@ describe("primary-hover (observed hover shift) in both emitters", () => {
     expect(cssVars(clean)).not.toContain("primary-active");
   });
 });
+
+describe("layout (container + breakpoints) in both emitters", () => {
+  const withLayout = () => {
+    const p = profileFor("stripe");
+    p.layout = { containerMaxWidthPx: 1080, breakpointsPx: [600, 900, 1200] };
+    p.declared = { ...p.declared, breakpoints: { "--screen-md": 900 } };
+    return p;
+  };
+
+  it("css: container var + breakpoint vars under the site's names", () => {
+    const css = cssVars(withLayout());
+    expect(css).toContain("--container-max-width: 1080px;");
+    expect(css).toContain("--breakpoint-sm: 600px;");
+    expect(css).toContain("--screen-md: 900px;"); // site's own name, verbatim
+    expect(css).toContain("--breakpoint-lg: 1200px;");
+    expect(css).not.toContain("--breakpoint-md:"); // replaced by the declared name
+  });
+
+  it("w3c: a breakpoint dimension group + a container max-width token", () => {
+    const doc = JSON.parse(w3cTokens(withLayout()));
+    expect(doc.breakpoint.$type).toBe("dimension");
+    expect(doc.breakpoint.sm.$value).toBe("600px");
+    expect(doc.breakpoint["screen-md"].$value).toBe("900px"); // -- stripped
+    expect(doc.container.$type).toBe("dimension");
+    expect(doc.container["max-width"].$value).toBe("1080px");
+  });
+
+  it("emits neither without layout observations", () => {
+    const p = profileFor("stripe");
+    expect(cssVars(p)).not.toContain("--breakpoint-");
+    expect(cssVars(p)).not.toContain("--container-max-width");
+    const doc = JSON.parse(w3cTokens(p));
+    expect(doc.breakpoint).toBeUndefined();
+    expect(doc.container).toBeUndefined();
+  });
+});

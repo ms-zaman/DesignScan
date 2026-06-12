@@ -18,7 +18,8 @@ URL
          └─ normalize.ts clusters the raw CSS into a clean token profile:
             background / text / primary / primary-hover / border /
             muted-surface colors, palette, font families, font-size scale,
-            spacing scale, radius scale, shadows
+            spacing scale, radius scale, shadows, container max-width +
+            the @media breakpoints the page really reshapes at
              └─ outputs a DesignProfile JSON
 ```
 

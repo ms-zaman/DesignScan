@@ -153,7 +153,28 @@ export function agentNotes(
     );
   }
 
-  // 7. Declared-token provenance — when the site publishes its own scale as
+  // 7. Layout — the page's real container cap and reshape grid, so the agent
+  // builds responsive rules on the observed boundaries instead of whatever
+  // its CSS framework defaults to.
+  const layout = profile.layout;
+  if (layout?.containerMaxWidthPx || layout?.breakpointsPx?.length) {
+    const bits: string[] = [];
+    if (layout.containerMaxWidthPx) {
+      bits.push(
+        `center page content in a container capped at \`${layout.containerMaxWidthPx}px\``,
+      );
+    }
+    if (layout.breakpointsPx?.length) {
+      bits.push(
+        `write \`@media (min-width: …)\` rules at the observed boundaries ` +
+          `(${layout.breakpointsPx.map((n) => `${n}px`).join(", ")}), not at a ` +
+          `framework's defaults`,
+      );
+    }
+    notes.push(`- **Layout:** ${bits.join("; ")}.`);
+  }
+
+  // 8. Declared-token provenance — when the site publishes its own scale as
   // custom properties (mined + painted-corroborated in normalize), say so: the
   // values stop being statistical guesses, and the agent can mirror the site's
   // own variable names instead of inventing a parallel vocabulary.
@@ -167,6 +188,7 @@ export function agentNotes(
     const groups: string[] = [];
     if (d.radius) groups.push(`radii (${px(d.radius)})`);
     if (d.spacing) groups.push(`spacing (${px(d.spacing)})`);
+    if (d.breakpoints) groups.push(`breakpoints (${px(d.breakpoints)})`);
     if (d.fontFamilies) {
       const names = Object.keys(d.fontFamilies)
         .slice(0, 3)
@@ -177,9 +199,9 @@ export function agentNotes(
     if (groups.length) {
       notes.push(
         `- **Declared tokens:** the site publishes its design scale as CSS custom ` +
-          `properties — ${groups.join("; ")} — and the page paints these exact ` +
-          `values. Treat them as the canonical scale and reuse the site's own ` +
-          `variable names when you create tokens.`,
+          `properties — ${groups.join("; ")} — and the page really uses these ` +
+          `exact values. Treat them as the canonical scale and reuse the site's ` +
+          `own variable names when you create tokens.`,
       );
     }
   }

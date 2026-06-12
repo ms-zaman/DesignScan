@@ -13,9 +13,11 @@
 // Light/Dark toggle.
 
 import {
+  breakpointEntries,
   type ColorRoles,
   isDistinctDark,
   resolveColorRoles,
+  type ScaleEntry,
   type ShadowToken,
   scaleTokens,
   shadowTokens,
@@ -119,6 +121,33 @@ function scaleSection(
     })
     .join("\n");
   return `<section><h2>${title}</h2><div class="scale-row">${items}</div></section>`;
+}
+
+// The reshape grid + container cap as proportional width bars (all scaled
+// against the largest value), so the relative rhythm of the breakpoints is
+// visible at a glance. Same resolved entries as the emitters, so labels match.
+function layoutSection(
+  layout: DesignProfile["layout"],
+  breakpoints: ScaleEntry[],
+): string {
+  const container = layout?.containerMaxWidthPx;
+  if (!container && !breakpoints.length) return "";
+  const maxPx = Math.max(container ?? 0, ...breakpoints.map((b) => b.px));
+  const pct = (px: number) => ((px / maxPx) * 100).toFixed(1);
+  const row = (label: string, sub: string, px: number, cls: string) =>
+    `<div class="bp-row">
+      <div class="bp-meta"><b>${esc(label)}</b><code>${esc(sub)}</code></div>
+      <div class="bp-bar ${cls}" style="width:${pct(px)}%"></div>
+    </div>`;
+  const rows = [
+    ...breakpoints.map((b) =>
+      row(b.declared ?? b.generic, b.value, b.px, "bp-break"),
+    ),
+    ...(container
+      ? [row("container", `max-width ${container}px`, container, "bp-cap")]
+      : []),
+  ];
+  return `<section><h2>Layout</h2><div class="bp-list">${rows.join("\n")}</div></section>`;
 }
 
 // Renders the same cleaned + named scale the DESIGN.md `shadows:` block and
@@ -309,6 +338,7 @@ function themeContent(profile: DesignProfile): string {
     typographySection(levels),
     scaleSection("Spacing", spacing, "spacing"),
     scaleSection("Radius", rounded, "radius"),
+    layoutSection(profile.layout, breakpointEntries(profile)),
     shadowSection(shadowTokens(profile)),
     componentsSection(
       roles,
@@ -348,6 +378,13 @@ figcaption code{color:var(--muted);font-size:11px}
 .scale-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
 .scale-item figcaption{align-items:flex-start}
 .radius-box{width:56px;height:56px;background:#9ca3af}
+.bp-list{display:flex;flex-direction:column;gap:10px}
+.bp-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center}
+.bp-meta{display:flex;flex-direction:column;font-size:12px}
+.bp-meta code{color:var(--muted);font-size:11px}
+.bp-bar{height:18px;border-radius:3px;min-width:2px}
+.bp-break{background:#9ca3af}
+.bp-cap{background:#4b5563}
 .shadow-box{width:120px;height:72px;background:#fff;border:1px solid var(--line);border-radius:8px}
 .shadow-row{padding:8px 0}
 .shadow-item figcaption{color:var(--muted)}

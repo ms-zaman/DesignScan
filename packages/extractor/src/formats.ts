@@ -15,6 +15,7 @@
 import { parseColor, toHex } from "./color.js";
 import { generate } from "./generate.js";
 import {
+  breakpointEntries,
   type ColorRoles,
   declaredFontName,
   isDistinctDark,
@@ -191,6 +192,7 @@ export function w3cTokens(
   for (const [key, entries] of [
     ["space", spacing],
     ["radius", radius],
+    ["breakpoint", breakpointEntries(profile)],
   ] as const) {
     if (!entries.length) continue;
     const group: Group = { $type: "dimension" };
@@ -199,6 +201,13 @@ export function w3cTokens(
       group[w3cScaleName(e, taken)] = { $value: e.value };
     }
     doc[key] = group;
+  }
+
+  if (profile.layout?.containerMaxWidthPx) {
+    doc.container = {
+      $type: "dimension",
+      "max-width": { $value: `${profile.layout.containerMaxWidthPx}px` },
+    };
   }
 
   const shadows = shadowTokens(profile);
@@ -279,6 +288,21 @@ export function cssVars(profile: DesignProfile, dark?: DesignProfile): string {
     for (const e of entries) {
       lines.push(`  ${cssScaleName(e, prefix, taken)}: ${e.value};`);
     }
+  }
+
+  // Layout facts: the container cap is directly usable (max-width:
+  // var(--container-max-width)); the breakpoint vars are documentation —
+  // @media preludes can't read var() — published the way tailwind v4
+  // publishes its own grid, under the site's names where declared.
+  if (profile.layout?.containerMaxWidthPx) {
+    lines.push(
+      `  --container-max-width: ${profile.layout.containerMaxWidthPx}px;`,
+    );
+  }
+  const breakpoints = breakpointEntries(profile);
+  const takenBp = declaredNames(breakpoints, false);
+  for (const e of breakpoints) {
+    lines.push(`  ${cssScaleName(e, "breakpoint", takenBp)}: ${e.value};`);
   }
 
   // Cleaned box-shadow values, usable directly: box-shadow: var(--shadow-sm).

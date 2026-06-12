@@ -161,3 +161,25 @@ describe("preview – hover micro-interaction", () => {
     expect(html).toContain("this.style.transform=''");
   });
 });
+
+describe("preview – layout section", () => {
+  it("renders the reshape grid + container as proportional bars", () => {
+    const p = profileFor("stripe");
+    p.layout = { containerMaxWidthPx: 1080, breakpointsPx: [600, 1200] };
+    p.declared = { ...p.declared, breakpoints: { "--screen-sm": 600 } };
+    const html = preview(p);
+    expect(html).toContain("<h2>Layout</h2>");
+    // Bars scale against the largest value (1200): full width for it,
+    // half for 600, 90% for the container cap.
+    expect(html).toContain('style="width:100.0%"');
+    expect(html).toContain('style="width:50.0%"');
+    expect(html).toContain('style="width:90.0%"');
+    expect(html).toContain("max-width 1080px");
+    // The site's own breakpoint name labels its bar.
+    expect(html).toContain("--screen-sm");
+  });
+
+  it("omits the section without layout observations", () => {
+    expect(preview(profileFor("stripe"))).not.toContain("<h2>Layout</h2>");
+  });
+});

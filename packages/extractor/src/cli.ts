@@ -157,6 +157,20 @@ program
           `  sizes(px)   ${profile.typography.sizeScalePx.join(" ")}`,
           `  spacing(px) ${profile.spacingScalePx.join(" ")}`,
           `  radius(px)  ${profile.radiusScalePx.join(" ")}`,
+          ...(profile.layout
+            ? [
+                `  layout      ${[
+                  profile.layout.containerMaxWidthPx
+                    ? `container ${profile.layout.containerMaxWidthPx}px`
+                    : "",
+                  profile.layout.breakpointsPx?.length
+                    ? `breaks(px) ${profile.layout.breakpointsPx.join(" ")}`
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}`,
+              ]
+            : []),
           "",
         ].join("\n"),
       );

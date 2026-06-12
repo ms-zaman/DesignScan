@@ -59,6 +59,15 @@ export interface RawObservations {
   // the same button-like elements (released off-element so no click fires).
   // Same shape as hovers — rest vs pressed. Optional (schema 1.5).
   buttonActives?: HoverSample[];
+  // Width breakpoints mined from the page's @media rules (CSSOM + fetched
+  // cross-origin sheets), as integer px -> number of rules gating on that
+  // boundary. max-width conditions are folded onto their min-width boundary
+  // (767.98px / 767px both mean "the 768 breakpoint"). Optional (schema 1.6).
+  mediaBreakpoints?: Record<string, number>;
+  // Authored max-widths of horizontally centered content wrappers, as integer
+  // px -> summed element height (the page-long main column outweighs a
+  // centered hero strip). Optional (schema 1.6).
+  containerWidths?: Record<string, number>;
   // How the dark palette was actually unlocked when this was a dark-scheme
   // capture: the prefers-color-scheme emulation, or a class/attribute gate we
   // applied because the media query alone left the page light. Absent when
@@ -114,7 +123,7 @@ export interface InputSample {
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.5";
+export const PROFILE_SCHEMA_VERSION = "1.6";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -187,6 +196,10 @@ export interface DesignProfile {
     radius?: Record<string, number>; // var name -> px
     spacing?: Record<string, number>; // var name -> px
     fontFamilies?: Record<string, string>; // var name -> family stack
+    // The site's own names for its responsive breakpoints (tailwind v4's
+    // --breakpoint-md and friends), corroborated against the boundaries its
+    // @media rules actually gate on. Optional (schema 1.6).
+    breakpoints?: Record<string, number>; // var name -> px
   };
   // Observed control geometry — the modal font-size/height of the buttons that
   // wear the resolved primary color, and of the page's text inputs. Lets the
@@ -197,5 +210,13 @@ export interface DesignProfile {
   controls?: {
     button?: { fontSizePx?: number; heightPx?: number };
     input?: { fontSizePx?: number; heightPx?: number };
+  };
+  // Page-level layout facts: the centered content container's authored
+  // max-width, and the width boundaries the page's own @media rules reshape
+  // at (ascending). Both observed, never guessed — either field appears only
+  // when the page really declares it. Optional (schema 1.6).
+  layout?: {
+    containerMaxWidthPx?: number;
+    breakpointsPx?: number[];
   };
 }

@@ -501,3 +501,48 @@ describe("generate – primary-hover", () => {
     expect(md).not.toContain("button-primary-hover");
   });
 });
+
+describe("generate – layout & breakpoints", () => {
+  const layoutProfile = () =>
+    profile({
+      layout: { containerMaxWidthPx: 1200, breakpointsPx: [640, 768, 1024] },
+    });
+
+  it("emits a data-only breakpoints front-matter group, ascending", () => {
+    const fm = frontMatter(generate(layoutProfile()));
+    expect(fm).toMatch(
+      /breakpoints:\n\s{2}sm: 640px\n\s{2}md: 768px\n\s{2}lg: 1024px/,
+    );
+  });
+
+  it("never references {breakpoints.*} — the spec has no such token group", () => {
+    // Same contract as shadows: a data block lints clean, a reference is a
+    // lint ERROR (and no component property could consume one anyway).
+    const md = generate(layoutProfile());
+    expect(md).not.toContain("{breakpoints.");
+  });
+
+  it("describes the container and the reshape grid in the Layout prose", () => {
+    const md = generate(layoutProfile());
+    expect(md).toContain("capped at **1200px**");
+    expect(md).toContain("640px, 768px, 1024px");
+    expect(md).toContain("@media (min-width: …)");
+  });
+
+  it("emits none of it when nothing was observed", () => {
+    const md = generate(profile());
+    expect(md).not.toContain("breakpoints:");
+    expect(md).not.toContain("capped at");
+    // The Layout section itself survives (it still carries spacing).
+    expect(md).toContain("## Layout");
+  });
+
+  it("keeps the Layout section for container-only observations (no spacing)", () => {
+    const md = generate(
+      profile({ spacingScalePx: [], layout: { containerMaxWidthPx: 1080 } }),
+    );
+    expect(md).toContain("## Layout");
+    expect(md).toContain("**1080px**");
+    expect(md).not.toContain("breakpoints:");
+  });
+});

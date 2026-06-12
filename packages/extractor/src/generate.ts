@@ -7,6 +7,7 @@
 
 import { agentNotes } from "./agentNotes.js";
 import {
+  breakpointEntries,
   isDistinctDark,
   resolveColorRoles,
   scaleTokens,
@@ -240,6 +241,8 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   const rounded = scaleTokens(profile.radiusScalePx);
   const spacing = scaleTokens(profile.spacingScalePx);
   const shadows = shadowTokens(profile);
+  const breakpoints = breakpointEntries(profile);
+  const containerPx = profile.layout?.containerMaxWidthPx;
   const bodyLevel =
     levels.find((l) => l.name === "body")?.name ??
     levels.find((l) => l.size >= 14 && l.size <= 18)?.name ??
@@ -317,6 +320,16 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     for (const s of shadows) fm.push(`  ${s.name}: ${q(s.value)}`);
   }
 
+  // Data-only like shadows: the spec has no breakpoint token group (and no
+  // component property could reference one — they belong in @media), so the
+  // observed reshape grid ships as plain values the Layout section explains.
+  // Generic sm/md/… names here by design; the site's own var names surface in
+  // the css/w3c emitters.
+  if (breakpoints.length) {
+    fm.push("breakpoints:");
+    for (const b of breakpoints) fm.push(`  ${b.generic}: ${b.value}`);
+  }
+
   fm.push("components:");
   fm.push(...componentLines);
   if (darkBlock) fm.push(...darkBlock.componentLines);
@@ -390,14 +403,33 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
     );
   }
 
-  if (spacing.length) {
+  if (spacing.length || containerPx || breakpoints.length) {
     body.push("");
     body.push("## Layout");
     body.push("");
-    body.push(
-      `Spacing follows an observed scale of ${spacing.map(([, v]) => v).join(", ")} — ` +
-        "usable for padding, gaps, and margins.",
-    );
+    if (containerPx) {
+      body.push(
+        `Content sits in a horizontally centered container capped at ` +
+          `**${containerPx}px** — cap top-level page sections at this width ` +
+          `rather than letting text run the full viewport.`,
+      );
+    }
+    if (breakpoints.length) {
+      if (containerPx) body.push("");
+      body.push(
+        `The page reshapes at ${breakpoints.length} observed breakpoint(s): ` +
+          `${breakpoints.map((b) => b.value).join(", ")} (see the \`breakpoints\` ` +
+          "tokens in the front matter). Write `@media (min-width: …)` rules at " +
+          "these exact boundaries instead of a framework's defaults.",
+      );
+    }
+    if (spacing.length) {
+      if (containerPx || breakpoints.length) body.push("");
+      body.push(
+        `Spacing follows an observed scale of ${spacing.map(([, v]) => v).join(", ")} — ` +
+          "usable for padding, gaps, and margins.",
+      );
+    }
   }
 
   body.push("");

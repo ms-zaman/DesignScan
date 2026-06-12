@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { extract, navError } from "./extract.js";
+import {
+  breakpointsFromConditions,
+  extract,
+  mediaConditionsFromCss,
+  navError,
+} from "./extract.js";
 
 // Integration test: drives the real Playwright/Chromium path in extract()
 // against a fully-known static page served as a data: URL. No network, no
@@ -611,4 +616,103 @@ describe("extract (integration)", () => {
     },
     TEST_TIMEOUT,
   );
+
+  it(
+    "mines media breakpoints and centered container widths",
+    async () => {
+      const page = `<!doctype html><html><head><title>Layout</title><style>
+        body { margin: 0; }
+        .wrap { max-width: 1100px; margin: 0 auto; height: 1200px; background: #eee; }
+        @media (min-width: 768px) { .wrap { padding: 10px; } }
+        @media (max-width: 767.98px) { .wrap { padding: 5px; } }
+        @media (min-width: 1024px) and (orientation: landscape) { body { letter-spacing: 0.01em; } }
+        @media print { body { background: #fff; } }
+      </style></head><body><div class="wrap">content</div></body></html>`;
+      const raw = await extract(dataUrl(page), { settleMs: 0 });
+
+      // min-width 768 + the desktop-first 767.98 fold onto one boundary;
+      // width-gated conditions count even when combined with other features;
+      // print (no width) contributes nothing.
+      expect(raw.mediaBreakpoints?.["768"]).toBe(2);
+      expect(raw.mediaBreakpoints?.["1024"]).toBe(1);
+      expect(Object.keys(raw.mediaBreakpoints ?? {})).toHaveLength(2);
+
+      // The centered wrapper's authored max-width, weighted by its height.
+      expect(raw.containerWidths?.["1100"]).toBeGreaterThanOrEqual(1200);
+    },
+    TEST_TIMEOUT,
+  );
+});
+
+describe("mediaConditionsFromCss – @media preludes from raw CSS text", () => {
+  it("extracts each condition up to its opening brace, nested or not", () => {
+    const css = `
+      .a { color: red; }
+      @media (min-width: 640px) { .a { color: blue; } }
+      @supports (display: grid) {
+        @media screen and (max-width: 767.98px) { .b { display: grid; } }
+      }
+    `;
+    expect(mediaConditionsFromCss(css)).toEqual([
+      "(min-width: 640px)",
+      "screen and (max-width: 767.98px)",
+    ]);
+  });
+
+  it("returns [] for css without @media (an @import line is not a prelude)", () => {
+    expect(
+      mediaConditionsFromCss('@import url("a.css") screen; .a { color: red }'),
+    ).toEqual([]);
+  });
+});
+
+describe("breakpointsFromConditions – width boundaries", () => {
+  it("counts min-width boundaries verbatim, summing repeats", () => {
+    expect(
+      breakpointsFromConditions([
+        "(min-width: 768px)",
+        "screen and (min-width: 768px)",
+        "(min-width: 1024px)",
+      ]),
+    ).toEqual({ "768": 2, "1024": 1 });
+  });
+
+  it("folds desktop-first max-widths onto their min-width boundary", () => {
+    // Bootstrap's 767.98px and a hand-written 767px both mean "the 768
+    // breakpoint": fractional rounds up, integer gets +1.
+    expect(
+      breakpointsFromConditions([
+        "(max-width: 767.98px)",
+        "(max-width: 767px)",
+      ]),
+    ).toEqual({ "768": 2 });
+  });
+
+  it("resolves em/rem against the 16px media basis, never the page root", () => {
+    expect(
+      breakpointsFromConditions(["(min-width: 40rem)", "(min-width: 48em)"]),
+    ).toEqual({ "640": 1, "768": 1 });
+  });
+
+  it("reads the range syntax in both spellings", () => {
+    expect(
+      breakpointsFromConditions([
+        "(width >= 40rem)",
+        "(64rem <= width)",
+        "(width < 768px)",
+        "(width <= 767px)",
+      ]),
+    ).toEqual({ "640": 1, "1024": 1, "768": 2 });
+  });
+
+  it("ignores conditions that don't gate on width", () => {
+    expect(
+      breakpointsFromConditions([
+        "print",
+        "(orientation: landscape)",
+        "(prefers-reduced-motion: reduce)",
+        "(min-height: 600px)",
+      ]),
+    ).toEqual({});
+  });
 });

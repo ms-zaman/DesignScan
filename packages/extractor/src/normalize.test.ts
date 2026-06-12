@@ -1414,3 +1414,116 @@ describe("normalize – pressed (:active) state", () => {
     expect(normalize("u", raw()).darkMechanism).toBeUndefined();
   });
 });
+
+describe("normalize – layout (breakpoints + container)", () => {
+  it("merges ±2px breakpoint families and presents them ascending", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        mediaBreakpoints: { "640": 2, "767": 1, "768": 5, "1024": 3 },
+      }),
+    );
+    expect(profile.layout?.breakpointsPx).toEqual([640, 768, 1024]);
+  });
+
+  it("drops sub-320px and over-1920px noise", () => {
+    const profile = normalize(
+      "u",
+      raw({ mediaBreakpoints: { "200": 4, "768": 1, "2560": 3 } }),
+    );
+    expect(profile.layout?.breakpointsPx).toEqual([768]);
+  });
+
+  it("caps the grid at the 6 most-gated-on boundaries", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        mediaBreakpoints: {
+          "480": 9,
+          "640": 8,
+          "768": 7,
+          "1024": 6,
+          "1280": 5,
+          "1536": 4,
+          "1700": 1, // least-used — the one that falls off
+        },
+      }),
+    );
+    expect(profile.layout?.breakpointsPx).toEqual([
+      480, 640, 768, 1024, 1280, 1536,
+    ]);
+  });
+
+  it("picks the height-weighted container, ties to the larger (outer) value", () => {
+    const profile = normalize(
+      "u",
+      raw({ containerWidths: { "640": 800, "1200": 5000 } }),
+    );
+    expect(profile.layout?.containerMaxWidthPx).toBe(1200);
+
+    const tie = normalize(
+      "u",
+      raw({ containerWidths: { "1200": 100, "1280": 100 } }),
+    );
+    expect(tie.layout?.containerMaxWidthPx).toBe(1280);
+  });
+
+  it("gates the container to plausible page-column widths", () => {
+    const profile = normalize("u", raw({ containerWidths: { "560": 9999 } }));
+    expect(profile.layout).toBeUndefined();
+  });
+
+  it("omits layout entirely when nothing was observed (tidy JSON)", () => {
+    const profile = normalize("u", raw());
+    expect("layout" in profile).toBe(false);
+  });
+});
+
+describe("normalize – declared breakpoints (:root custom properties)", () => {
+  it("mines --breakpoint-*/--screen-* names corroborated by the @media rules", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        customProps: {
+          "--breakpoint-md": "48rem",
+          "--screen-lg": "1024px",
+          // Declared but never gated on — a framework dump entry, dropped.
+          "--breakpoint-2xl": "1536px",
+        },
+        mediaBreakpoints: { "768": 3, "1024": 2 },
+      }),
+    );
+    expect(profile.declared?.breakpoints).toEqual({
+      "--breakpoint-md": 768,
+      "--screen-lg": 1024,
+    });
+  });
+
+  it("resolves rem against the 16px media basis even on a 62.5% page", () => {
+    // Inside @media, rem is the INITIAL font size — html { font-size: 62.5% }
+    // must not shrink 48rem to 480px.
+    const profile = normalize(
+      "u",
+      raw({
+        rootFontSizePx: 10,
+        customProps: { "--breakpoint-md": "48rem" },
+        mediaBreakpoints: { "768": 1 },
+      }),
+    );
+    expect(profile.declared?.breakpoints).toEqual({ "--breakpoint-md": 768 });
+  });
+
+  it("keeps one canonical (shortest) name per boundary", () => {
+    const profile = normalize(
+      "u",
+      raw({
+        customProps: {
+          "--breakpoint-medium-screens": "768px",
+          "--screen-md": "768px",
+        },
+        mediaBreakpoints: { "768": 2 },
+      }),
+    );
+    expect(profile.declared?.breakpoints).toEqual({ "--screen-md": 768 });
+  });
+});

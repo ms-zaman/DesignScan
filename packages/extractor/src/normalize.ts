@@ -391,6 +391,9 @@ const SPACING_EXCLUDED = new Set([
   "focus",
   "scrollbar",
 ]);
+// Tailwind v4 publishes --breakpoint-*; older systems use --screen-* (the v3
+// `screens` vocabulary). "media" alone is too generic to trust.
+const BREAKPOINT_NAME_SEGMENTS = new Set(["breakpoint", "screen", "screens"]);
 const FONT_NAME_SEGMENTS = new Set(["font", "family", "typeface"]);
 // --font-size-*, --font-weight-* etc. describe type metrics, not a family.
 const FONT_EXCLUDED = new Set([
@@ -442,12 +445,37 @@ function mineDeclaredScales(
       .filter(Boolean),
   );
 
+  // Boundaries the page's own @media rules really gate on — the
+  // painted-corroboration analog for declared breakpoints (a framework's full
+  // --breakpoint-* dump includes steps the site never reshapes at).
+  const observedBps = Object.keys(raw.mediaBreakpoints ?? {})
+    .map((k) => parseFloat(k))
+    .filter((n) => Number.isFinite(n));
+
   const radius: Record<string, number> = {};
   const spacing: Record<string, number> = {};
   const fontFamilies: Record<string, string> = {};
+  const breakpoints: Record<string, number> = {};
 
   for (const [name, value] of Object.entries(props)) {
     const segs = nameSegments(name);
+
+    if (segs.some((s) => BREAKPOINT_NAME_SEGMENTS.has(s))) {
+      // Breakpoint vars are consumed inside @media, where rem/em resolve
+      // against the INITIAL font size (16px) — never the page's root
+      // font-size, so rootPx would corrupt them on 62.5%-trick sites.
+      const px = lengthPx(value, 16);
+      // ±2 folds the desktop-first 767.98/767 family onto its boundary.
+      if (
+        px !== null &&
+        px >= 320 &&
+        px <= 1920 &&
+        observedBps.some((b) => Math.abs(b - px) <= 2)
+      ) {
+        breakpoints[name] = Math.round(px);
+      }
+      continue;
+    }
 
     if (segs.some((s) => RADIUS_NAME_SEGMENTS.has(s))) {
       const px = lengthPx(value, rootPx);
@@ -512,6 +540,8 @@ function mineDeclaredScales(
   const out: NonNullable<DesignProfile["declared"]> = {};
   if (Object.keys(radius).length) out.radius = byValue(radius, 12);
   if (Object.keys(spacing).length) out.spacing = byValue(spacing, 12);
+  if (Object.keys(breakpoints).length)
+    out.breakpoints = byValue(breakpoints, 8);
   if (Object.keys(fontFamilies).length) {
     out.fontFamilies = Object.fromEntries(
       // Same dedupe (one name per distinct stack), canonical-shortest first.
@@ -1002,6 +1032,56 @@ function controlMetrics(
   return { ...(button ? { button } : {}), ...(input ? { input } : {}) };
 }
 
+// ---- layout -------------------------------------------------------------------
+
+// The reshape boundaries the page's @media rules gate on. extract already
+// folded max-width conditions onto their min-width boundary, so here we just
+// merge the ±2px families (767/768/769 are one breakpoint), keep the most
+// gated-on steps, and present them ascending. Below 320px is sub-phone noise;
+// above 1920px is ultra-wide tweaking, not the responsive grid.
+function buildBreakpoints(map: Record<string, number>, max = 6): number[] {
+  const buckets = new Map<number, number>();
+  for (const [k, count] of Object.entries(map)) {
+    const v = Math.round(parseFloat(k));
+    if (!Number.isFinite(v) || v < 320 || v > 1920) continue;
+    buckets.set(v, (buckets.get(v) || 0) + count);
+  }
+  return byFreqThenValue(
+    clusterByFrequency(buckets, { absTol: 2, relTol: 0 }),
+    max,
+  );
+}
+
+// The content container's authored max-width: the height-weighted mode of the
+// centered-wrapper observations (extract weighted each by element height, so
+// the page-long main column dominates). Ties go to the larger value — the
+// outermost wrapper, not a nested inner column.
+function pickContainer(map: Record<string, number>): number | undefined {
+  let best: { px: number; weight: number } | undefined;
+  for (const [k, weight] of Object.entries(map)) {
+    const px = Math.round(parseFloat(k));
+    if (!Number.isFinite(px) || px < 600 || px > 1920) continue;
+    if (
+      !best ||
+      weight > best.weight ||
+      (weight === best.weight && px > best.px)
+    )
+      best = { px, weight };
+  }
+  return best?.px;
+}
+
+function buildLayout(raw: RawObservations): DesignProfile["layout"] {
+  const breakpointsPx = buildBreakpoints(raw.mediaBreakpoints ?? {});
+  const containerMaxWidthPx = pickContainer(raw.containerWidths ?? {});
+  if (!breakpointsPx.length && containerMaxWidthPx === undefined)
+    return undefined;
+  return {
+    ...(containerMaxWidthPx !== undefined ? { containerMaxWidthPx } : {}),
+    ...(breakpointsPx.length ? { breakpointsPx } : {}),
+  };
+}
+
 export function normalize(url: string, raw: RawObservations): DesignProfile {
   const background = pickBackground(raw.bgArea);
   const surfaces = pickSurfaces(raw, background);
@@ -1010,6 +1090,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
   const active = pickHoverInfo(raw.buttonActives, primary, background);
   const declared = mineDeclaredScales(raw);
   const controls = controlMetrics(raw, primary);
+  const layout = buildLayout(raw);
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
@@ -1064,6 +1145,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
     ...(raw.darkMechanism ? { darkMechanism: raw.darkMechanism } : {}),
     ...(declared ? { declared } : {}),
     ...(controls ? { controls } : {}),
+    ...(layout ? { layout } : {}),
   };
 }
 

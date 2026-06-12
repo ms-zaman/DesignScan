@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { resolveColorRoles, shadowTokens } from "./resolve.js";
+import {
+  breakpointEntries,
+  resolveColorRoles,
+  shadowTokens,
+} from "./resolve.js";
 import type { DesignProfile } from "./types.js";
 
 // shadowTokens only reads profile.shadows.
@@ -159,5 +163,33 @@ describe("shadowTokens – cleaning, naming, ordering", () => {
 
   it("returns an empty scale for a shadowless page", () => {
     expect(shadowTokens(withShadows())).toEqual([]);
+  });
+});
+
+// breakpointEntries only reads profile.layout + profile.declared.
+const withLayout = (
+  layout: DesignProfile["layout"],
+  declared?: DesignProfile["declared"],
+): DesignProfile => ({ layout, declared }) as DesignProfile;
+
+describe("breakpointEntries – named responsive grid", () => {
+  it("names steps sm-first and attaches the site's declared names", () => {
+    const entries = breakpointEntries(
+      withLayout(
+        { breakpointsPx: [640, 768, 1024] },
+        { breakpoints: { "--breakpoint-md": 768 } },
+      ),
+    );
+    expect(entries.map((e) => e.generic)).toEqual(["sm", "md", "lg"]);
+    expect(entries.map((e) => e.value)).toEqual(["640px", "768px", "1024px"]);
+    expect(entries[1].declared).toBe("--breakpoint-md");
+    expect(entries[0].declared).toBeUndefined();
+  });
+
+  it("returns [] when the profile has no layout observations", () => {
+    expect(breakpointEntries(withLayout(undefined))).toEqual([]);
+    expect(
+      breakpointEntries(withLayout({ containerMaxWidthPx: 1200 })),
+    ).toEqual([]);
   });
 });

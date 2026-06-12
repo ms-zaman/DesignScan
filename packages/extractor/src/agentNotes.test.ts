@@ -184,4 +184,28 @@ describe("agentNotes – hover micro-interaction", () => {
       "Primary button hover",
     );
   });
+
+  it("cites the observed container cap and breakpoints in a layout note", () => {
+    const p = profile({
+      layout: { containerMaxWidthPx: 1200, breakpointsPx: [640, 1024] },
+    });
+    const note = find(notesFor(p), "Layout");
+    expect(note).toBeDefined();
+    expect(note).toContain("`1200px`");
+    expect(note).toContain("640px, 1024px");
+    expect(note).toContain("@media (min-width: …)");
+  });
+
+  it("emits no layout note without observations", () => {
+    expect(find(notesFor(profile()), "Layout")).toBeUndefined();
+  });
+
+  it("lists declared breakpoints in the declared-tokens note", () => {
+    const p = profile({
+      layout: { breakpointsPx: [768] },
+      declared: { breakpoints: { "--breakpoint-md": 768 } },
+    });
+    const note = find(notesFor(p), "Declared tokens");
+    expect(note).toContain("breakpoints (`--breakpoint-md: 768px`)");
+  });
 });

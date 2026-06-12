@@ -17,8 +17,8 @@ export { generate } from "./generate.js";
 export { createMcpServer, runMcpServer } from "./mcp.js";
 export { normalize, profileWarnings } from "./normalize.js";
 export { preview } from "./preview.js";
-export type { ShadowToken } from "./resolve.js";
-export { shadowTokens } from "./resolve.js";
+export type { ScaleEntry, ShadowToken } from "./resolve.js";
+export { breakpointEntries, shadowTokens } from "./resolve.js";
 export type {
   ButtonSample,
   DesignProfile,

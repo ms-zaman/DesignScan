@@ -136,6 +136,7 @@ export interface ScaleEntry {
 export function scaleEntries(
   values: number[],
   declared?: Record<string, number>,
+  names: string[] = SCALE,
 ): ScaleEntry[] {
   // Invert declared (name -> px) to px -> name; shortest name wins (the
   // canonical alias), lexicographic on ties for determinism.
@@ -149,16 +150,34 @@ export function scaleEntries(
     )
       byPx.set(px, name);
   }
-  return scaleTokens(values).map(([generic, value]) => {
-    const px = Number.parseFloat(value);
-    const declaredName = byPx.get(px);
-    return {
-      px,
-      value,
-      generic,
-      ...(declaredName ? { declared: declaredName } : {}),
-    };
-  });
+  return values
+    .filter((n) => n < 9999)
+    .slice(0, names.length)
+    .map((px, idx) => {
+      const declaredName = byPx.get(px);
+      return {
+        px,
+        value: `${px}px`,
+        generic: names[idx],
+        ...(declaredName ? { declared: declaredName } : {}),
+      };
+    });
+}
+
+// Breakpoints start at "sm" — no mainstream system names a step below it, and
+// the smallest observed boundary IS the small-screen cutoff.
+export const BREAKPOINT_SCALE = ["sm", "md", "lg", "xl", "2xl", "3xl"];
+
+// The page's responsive breakpoints as named steps, with the site's own
+// --breakpoint-*/--screen-* names attached where declared (and corroborated
+// by normalize against the @media rules). One resolver so the DESIGN.md,
+// css/w3c emitters, and preview present the same grid.
+export function breakpointEntries(profile: DesignProfile): ScaleEntry[] {
+  return scaleEntries(
+    profile.layout?.breakpointsPx ?? [],
+    profile.declared?.breakpoints,
+    BREAKPOINT_SCALE,
+  );
 }
 
 // The site's own name for its primary font stack: the declared fontFamilies
