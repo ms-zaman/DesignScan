@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ms-zaman/designscan",
-  "description": "Extract any website's design system as tokens: colors with real observed hover/pressed states, typography scale, spacing, radii, shadows, and component specs — emitted as DESIGN.md, W3C Design Tokens JSON, or CSS custom properties.",
+  "description": "Extract a website’s design tokens (colors, type, spacing, shadows) as DESIGN.md, W3C, or CSS.",
   "title": "DesignScan",
   "repository": {
     "url": "https://github.com/ms-zaman/DesignScan",
