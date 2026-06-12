@@ -1,6 +1,7 @@
 {
   "name": "@designscan/extractor",
-  "version": "0.3.0",
+  "version": "0.3.1",
+  "mcpName": "io.github.ms-zaman/designscan",
   "description": "URL -> design tokens -> DESIGN.md. The extraction engine.",
   "type": "module",
   "license": "MIT",
