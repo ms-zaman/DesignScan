@@ -14,7 +14,13 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extract } from "./extract.js";
-import { type GalleryEntry, galleryHtml, galleryMarkdown } from "./gallery.js";
+import {
+  GALLERY_CSS,
+  GALLERY_CSS_FILENAME,
+  type GalleryEntry,
+  galleryHtml,
+  galleryMarkdown,
+} from "./gallery.js";
 import { generate } from "./generate.js";
 import { normalize, profileWarnings } from "./normalize.js";
 import { preview } from "./preview.js";
@@ -68,6 +74,7 @@ async function rebuild(): Promise<void> {
     entries.push({ name, profile: asProfile(stored) });
   }
   await writeFile(join(EXAMPLES_DIR, "index.html"), galleryHtml(entries));
+  await writeFile(join(EXAMPLES_DIR, GALLERY_CSS_FILENAME), GALLERY_CSS);
   await writeFile(join(EXAMPLES_DIR, "README.md"), galleryMarkdown(entries));
   process.stderr.write(
     `✓ rebuilt ${entries.length} brand(s) → examples/index.html + README.md\n`,

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   brandLabel,
+  GALLERY_CSS,
+  GALLERY_CSS_FILENAME,
   type GalleryEntry,
   galleryHtml,
   galleryMarkdown,
@@ -103,6 +105,21 @@ describe("galleryHtml", () => {
     // labels are the trimmed titles
     expect(html).toContain("<strong>Stripe</strong>");
     expect(html).toContain("<strong>Linear</strong>");
+  });
+
+  it("links the external stylesheet instead of inlining a <style> blob", () => {
+    const html = galleryHtml(entries);
+    expect(html).toContain(
+      `<link rel="stylesheet" href="${GALLERY_CSS_FILENAME}" />`,
+    );
+    expect(html).not.toContain("<style>");
+    // The card's per-brand colors are the one thing that stays inline — as
+    // CSS custom properties the stylesheet consumes, not hard-coded rules.
+    expect(html).toContain("--spec-bg:");
+    expect(html).toContain("--chip-bg:");
+    // The stylesheet itself carries the real rules + the nav-button fix.
+    expect(GALLERY_CSS).toContain(".nav-links a:not(.btn)");
+    expect(GALLERY_CSS).toContain(".btn-primary");
   });
 
   it("reflects the brand count in the SEO title/description", () => {

@@ -63,7 +63,7 @@ function sorted(entries: GalleryEntry[]): GalleryEntry[] {
 
 // A small "color dot + hex" entry for the card's metadata row.
 const hexChip = (hex: string | null): string =>
-  hex ? `<span><i style="background:${esc(hex)}"></i>${esc(hex)}</span>` : "";
+  hex ? `<span><i style="--dot:${esc(hex)}"></i>${esc(hex)}</span>` : "";
 
 // One card per brand, rendered as a *mini live specimen*: the top panel uses
 // the brand's own background + text, the name set in its text color, and
@@ -86,9 +86,9 @@ function card(entry: GalleryEntry): string {
   // a light tint (e.g. Stripe's #e2e4ff) must sit behind contrast-picked text,
   // not be used as faint outline text that vanishes on a light specimen.
   const chips = [
-    `<span class="chip" style="background:${esc(primary)};color:${onColor(primary)}">Primary</span>`,
+    `<span class="chip" style="--chip-bg:${esc(primary)};--chip-fg:${onColor(primary)}">Primary</span>`,
     c.secondary
-      ? `<span class="chip" style="background:${esc(c.secondary)};color:${onColor(c.secondary)}">Secondary</span>`
+      ? `<span class="chip" style="--chip-bg:${esc(c.secondary)};--chip-fg:${onColor(c.secondary)}">Secondary</span>`
       : "",
   ].join("");
   const hexes = [hexChip(c.primary), hexChip(c.background), hexChip(c.text)]
@@ -96,7 +96,7 @@ function card(entry: GalleryEntry): string {
     .join("");
 
   return `      <a class="card" href="${esc(entry.name)}.preview.html">
-        <div class="spec" style="background:${esc(bg)};color:${esc(ink)}">
+        <div class="spec" style="--spec-bg:${esc(bg)};--spec-ink:${esc(ink)}">
           <span class="spec-name">${esc(label)}</span>
           <span class="spec-btns">${chips}</span>
         </div>
@@ -109,7 +109,12 @@ function card(entry: GalleryEntry): string {
       </a>`;
 }
 
-const GALLERY_STYLE = `
+// The gallery stylesheet, written to its own file (examples/gallery.css) and
+// linked from index.html rather than dumped into an inline <style> blob — it's
+// a real, maintainable stylesheet. The only styling that stays inline is the
+// per-brand runtime color data on the cards, passed as CSS custom properties.
+export const GALLERY_CSS_FILENAME = "gallery.css";
+export const GALLERY_CSS = `
 :root{
   --maxw:1120px;
   /* Warm-paper editorial palette: no pure white, one confident accent, no
@@ -136,8 +141,10 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);
   display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px}
 .nav-links{display:flex;align-items:center;gap:24px}
-.nav-links a{text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
-.nav-links a:hover{color:var(--fg)}
+/* :not(.btn) so the plain-link color never out-specificities a .btn-primary
+   sitting in the nav (element+class beats a lone .btn-primary class). */
+.nav-links a:not(.btn){text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
+.nav-links a:not(.btn):hover{color:var(--fg)}
 
 .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:14px;font-weight:600;
   padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);
@@ -205,18 +212,22 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .fmt{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
 .fmt code{display:inline-block;margin-bottom:9px;font-weight:700;font-size:13px}
 .fmt p{margin:0;color:var(--muted);font-size:14px}
+.code + .formats{margin-top:24px}
 
 /* corpus — each card is a mini live specimen in the brand's own colors */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(264px,1fr));gap:22px}
 .card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);
   border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s,border-color .18s}
 .card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 18px 40px rgba(29,27,22,.14)}
+/* The per-brand colors are the one thing that can't live in a static sheet —
+   they're runtime data — so the card sets them as custom properties inline and
+   every actual rule stays here. */
 .spec{position:relative;padding:22px 20px 20px;min-height:128px;display:flex;flex-direction:column;justify-content:space-between;
-  border-bottom:1px solid var(--line)}
+  border-bottom:1px solid var(--line);background:var(--spec-bg);color:var(--spec-ink)}
 .spec .spec-name{font-weight:800;font-size:22px;letter-spacing:-.02em;line-height:1.1;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .spec .spec-btns{display:flex;gap:8px;margin-top:18px}
-.spec .chip{font:600 12px/1 'Inter',system-ui,sans-serif;padding:8px 13px;border-radius:8px;white-space:nowrap}
+.spec .chip{font:600 12px/1 'Inter',system-ui,sans-serif;padding:8px 13px;border-radius:8px;white-space:nowrap;background:var(--chip-bg);color:var(--chip-fg)}
 .meta{padding:15px 18px 6px;display:flex;flex-direction:column;gap:7px}
 .meta .m-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .meta strong{font-size:15.5px;letter-spacing:-.01em}
@@ -225,7 +236,7 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .meta .hexes{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:1px}
 .meta .hexes span{display:inline-flex;align-items:center;gap:6px;color:var(--muted);
   font:500 11.5px 'JetBrains Mono',ui-monospace,monospace}
-.meta .hexes i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(29,27,22,.12);flex:none}
+.meta .hexes i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(29,27,22,.12);flex:none;background:var(--dot)}
 .card .go{margin-top:auto;padding:11px 18px 15px;color:var(--accent-ink);font-size:13px;font-weight:700}
 
 /* footer — light, grounded on the recessed paper band */
@@ -371,7 +382,7 @@ export function galleryHtml(entries: GalleryEntry[]): string {
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
-<style>${GALLERY_STYLE}</style>
+<link rel="stylesheet" href="${GALLERY_CSS_FILENAME}" />
 </head>
 <body>
 <nav>
