@@ -1,6 +1,6 @@
 {
   "name": "@designscan/extractor",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "mcpName": "io.github.ms-zaman/designscan",
   "description": "URL -> design tokens -> DESIGN.md. The extraction engine.",
   "type": "module",
@@ -34,7 +34,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./cli": "./dist/cli.js"
   },
   "bin": {
     "designscan": "./dist/cli.js"

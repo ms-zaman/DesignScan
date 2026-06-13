@@ -1,6 +1,6 @@
 {
   "name": "designscan",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Any URL -> design tokens -> DESIGN.md. Short CLI name for @designscan/extractor: npx designscan <url>.",
   "type": "module",
   "license": "MIT",
@@ -33,6 +33,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@designscan/extractor": ">=0.3.1 <1"
+    "@designscan/extractor": ">=0.4.0 <1"
   }
 }
