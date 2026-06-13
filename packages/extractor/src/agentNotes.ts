@@ -33,7 +33,8 @@ export function agentNotes(
   levels: TypeLevel[],
 ): string[] {
   const roles = resolveColorRoles(profile);
-  const { background, text, primary, onPrimary, accent1, accent2 } = roles;
+  const { background, text, primary, onPrimary, secondary, accent1, accent2 } =
+    roles;
   const notes: string[] = [];
 
   const hasHeading = levels.some((l) => l.size >= 24);
@@ -108,6 +109,17 @@ export function agentNotes(
         `(${onPrimary}) text is ${r1(c)}:1${
           c >= AA_BODY ? " (passes AA)" : " — verify label legibility"
         }. Reserve \`primary\` for the single most important action per view.`,
+    );
+  }
+
+  // 4a. Secondary button — pairs with the primary so the agent keeps the
+  // hierarchy (one primary, the secondary for lesser actions) instead of
+  // styling every button the brand color.
+  if (secondary && secondary !== primary) {
+    notes.push(
+      `- **Secondary actions:** a second filled button (\`secondary\`, ${secondary}) ` +
+        `was observed beside the primary. Use it for cancel/back/alternate ` +
+        `actions and keep \`primary\` for the one main action.`,
     );
   }
 

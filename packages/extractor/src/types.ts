@@ -123,7 +123,7 @@ export interface InputSample {
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.7";
+export const PROFILE_SCHEMA_VERSION = "1.8";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -144,6 +144,14 @@ export interface DesignProfile {
     // Optional for back-compat with profiles captured before schema 1.3.
     border?: string | null;
     mutedSurface?: string | null;
+    // The second, distinct *filled* button style observed on the page — the
+    // secondary action (a neutral/tonal or alternate-brand button), with the
+    // text color seen on it. The page's most common opaque button fill that
+    // isn't the primary and reads as a real button. Absent when the only other
+    // buttons are ghost/outline (transparent — not expressible as a fill token)
+    // or none stand out. Optional (schema 1.8).
+    secondary?: string;
+    onSecondary?: string;
     // What the primary button's background becomes on hover, observed by
     // really hovering it (null when no button hover-shifts from the primary).
     // Optional for back-compat with profiles captured before schema 1.4.

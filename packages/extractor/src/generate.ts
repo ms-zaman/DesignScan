@@ -60,6 +60,8 @@ function buildColorsAndComponents(
   const {
     primary,
     onPrimary,
+    secondary,
+    onSecondary,
     primaryHover,
     primaryActive,
     background,
@@ -130,6 +132,21 @@ function buildColorsAndComponents(
     lines.push(`    backgroundColor: "${ref("primary-active")}"`);
     use("primary-active");
     lines.push(`    textColor: "${ref("on-primary")}"`);
+    if (btnLevel) lines.push(`    typography: "{typography.${btnLevel}}"`);
+    if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
+    if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
+    if (btnHeight) lines.push(`    height: ${btnHeight}px`);
+  }
+
+  // Secondary button — the second distinct filled button style observed beside
+  // the primary CTA (only present when one was found). Mirrors button-primary's
+  // shared geometry so the two read as a pair.
+  if (secondary && onSecondary) {
+    lines.push(`  ${cn("button-secondary")}:`);
+    lines.push(`    backgroundColor: "${ref("secondary")}"`);
+    use("secondary");
+    lines.push(`    textColor: "${ref("on-secondary")}"`);
+    use("on-secondary");
     if (btnLevel) lines.push(`    typography: "{typography.${btnLevel}}"`);
     if (roundedMd) lines.push(`    rounded: "{rounded.${roundedMd}}"`);
     if (spacingMd) lines.push(`    padding: "{spacing.${spacingMd}}"`);
@@ -222,6 +239,8 @@ function buildColorsAndComponents(
   const candidates: [string, string | null][] = [
     ["primary", primary],
     ["on-primary", onPrimary],
+    ["secondary", secondary],
+    ["on-secondary", onSecondary],
     ["primary-hover", primaryHover],
     ["primary-active", primaryActive],
     ["background", background],
@@ -246,6 +265,8 @@ function buildColorsAndComponents(
 const COLOR_LABEL: Record<string, string> = {
   primary: "the dominant brand/accent color, used for primary actions",
   "on-primary": "the readable foreground used on primary surfaces",
+  secondary: "the secondary action button's fill, beside the primary CTA",
+  "on-secondary": "the readable foreground on the secondary button",
   "primary-hover": "the primary button background as observed on hover",
   "primary-active":
     "the primary button background as observed while pressed (:active)",
@@ -269,7 +290,14 @@ const COLOR_LABEL: Record<string, string> = {
 const COLOR_GROUPS: [string, string[]][] = [
   [
     "Brand & actions",
-    ["primary", "on-primary", "primary-hover", "primary-active"],
+    [
+      "primary",
+      "on-primary",
+      "secondary",
+      "on-secondary",
+      "primary-hover",
+      "primary-active",
+    ],
   ],
   ["Surfaces & text", ["background", "text", "border", "muted-surface"]],
   ["Accents", ["accent-1", "accent-2", "on-accent-2"]],
@@ -573,6 +601,13 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
           "the press physically reshapes the button, not just its color.",
       );
     }
+  }
+  if (cmap.secondary) {
+    body.push(
+      "- **Secondary button:** the second filled style observed beside the primary — " +
+        "`{colors.secondary}` background with `{colors.on-secondary}` text, for " +
+        "secondary actions (cancel, back, alternate CTA).",
+    );
   }
   if (cmap.background && cmap.text) {
     body.push(

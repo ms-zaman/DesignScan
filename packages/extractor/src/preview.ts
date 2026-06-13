@@ -60,6 +60,8 @@ function colorsSection(roles: ColorRoles): string {
   const swatches: [string, string | null][] = [
     ["primary", roles.primary],
     ["on-primary", roles.onPrimary],
+    ["secondary", roles.secondary],
+    ["on-secondary", roles.onSecondary],
     ["primary-hover", roles.primaryHover],
     ["primary-active", roles.primaryActive],
     ["background", roles.background],
@@ -278,6 +280,14 @@ function componentsSection(
     <span class="cmp-label">button-primary${stateLabels}</span>
     <button${hover}${press} style="align-self:flex-start;background:${esc(roles.primary)};color:${esc(roles.onPrimary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${btnSize}/1 ${bodyFont};${btnH}cursor:pointer">Primary action</button>
   </div>`);
+
+  // button-secondary — the second filled style, when one was observed.
+  if (roles.secondary && roles.onSecondary) {
+    parts.push(`<div class="cmp">
+    <span class="cmp-label">button-secondary</span>
+    <button style="align-self:flex-start;background:${esc(roles.secondary)};color:${esc(roles.onSecondary)};border:0;border-radius:${rMd};padding:${pMd} calc(${pMd} * 2);font:600 ${btnSize}/1 ${bodyFont};${btnH}cursor:pointer">Secondary action</button>
+  </div>`);
+  }
 
   // surface / card + input + body-text (need background & text); card edge and
   // input border painted in the extracted `border` color.

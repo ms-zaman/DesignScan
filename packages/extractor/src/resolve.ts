@@ -208,6 +208,10 @@ export function declaredFontName(profile: DesignProfile): string | null {
 export interface ColorRoles {
   primary: string;
   onPrimary: string;
+  // The second distinct filled button style (secondary action), with a legible
+  // foreground. Both null when no qualifying secondary button was observed.
+  secondary: string | null;
+  onSecondary: string | null;
   // Observed hover shift of the primary button (null when none was seen).
   // Resolved upstream in normalize by physically hovering the button.
   primaryHover: string | null;
@@ -273,9 +277,13 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
     ? (profile.colors.primaryActive ?? null)
     : null;
 
+  const secondary = profile.colors.secondary ?? null;
   return {
     primary,
     onPrimary: onColor(primary),
+    secondary,
+    onSecondary:
+      profile.colors.onSecondary ?? (secondary ? onColor(secondary) : null),
     primaryHover,
     primaryActive,
     background,

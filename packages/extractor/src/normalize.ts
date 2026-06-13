@@ -9,6 +9,7 @@ import {
   saturation,
   toHex,
 } from "./color.js";
+import { onColor } from "./resolve.js";
 import type { DesignProfile, HoverSample, RawObservations } from "./types.js";
 import { PROFILE_SCHEMA_VERSION } from "./types.js";
 
@@ -1033,6 +1034,70 @@ function controlMetrics(
   return { ...(button ? { button } : {}), ...(input ? { input } : {}) };
 }
 
+// ---- secondary button --------------------------------------------------------
+// The page's second, distinct *filled* button — the secondary action sitting
+// beside the primary CTA (a neutral/tonal button, or an alternate-brand fill).
+// We can only express a fill in the spec (no border/transparent token), so
+// ghost/outline secondaries are left out by design: we tally opaque button
+// backgrounds, drop the ones that ARE the primary (or its hover/active, or the
+// page background), and take the most common remaining fill that reads as a
+// real button (visibly distinct from the page). Its text color is what was
+// actually painted on it when that reads legibly, else a contrast-picked
+// foreground. Requires ≥2 occurrences so a one-off colored button isn't
+// mistaken for a system-level secondary.
+function pickSecondaryButton(
+  raw: RawObservations,
+  primary: string | null,
+  background: string | null,
+  primaryHover: string | null,
+  primaryActive: string | null,
+): { secondary: string; onSecondary: string } | undefined {
+  if (!primary) return undefined;
+  const exclude = new Set(
+    [primary, primaryHover, primaryActive, background].filter(
+      (h): h is string => !!h,
+    ),
+  );
+  const bg = background ? parseColor(background) : null;
+  const bgLum = bg ? luminance(bg) : null;
+
+  const byBg = new Map<string, { count: number; texts: Map<string, number> }>();
+  for (const b of raw.buttons) {
+    const c = parseColor(b.bg);
+    if (!c || c.a < 0.9) continue; // fills only — ghost/outline can't be a token
+    const hex = toHex(c);
+    if (exclude.has(hex)) continue;
+    // Must be visibly distinct from the page itself (a "button" that resolves
+    // to the background is a ghost/transparent one showing through).
+    if (bgLum !== null && contrastRatio(luminance(c), bgLum) < 1.12) continue;
+    const e = byBg.get(hex) ?? { count: 0, texts: new Map() };
+    e.count++;
+    const tc = parseColor(b.color);
+    if (tc && tc.a >= 0.9) {
+      const th = toHex(tc);
+      e.texts.set(th, (e.texts.get(th) ?? 0) + 1);
+    }
+    byBg.set(hex, e);
+  }
+
+  const top = [...byBg.entries()]
+    .filter(([, e]) => e.count >= 2)
+    .sort((a, b) => b[1].count - a[1].count || (a[0] < b[0] ? -1 : 1))[0];
+  if (!top) return undefined;
+  const [secondary, info] = top;
+
+  // Observed text wins when it's legible on the fill; otherwise a safe pick.
+  const modalText = [...info.texts.entries()].sort(
+    (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1),
+  )[0]?.[0];
+  const secLum = luminance(parseColor(secondary)!);
+  const onSecondary =
+    modalText && contrastRatio(luminance(parseColor(modalText)!), secLum) >= 3
+      ? modalText
+      : onColor(secondary);
+  return { secondary, onSecondary };
+}
+
 // ---- semantic status colors --------------------------------------------------
 // The declaredPrimary lesson applied to feedback colors. Modern design systems
 // publish error/success/warning/info outright (--color-error,
@@ -1239,6 +1304,13 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
   const controls = controlMetrics(raw, primary);
   const layout = buildLayout(raw);
   const status = pickStatusColors(raw);
+  const secondaryBtn = pickSecondaryButton(
+    raw,
+    primary,
+    background,
+    hover.color,
+    active.color,
+  );
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
@@ -1253,6 +1325,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       mutedSurface: surfaces.mutedSurface,
       primaryHover: hover.color,
       primaryActive: active.color,
+      ...(secondaryBtn ?? {}),
       ...(status ? { status } : {}),
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },

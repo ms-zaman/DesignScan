@@ -1621,3 +1621,67 @@ describe("normalize – declared breakpoints (:root custom properties)", () => {
     expect(profile.declared?.breakpoints).toEqual({ "--screen-md": 768 });
   });
 });
+
+describe("normalize – secondary button (second filled style)", () => {
+  const whitePage = { "rgb(255, 255, 255)": 100000 };
+  const purple = (color = "rgb(255, 255, 255)") =>
+    button({ bg: "rgb(83, 58, 253)", color });
+  const grey = (color = "rgb(20, 20, 20)") =>
+    button({ bg: "rgb(238, 238, 238)", color });
+
+  it("detects the most common non-primary opaque button fill", () => {
+    const p = normalize(
+      "u",
+      raw({ bgArea: whitePage, buttons: [purple(), purple(), grey(), grey()] }),
+    );
+    expect(p.colors.primary).toBe("#533afd");
+    expect(p.colors.secondary).toBe("#eeeeee");
+    expect(p.colors.onSecondary).toBe("#141414"); // observed dark text, legible
+  });
+
+  it("needs >= 2 occurrences — a one-off non-primary button doesn't qualify", () => {
+    const p = normalize(
+      "u",
+      raw({ bgArea: whitePage, buttons: [purple(), purple(), grey()] }),
+    );
+    expect(p.colors.secondary).toBeUndefined();
+  });
+
+  it("skips a button whose fill is ~the page background (ghost/transparent)", () => {
+    const ghost = button({
+      bg: "rgb(255, 255, 255)",
+      color: "rgb(83, 58, 253)",
+    });
+    const p = normalize(
+      "u",
+      raw({ bgArea: whitePage, buttons: [purple(), purple(), ghost, ghost] }),
+    );
+    expect(p.colors.secondary).toBeUndefined();
+  });
+
+  it("falls back to a contrast-picked foreground when the observed text is illegible", () => {
+    // White text on a light-grey fill is unreadable → onColor picks dark.
+    const p = normalize(
+      "u",
+      raw({
+        bgArea: whitePage,
+        buttons: [
+          purple(),
+          purple(),
+          grey("rgb(255, 255, 255)"),
+          grey("rgb(255, 255, 255)"),
+        ],
+      }),
+    );
+    expect(p.colors.secondary).toBe("#eeeeee");
+    expect(p.colors.onSecondary).toBe("#111111");
+  });
+
+  it("is absent when there is no second button style", () => {
+    const p = normalize(
+      "u",
+      raw({ bgArea: whitePage, buttons: [purple(), purple()] }),
+    );
+    expect(p.colors.secondary).toBeUndefined();
+  });
+});
