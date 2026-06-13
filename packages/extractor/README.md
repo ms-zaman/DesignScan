@@ -26,8 +26,8 @@ URL
 ## Install
 
 ```bash
-# one-off, no install
-npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md
+# one-off, no install (the `designscan` package is a thin alias for this one)
+npx designscan stripe.com --md --out stripe.DESIGN.md
 
 # or install the CLI / library
 npm i @designscan/extractor

@@ -132,7 +132,7 @@ describe("galleryHtml", () => {
     // front door): runnable command, pipeline explanation, agent setup.
     expect(html).toContain("Quick start");
     expect(html).toContain(
-      "npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md",
+      "npx designscan stripe.com --md --out stripe.DESIGN.md",
     );
     expect(html).toContain("How it works");
     expect(html).toContain("mcpServers");

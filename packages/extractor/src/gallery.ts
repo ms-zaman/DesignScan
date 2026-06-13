@@ -137,11 +137,11 @@ const LANDING = `
 npx playwright install chromium
 
 <span class="c"># any URL &rarr; DESIGN.md (Google Labs open format)</span>
-npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md
+npx designscan stripe.com --md --out stripe.DESIGN.md
 
 <span class="c"># other formats, themes, and a visual proof sheet</span>
-npx @designscan/extractor vercel.com --format w3c --out vercel.tokens.json
-npx @designscan/extractor linear.app --theme both --md --preview --out linear.DESIGN.md</pre>
+npx designscan vercel.com --format w3c --out vercel.tokens.json
+npx designscan linear.app --theme both --md --preview --out linear.DESIGN.md</pre>
     <div class="formats">
       <span><code>--md</code> DESIGN.md — YAML tokens + prose, passes the official linter</span>
       <span><code>--format w3c</code> W3C Design Tokens JSON (Style Dictionary, Tokens Studio)</span>

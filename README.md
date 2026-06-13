@@ -45,16 +45,18 @@ automatically so the corpus only holds trustworthy specs.
 | Path | What |
 |------|------|
 | [`packages/extractor`](packages/extractor) | The extraction + generation engine (Playwright → tokens → `DESIGN.md`). |
+| [`packages/designscan`](packages/designscan) | The short npm name — a thin CLI shim over the engine (`npx designscan <url>`). |
 | [`examples/`](examples) | The brand corpus — `DESIGN.md` + HTML preview + token JSON per brand, with a gallery index. |
 
 ## Install (as a CLI / library)
 
 The engine ships as the publishable [`@designscan/extractor`](packages/extractor)
-package — a `designscan` CLI and a typed library.
+package — a `designscan` CLI and a typed library — with
+[`designscan`](packages/designscan) as its short npx alias.
 
 ```bash
 # one-off, no install
-npx @designscan/extractor stripe.com --md --out stripe.DESIGN.md
+npx designscan stripe.com --md --out stripe.DESIGN.md
 
 # or install the CLI
 npm i -g @designscan/extractor
