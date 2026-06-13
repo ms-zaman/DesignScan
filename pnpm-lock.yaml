@@ -15,6 +15,12 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
 
+  packages/designscan:
+    dependencies:
+      '@designscan/extractor':
+        specifier: '>=0.3.1 <1'
+        version: 0.3.1
+
   packages/extractor:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -105,6 +111,11 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@designscan/extractor@0.3.1':
+    resolution: {integrity: sha512-NZ8xi0ergYZmvZJkGNdU5/6om7+9Mm9CGy8qz2AvCqB9m9puLy4Bmm74j96IGHfUoUbrTHwnbrB8qXAJ+qd6Ng==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1654,6 +1665,16 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.4.16':
     optional: true
+
+  '@designscan/extractor@0.3.1':
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(zod@4.4.3)
+      commander: 12.1.0
+      playwright: 1.60.0
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - supports-color
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

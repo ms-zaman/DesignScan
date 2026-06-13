@@ -1,0 +1,38 @@
+{
+  "name": "designscan",
+  "version": "0.1.0",
+  "description": "Any URL -> design tokens -> DESIGN.md. Short CLI name for @designscan/extractor: npx designscan <url>.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "design-tokens",
+    "design.md",
+    "css",
+    "extractor",
+    "design-system",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ms-zaman/DesignScan.git",
+    "directory": "packages/designscan"
+  },
+  "homepage": "https://github.com/ms-zaman/DesignScan#readme",
+  "bugs": "https://github.com/ms-zaman/DesignScan/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "designscan": "./bin/designscan.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "dependencies": {
+    "@designscan/extractor": ">=0.3.1 <1"
+  }
+}
