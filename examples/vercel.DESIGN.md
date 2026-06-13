@@ -11,6 +11,8 @@ colors:
   accent-1: "#666666"
   accent-2: "#8f8f8f"
   on-accent-2: "#111111"
+  error: "#ee0000"
+  warning: "#f5a623"
 typography:
   headline-lg:
     fontFamily: "Geist, Arial, sans-serif"
@@ -56,6 +58,13 @@ shadows:
   sm: "rgb(235, 235, 235) 0px 0px 0px 1px"
   md: "rgba(0, 0, 0, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 2px 2px 0px, rgb(250, 250, 250) 0px 0px 0px 1px"
   lg: "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 114, 245) 0px 0px 0px 4px"
+breakpoints:
+  sm: 401px
+  md: 601px
+  lg: 641px
+  xl: 769px
+  2xl: 961px
+  3xl: 1200px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -91,11 +100,17 @@ components:
     backgroundColor: "{colors.accent-2}"
     textColor: "{colors.on-accent-2}"
     rounded: "{rounded.full}"
+  error-message:
+    textColor: "{colors.error}"
+    typography: "{typography.body}"
+  warning-message:
+    textColor: "{colors.warning}"
+    typography: "{typography.body}"
 ---
 
 ## Overview
 
-Auto-extracted from https://vercel.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://vercel.com by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -116,11 +131,20 @@ Auto-extracted from https://vercel.com by DesignScan on 2026-06-11. These tokens
 - **accent-2 (#8f8f8f):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
 
+**Feedback**
+
+- **error (#ee0000):** the feedback color for errors, destructive actions, and invalid input.
+- **warning (#f5a623):** the feedback color for warnings and caution states.
+
 ## Typography
 
 Primary typeface: **Geist**, with geistMonoFont. Sizes range 12px–32px across 5 level(s); weights observed: 400, 500, 600.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1080px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 401px, 601px, 641px, 769px, 961px, 1200px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 40px — usable for padding, gaps, and margins.
 
@@ -145,6 +169,7 @@ Corner radii observed: 2px, 4px, 6px. Use the smaller values for inputs and chip
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
+- **Feedback messages:** `{colors.error}`, `{colors.warning}` for validation, alerts, and status text/icons (the site's declared semantic colors).
 
 ## Do's and Don'ts
 
@@ -161,4 +186,6 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#666666) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Status colors:** the site declares `error` (#ee0000), `warning` (#f5a623). Use these for validation, alerts, and status icons/text at full strength; for alert *backgrounds* tint them (~8–12% alpha) rather than filling with the solid color, and pair solid fills with a contrast-checked foreground.
+- **Layout:** center page content in a container capped at `1080px`; write `@media (min-width: …)` rules at the observed boundaries (401px, 601px, 641px, 769px, 961px, 1200px), not at a framework's defaults.
 - **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--geist-radius: 6px`); spacing (`--spacing: 4px`, `--geist-space-2x: 8px`, `--geist-gap-half: 12px`, `--geist-space-4x: 16px`); fonts (`--font-mono`, `--font-sans`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

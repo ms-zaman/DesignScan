@@ -75,6 +75,13 @@ shadows:
   md: "rgba(0, 0, 0, 0.03) 0px 1.2px 0px 0px"
   lg: "rgba(0, 0, 0, 0.4) 0px 2px 4px 0px"
   xl: "rgba(0, 0, 0, 0.2) 0px 0px 12px 0px inset"
+breakpoints:
+  sm: 641px
+  md: 701px
+  lg: 769px
+  xl: 929px
+  2xl: 1025px
+  3xl: 1281px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -115,7 +122,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://linear.app by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://linear.app by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -142,6 +149,10 @@ Auto-extracted from https://linear.app by DesignScan on 2026-06-11. These tokens
 Primary typeface: **Inter Variable**, with Berkeley Mono. Sizes range 13px–64px across 7 level(s); weights observed: 300, 400, 510, 590.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1436px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 641px, 701px, 769px, 929px, 1025px, 1281px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 28px — usable for padding, gaps, and margins.
 
@@ -183,4 +194,5 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#62666d) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Layout:** center page content in a container capped at `1436px`; write `@media (min-width: …)` rules at the observed boundaries (641px, 701px, 769px, 929px, 1025px, 1281px), not at a framework's defaults.
 - **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-4: 4px`, `--radius-6: 6px`, `--radius-8: 8px`, `--radius-12: 12px`); spacing (`--editor-last-invisible-paragraph-spacing: 10px`, `--editor-block-spacing: 16px`); fonts (`--font-regular`, `--font-monospace`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

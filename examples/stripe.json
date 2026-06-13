@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://stripe.com",
   "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
-  "fetchedAt": "2026-06-11T09:28:48.170Z",
+  "fetchedAt": "2026-06-13T18:43:08.639Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -12,6 +12,12 @@
     "mutedSurface": "#f8fafd",
     "primaryHover": "#4032c8",
     "primaryActive": null,
+    "secondary": "#e2e4ff",
+    "onSecondary": "#533afd",
+    "status": {
+      "error": "#d8351e",
+      "success": "#00b261"
+    },
     "palette": [
       {
         "hex": "#50617a",
@@ -19,19 +25,19 @@
       },
       {
         "hex": "#061b31",
-        "count": 114
-      },
-      {
-        "hex": "#64748d",
-        "count": 51
+        "count": 113
       },
       {
         "hex": "#ffffff",
-        "count": 49
+        "count": 52
+      },
+      {
+        "hex": "#64748d",
+        "count": 52
       },
       {
         "hex": "#533afd",
-        "count": 48
+        "count": 49
       },
       {
         "hex": "#273951",
@@ -51,14 +57,14 @@
       },
       {
         "hex": "#f8fafd",
-        "count": 9
+        "count": 10
       },
       {
         "hex": "#ff6118",
         "count": 8
       },
       {
-        "hex": "#7d8ba4",
+        "hex": "#6480b2",
         "count": 7
       },
       {
@@ -159,5 +165,16 @@
       "fontSizePx": 16,
       "heightPx": 48
     }
+  },
+  "layout": {
+    "containerMaxWidthPx": 1266,
+    "breakpointsPx": [
+      480,
+      600,
+      640,
+      840,
+      940,
+      1300
+    ]
   }
 }

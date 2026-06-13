@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://sentry.io",
   "title": "Application Performance Monitoring & Error Tracking Software | Sentry",
-  "fetchedAt": "2026-06-11T09:28:34.099Z",
+  "fetchedAt": "2026-06-13T18:42:28.526Z",
   "theme": "light",
   "colors": {
     "background": "#1f1633",
@@ -133,6 +133,14 @@
     "rgba(0, 0, 0, 0.08) 0px 2px 8px 0px",
     "rgba(0, 0, 0, 0.1) 0px 1px 3px 0px inset"
   ],
+  "declared": {
+    "breakpoints": {
+      "--breakpoint-sm": 576,
+      "--breakpoint-md": 768,
+      "--breakpoint-lg": 992,
+      "--breakpoint-xl": 1152
+    }
+  },
   "controls": {
     "button": {
       "fontSizePx": 12,
@@ -142,5 +150,16 @@
       "fontSizePx": 16,
       "heightPx": 42
     }
+  },
+  "layout": {
+    "containerMaxWidthPx": 1152,
+    "breakpointsPx": [
+      576,
+      641,
+      768,
+      992,
+      1024,
+      1152
+    ]
   }
 }

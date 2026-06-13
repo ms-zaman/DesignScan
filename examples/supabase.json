@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://supabase.com",
   "title": "Supabase | The Postgres Development Platform.",
-  "fetchedAt": "2026-06-11T09:29:02.315Z",
+  "fetchedAt": "2026-06-13T18:43:22.136Z",
   "theme": "light",
   "colors": {
     "background": "#fcfcfc",
@@ -12,6 +12,10 @@
     "mutedSurface": null,
     "primaryHover": null,
     "primaryActive": null,
+    "status": {
+      "error": "#e54d2e",
+      "warning": "#dc7b18"
+    },
     "palette": [
       {
         "hex": "#707070",
@@ -123,6 +127,10 @@
       "--spacing-lg": 32,
       "--spacing-xl": 64
     },
+    "breakpoints": {
+      "--breakpoint-lg": 1024,
+      "--breakpoint-2xl": 1536
+    },
     "fontFamilies": {
       "--default-font-family": "Circular,custom-font,Helvetica Neue,Helvetica,Arial,sans-serif",
       "--default-mono-font-family": "Source Code Pro,Office Code Pro,Menlo,monospace"
@@ -137,5 +145,16 @@
       "fontSizePx": 14,
       "heightPx": 36
     }
+  },
+  "layout": {
+    "containerMaxWidthPx": 1280,
+    "breakpointsPx": [
+      480,
+      640,
+      768,
+      1024,
+      1280,
+      1536
+    ]
   }
 }

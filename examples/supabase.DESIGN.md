@@ -11,6 +11,8 @@ colors:
   accent-2: "#000000"
   on-accent-2: "#ffffff"
   border: "#dfdfdf"
+  error: "#e54d2e"
+  warning: "#dc7b18"
 typography:
   display:
     fontFamily: "Circular, custom-font, \"Helvetica Neue\", Helvetica, Arial, sans-serif"
@@ -63,6 +65,13 @@ spacing:
   3xl: 32px
 shadows:
   sm: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px"
+breakpoints:
+  sm: 480px
+  md: 640px
+  lg: 768px
+  xl: 1024px
+  2xl: 1280px
+  3xl: 1536px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -96,11 +105,17 @@ components:
   divider:
     backgroundColor: "{colors.border}"
     height: 1px
+  error-message:
+    textColor: "{colors.error}"
+    typography: "{typography.body}"
+  warning-message:
+    textColor: "{colors.warning}"
+    typography: "{typography.body}"
 ---
 
 ## Overview
 
-Auto-extracted from https://supabase.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://supabase.com by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -121,11 +136,20 @@ Auto-extracted from https://supabase.com by DesignScan on 2026-06-11. These toke
 - **accent-2 (#000000):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
 
+**Feedback**
+
+- **error (#e54d2e):** the feedback color for errors, destructive actions, and invalid input.
+- **warning (#dc7b18):** the feedback color for warnings and caution states.
+
 ## Typography
 
 Primary typeface: **Circular**, with Source Code Pro. Sizes range 12px–72px across 7 level(s); weights observed: 400, 500.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1280px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 480px, 640px, 768px, 1024px, 1280px, 1536px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 32px — usable for padding, gaps, and margins.
 
@@ -148,6 +172,7 @@ Corner radii observed: 6px, 8px, 12px, 16px. Use the smaller values for inputs a
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
 - **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.
+- **Feedback messages:** `{colors.error}`, `{colors.warning}` for validation, alerts, and status text/icons (the site's declared semantic colors).
 
 ## Do's and Don'ts
 
@@ -164,4 +189,6 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#171717) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
-- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-md: 6px`, `--radius-lg: 8px`, `--radius-xl: 12px`, `--radius-2xl: 16px`); spacing (`--spacing: 4px`, `--spacing-sm: 8px`, `--spacing-md: 16px`, `--spacing-lg: 32px`); fonts (`--default-font-family`, `--default-mono-font-family`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.
+- **Status colors:** the site declares `error` (#e54d2e), `warning` (#dc7b18). Use these for validation, alerts, and status icons/text at full strength; for alert *backgrounds* tint them (~8–12% alpha) rather than filling with the solid color, and pair solid fills with a contrast-checked foreground.
+- **Layout:** center page content in a container capped at `1280px`; write `@media (min-width: …)` rules at the observed boundaries (480px, 640px, 768px, 1024px, 1280px, 1536px), not at a framework's defaults.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-md: 6px`, `--radius-lg: 8px`, `--radius-xl: 12px`, `--radius-2xl: 16px`); spacing (`--spacing: 4px`, `--spacing-sm: 8px`, `--spacing-md: 16px`, `--spacing-lg: 32px`); breakpoints (`--breakpoint-lg: 1024px`, `--breakpoint-2xl: 1536px`); fonts (`--default-font-family`, `--default-mono-font-family`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

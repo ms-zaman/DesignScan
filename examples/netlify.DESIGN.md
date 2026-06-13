@@ -5,6 +5,8 @@ description: "Auto-extracted from https://netlify.com by DesignScan."
 colors:
   primary: "#2e51ed"
   on-primary: "#ffffff"
+  secondary: "#32e6e2"
+  on-secondary: "#181a1c"
   background: "#ffffff"
   text: "#353a3e"
   accent-1: "#181a1c"
@@ -12,6 +14,9 @@ colors:
   on-accent-2: "#111111"
   border: "#e9ebed"
   muted-surface: "#f6f6f7"
+  success: "#bef9c6"
+  warning: "#f6e0a5"
+  info: "#cde2ff"
 typography:
   display:
     fontFamily: "\"Instrument Sans\", system-ui, Helvetica, sans-serif"
@@ -78,10 +83,22 @@ shadows:
   sm: "rgb(128, 128, 128) 0px 0px 5px 0px"
   md: "color(srgb 0 0 0 / 0.25) 0px 4px 12px 0px"
   lg: "color(srgb 0 0 0 / 0.07) 0px 16px 24px 0px, color(srgb 0 0 0 / 0.06) 0px 6px 30px 0px, color(srgb 0 0 0 / 0.1) 0px 8px 10px 0px"
+breakpoints:
+  sm: 401px
+  md: 426px
+  lg: 481px
+  xl: 641px
+  2xl: 897px
+  3xl: 1085px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.md}"
+  button-secondary:
+    backgroundColor: "{colors.secondary}"
+    textColor: "{colors.on-secondary}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
   surface:
@@ -114,11 +131,20 @@ components:
     textColor: "{colors.text}"
     rounded: "{rounded.lg}"
     padding: "{spacing.lg}"
+  success-message:
+    textColor: "{colors.success}"
+    typography: "{typography.body}"
+  warning-message:
+    textColor: "{colors.warning}"
+    typography: "{typography.body}"
+  info-message:
+    textColor: "{colors.info}"
+    typography: "{typography.body}"
 ---
 
 ## Overview
 
-Auto-extracted from https://netlify.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://netlify.com by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -126,6 +152,8 @@ Auto-extracted from https://netlify.com by DesignScan on 2026-06-11. These token
 
 - **primary (#2e51ed):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+- **secondary (#32e6e2):** the secondary action button's fill, beside the primary CTA.
+- **on-secondary (#181a1c):** the readable foreground on the secondary button.
 
 **Surfaces & text**
 
@@ -140,11 +168,21 @@ Auto-extracted from https://netlify.com by DesignScan on 2026-06-11. These token
 - **accent-2 (#89ddff):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
 
+**Feedback**
+
+- **success (#bef9c6):** the feedback color for success and confirmation states.
+- **warning (#f6e0a5):** the feedback color for warnings and caution states.
+- **info (#cde2ff):** the feedback color for informational notices.
+
 ## Typography
 
 Primary typeface: **Instrument Sans**, with Martian Mono, Figtree. Sizes range 12px–64px across 9 level(s); weights observed: 400, 500, 600, 700, 800.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1000px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 401px, 426px, 481px, 641px, 897px, 1085px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 48px — usable for padding, gaps, and margins.
 
@@ -165,11 +203,13 @@ Corner radii observed: 2px, 4px, 6px, 8px, 12px, 16px. Use the smaller values fo
 ## Components
 
 - **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`.
+- **Secondary button:** the second filled style observed beside the primary — `{colors.secondary}` background with `{colors.on-secondary}` text, for secondary actions (cancel, back, alternate CTA).
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
 - **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.
 - **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.
+- **Feedback messages:** `{colors.success}`, `{colors.warning}`, `{colors.info}` for validation, alerts, and status text/icons (the site's declared semantic colors).
 
 ## Do's and Don'ts
 
@@ -183,7 +223,10 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Headings:** the `text` token (#353a3e) sits at 11.5:1 on `background` — fine for body copy, but it reads muted at display sizes. For large headings use `accent-1` (#181a1c, 17.5:1) to keep visual hierarchy. Reserve `text` for paragraph and UI copy.
 - **Fonts:** the brand face `Instrument Sans` likely isn't installed locally. Use the full stack `"Instrument Sans", system-ui, Helvetica, sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
 - **Primary actions:** `primary` (#2e51ed) with `on-primary` (#ffffff) text is 6.0:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Secondary actions:** a second filled button (`secondary`, #32e6e2) was observed beside the primary. Use it for cancel/back/alternate actions and keep `primary` for the one main action.
 - **Links:** use `accent-1` (#181a1c) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Status colors:** the site declares `success` (#bef9c6), `warning` (#f6e0a5), `info` (#cde2ff). Use these for validation, alerts, and status icons/text at full strength; for alert *backgrounds* tint them (~8–12% alpha) rather than filling with the solid color, and pair solid fills with a contrast-checked foreground.
+- **Layout:** center page content in a container capped at `1000px`; write `@media (min-width: …)` rules at the observed boundaries (401px, 426px, 481px, 641px, 897px, 1085px), not at a framework's defaults.
 - **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-xs: 2px`, `--radius-s: 4px`, `--radius-m: 6px`, `--border-radius-3: 8px`); spacing (`--space-3xs: 4px`, `--space-2xs: 8px`, `--space-xs: 12px`, `--space-s: 16px`); fonts (`--font-heading`, `--font-primary`, `--font-monospace`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

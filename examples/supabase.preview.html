@@ -55,7 +55,7 @@ figcaption code{color:var(--muted);font-size:11px}
 <header>
   <div>
     <h1>Supabase | The Postgres Development Platform.</h1>
-    <div class="sub">DesignScan preview · <a href="https://supabase.com">https://supabase.com</a> · 2026-06-11</div>
+    <div class="sub">DesignScan preview · <a href="https://supabase.com">https://supabase.com</a> · 2026-06-13</div>
   </div>
   
 </header>
@@ -91,6 +91,14 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#dfdfdf"></div>
         <figcaption><b>border</b><code>#dfdfdf</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#e54d2e"></div>
+        <figcaption><b>error</b><code>#e54d2e</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#dc7b18"></div>
+        <figcaption><b>warning</b><code>#dc7b18</code></figcaption>
       </figure></div></section>
 <section><h2>Typography</h2><div class="type-list"><div class="type-row">
         <div class="type-meta"><b>display</b><span>72px · 400 · lh 1.2</span></div>
@@ -131,7 +139,34 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="scale-item"><div class="radius-box" style="border-radius:8px"></div><figcaption><b>sm</b><code>8px</code></figcaption></figure>
 <figure class="scale-item"><div class="radius-box" style="border-radius:12px"></div><figcaption><b>md</b><code>12px</code></figcaption></figure>
 <figure class="scale-item"><div class="radius-box" style="border-radius:16px"></div><figcaption><b>lg</b><code>16px</code></figcaption></figure></div></section>
-
+<section><h2>Layout</h2><div class="bp-list"><div class="bp-row">
+      <div class="bp-meta"><b>sm</b><code>480px</code></div>
+      <div class="bp-bar bp-break" style="width:31.3%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>md</b><code>640px</code></div>
+      <div class="bp-bar bp-break" style="width:41.7%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>lg</b><code>768px</code></div>
+      <div class="bp-bar bp-break" style="width:50.0%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>--breakpoint-lg</b><code>1024px</code></div>
+      <div class="bp-bar bp-break" style="width:66.7%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>2xl</b><code>1280px</code></div>
+      <div class="bp-bar bp-break" style="width:83.3%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>--breakpoint-2xl</b><code>1536px</code></div>
+      <div class="bp-bar bp-break" style="width:100.0%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>container</b><code>max-width 1280px</code></div>
+      <div class="bp-bar bp-cap" style="width:83.3%"></div>
+    </div></div></section>
 <section><h2>Elevation</h2><div class="shadow-row"><figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px"></div><figcaption><b>sm</b></figcaption></figure></div></section>
 <section><h2>Components</h2><div class="cmp-grid"><div class="cmp">
     <span class="cmp-label">button-primary</span>
@@ -157,6 +192,11 @@ figcaption code{color:var(--muted);font-size:11px}
 <div class="cmp">
       <span class="cmp-label">badge</span>
       <span style="align-self:flex-start;background:#000000;color:#ffffff;border-radius:9999px;padding:8px 12px;font:500 14px/1 Circular, custom-font, 'Helvetica Neue', Helvetica, Arial, sans-serif">Badge</span>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">feedback messages</span>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="color:#e54d2e;font:500 14px/1.5 Circular, custom-font, 'Helvetica Neue', Helvetica, Arial, sans-serif"><b>error</b> · Something went wrong — please try again.</div>
+<div style="color:#dc7b18;font:500 14px/1.5 Circular, custom-font, 'Helvetica Neue', Helvetica, Arial, sans-serif"><b>warning</b> · Heads up — this action can't be undone.</div></div>
     </div></div></section></div>
 
 </main>

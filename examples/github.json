@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://github.com",
   "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub",
-  "fetchedAt": "2026-06-11T09:24:42.808Z",
+  "fetchedAt": "2026-06-13T18:39:04.186Z",
   "theme": "light",
   "colors": {
     "background": "#0d1117",
@@ -12,6 +12,10 @@
     "mutedSurface": null,
     "primaryHover": "#077124",
     "primaryActive": null,
+    "status": {
+      "error": "#fa383d",
+      "success": "#238636"
+    },
     "palette": [
       {
         "hex": "#000000",
@@ -70,7 +74,7 @@
         "count": 1
       },
       {
-        "hex": "#0377ff",
+        "hex": "#005dd5",
         "count": 1
       },
       {
@@ -155,6 +159,13 @@
       "--brand-River-variant-gridline-spacing-outerBlock": 64,
       "--brand-RiverBreakout-variant-gridline-spacing-outerBlockEnd": 80
     },
+    "breakpoints": {
+      "--brand-breakpoint-xsmall": 320,
+      "--brand-breakpoint-small": 544,
+      "--breakpoint-medium": 768,
+      "--breakpoint-large": 1012,
+      "--breakpoint-xlarge": 1280
+    },
     "fontFamilies": {
       "--fontStack-system": "\"Mona Sans VF\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
       "--brand-body-fontFamily": "\"Mona Sans\", \"MonaSansFallback\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
@@ -170,5 +181,16 @@
       "fontSizePx": 16,
       "heightPx": 41
     }
+  },
+  "layout": {
+    "containerMaxWidthPx": 1280,
+    "breakpointsPx": [
+      544,
+      768,
+      1012,
+      1024,
+      1280,
+      1400
+    ]
   }
 }

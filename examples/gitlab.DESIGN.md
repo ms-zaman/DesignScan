@@ -79,6 +79,13 @@ shadows:
   md: "rgba(0, 0, 0, 0.08) 0px -4px 20px 0px"
   lg: "rgba(0, 0, 0, 0.12) 0px 0px 24px 0px"
   xl: "rgba(0, 0, 0, 0.01) 0px 52px 21px 0px, rgba(0, 0, 0, 0.03) 0px 29px 17px 0px, rgba(0, 0, 0, 0.04) 0px 13px 13px 0px, rgba(0, 0, 0, 0.05) 0px 3px 7px 0px"
+breakpoints:
+  sm: 547px
+  md: 577px
+  lg: 769px
+  xl: 1026px
+  2xl: 1200px
+  3xl: 1400px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -117,7 +124,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://gitlab.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://gitlab.com by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -144,6 +151,10 @@ Auto-extracted from https://gitlab.com by DesignScan on 2026-06-11. These tokens
 Primary typeface: **GitLab Sans**, with Inter. Sizes range 14px–96px across 8 level(s); weights observed: 400, 580, 600, 660, 700.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1170px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 547px, 577px, 769px, 1026px, 1200px, 1400px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 48px — usable for padding, gaps, and margins.
 
@@ -185,3 +196,4 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#74717a) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Layout:** center page content in a container capped at `1170px`; write `@media (min-width: …)` rules at the observed boundaries (547px, 577px, 769px, 1026px, 1200px, 1400px), not at a framework's defaults.

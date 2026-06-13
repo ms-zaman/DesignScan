@@ -55,7 +55,7 @@ figcaption code{color:var(--muted);font-size:11px}
 <header>
   <div>
     <h1>Retool | Build internal software better, with AI.</h1>
-    <div class="sub">DesignScan preview · <a href="https://retool.com">https://retool.com</a> · 2026-06-11</div>
+    <div class="sub">DesignScan preview · <a href="https://retool.com">https://retool.com</a> · 2026-06-13</div>
   </div>
   
 </header>
@@ -67,6 +67,14 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#111111"></div>
         <figcaption><b>on-primary</b><code>#111111</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#e9ebdf"></div>
+        <figcaption><b>secondary</b><code>#e9ebdf</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#151515"></div>
+        <figcaption><b>on-secondary</b><code>#151515</code></figcaption>
       </figure>
 <figure class="swatch">
         <div class="chip" style="background:#4b81bf"></div>
@@ -99,6 +107,18 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#242424"></div>
         <figcaption><b>muted-surface</b><code>#242424</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#f15264"></div>
+        <figcaption><b>error</b><code>#f15264</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#52bb9d"></div>
+        <figcaption><b>success</b><code>#52bb9d</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#e0a24e"></div>
+        <figcaption><b>warning</b><code>#e0a24e</code></figcaption>
       </figure></div></section>
 <section><h2>Typography</h2><div class="type-list"><div class="type-row">
         <div class="type-meta"><b>display</b><span>72px · 380 · lh 1.2</span></div>
@@ -148,12 +168,43 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="scale-item"><div class="radius-box" style="border-radius:8px"></div><figcaption><b>md</b><code>8px</code></figcaption></figure>
 <figure class="scale-item"><div class="radius-box" style="border-radius:20px"></div><figcaption><b>lg</b><code>20px</code></figcaption></figure>
 <figure class="scale-item"><div class="radius-box" style="border-radius:36px"></div><figcaption><b>xl</b><code>36px</code></figcaption></figure></div></section>
-
+<section><h2>Layout</h2><div class="bp-list"><div class="bp-row">
+      <div class="bp-meta"><b>sm</b><code>640px</code></div>
+      <div class="bp-bar bp-break" style="width:44.4%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>md</b><code>768px</code></div>
+      <div class="bp-bar bp-break" style="width:53.3%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>lg</b><code>1024px</code></div>
+      <div class="bp-bar bp-break" style="width:71.1%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>xl</b><code>1200px</code></div>
+      <div class="bp-bar bp-break" style="width:83.3%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>2xl</b><code>1280px</code></div>
+      <div class="bp-bar bp-break" style="width:88.9%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>3xl</b><code>1440px</code></div>
+      <div class="bp-bar bp-break" style="width:100.0%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>container</b><code>max-width 1280px</code></div>
+      <div class="bp-bar bp-cap" style="width:88.9%"></div>
+    </div></div></section>
 <section><h2>Elevation</h2><div class="shadow-row"><figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0.12) 0px 1px 2px 0px, rgb(0, 0, 0) 0px 0px 0px 0.5px"></div><figcaption><b>sm</b></figcaption></figure>
 <figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(0, 0, 0, 0.35) 0px 68px 116px 0px"></div><figcaption><b>md</b></figcaption></figure></div></section>
 <section><h2>Components</h2><div class="cmp-grid"><div class="cmp">
     <span class="cmp-label">button-primary · :hover #4b81bf</span>
     <button onmouseover="this.style.background='#4b81bf'" onmouseout="this.style.background='#518dd2'" style="align-self:flex-start;background:#518dd2;color:#111111;border:0;border-radius:8px;padding:12px calc(12px * 2);font:600 16px/1 ui-sans-serif, system-ui, sans-serif;height:36px;box-sizing:border-box;cursor:pointer">Primary action</button>
+  </div>
+<div class="cmp">
+    <span class="cmp-label">button-secondary</span>
+    <button style="align-self:flex-start;background:#e9ebdf;color:#151515;border:0;border-radius:8px;padding:12px calc(12px * 2);font:600 16px/1 ui-sans-serif, system-ui, sans-serif;height:36px;box-sizing:border-box;cursor:pointer">Secondary action</button>
   </div>
 <div class="cmp">
       <span class="cmp-label">surface · input · body-text · border</span>
@@ -179,6 +230,12 @@ figcaption code{color:var(--muted);font-size:11px}
 <div class="cmp">
       <span class="cmp-label">badge</span>
       <span style="align-self:flex-start;background:#f7f8f4;color:#111111;border-radius:9999px;padding:8px 12px;font:500 14px/1 ui-sans-serif, system-ui, sans-serif">Badge</span>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">feedback messages</span>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="color:#f15264;font:500 14px/1.5 ui-sans-serif, system-ui, sans-serif"><b>error</b> · Something went wrong — please try again.</div>
+<div style="color:#52bb9d;font:500 14px/1.5 ui-sans-serif, system-ui, sans-serif"><b>success</b> · Saved. Your changes are live.</div>
+<div style="color:#e0a24e;font:500 14px/1.5 ui-sans-serif, system-ui, sans-serif"><b>warning</b> · Heads up — this action can't be undone.</div></div>
     </div></div></section></div>
 
 </main>

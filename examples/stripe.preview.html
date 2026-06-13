@@ -55,7 +55,7 @@ figcaption code{color:var(--muted);font-size:11px}
 <header>
   <div>
     <h1>Stripe | Financial Infrastructure to Grow Your Revenue</h1>
-    <div class="sub">DesignScan preview · <a href="https://stripe.com">https://stripe.com</a> · 2026-06-11</div>
+    <div class="sub">DesignScan preview · <a href="https://stripe.com">https://stripe.com</a> · 2026-06-13</div>
   </div>
   
 </header>
@@ -67,6 +67,14 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#ffffff"></div>
         <figcaption><b>on-primary</b><code>#ffffff</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#e2e4ff"></div>
+        <figcaption><b>secondary</b><code>#e2e4ff</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#533afd"></div>
+        <figcaption><b>on-secondary</b><code>#533afd</code></figcaption>
       </figure>
 <figure class="swatch">
         <div class="chip" style="background:#4032c8"></div>
@@ -99,6 +107,14 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="swatch">
         <div class="chip" style="background:#f8fafd"></div>
         <figcaption><b>muted-surface</b><code>#f8fafd</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#d8351e"></div>
+        <figcaption><b>error</b><code>#d8351e</code></figcaption>
+      </figure>
+<figure class="swatch">
+        <div class="chip" style="background:#00b261"></div>
+        <figcaption><b>success</b><code>#00b261</code></figcaption>
       </figure></div></section>
 <section><h2>Typography</h2><div class="type-list"><div class="type-row">
         <div class="type-meta"><b>display</b><span>48px · 300 · lh 1.1</span></div>
@@ -140,7 +156,34 @@ figcaption code{color:var(--muted);font-size:11px}
 <figure class="scale-item"><div class="radius-box" style="border-radius:6px"></div><figcaption><b>md</b><code>6px</code></figcaption></figure>
 <figure class="scale-item"><div class="radius-box" style="border-radius:8px"></div><figcaption><b>lg</b><code>8px</code></figcaption></figure>
 <figure class="scale-item"><div class="radius-box" style="border-radius:16px"></div><figcaption><b>xl</b><code>16px</code></figcaption></figure></div></section>
-
+<section><h2>Layout</h2><div class="bp-list"><div class="bp-row">
+      <div class="bp-meta"><b>sm</b><code>480px</code></div>
+      <div class="bp-bar bp-break" style="width:36.9%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>md</b><code>600px</code></div>
+      <div class="bp-bar bp-break" style="width:46.2%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>lg</b><code>640px</code></div>
+      <div class="bp-bar bp-break" style="width:49.2%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>xl</b><code>840px</code></div>
+      <div class="bp-bar bp-break" style="width:64.6%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>2xl</b><code>940px</code></div>
+      <div class="bp-bar bp-break" style="width:72.3%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>3xl</b><code>1300px</code></div>
+      <div class="bp-bar bp-break" style="width:100.0%"></div>
+    </div>
+<div class="bp-row">
+      <div class="bp-meta"><b>container</b><code>max-width 1266px</code></div>
+      <div class="bp-bar bp-cap" style="width:97.4%"></div>
+    </div></div></section>
 <section><h2>Elevation</h2><div class="shadow-row"><figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(23, 23, 23, 0.06) 0px 3px 6px 0px"></div><figcaption><b>sm</b></figcaption></figure>
 <figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(50, 50, 93, 0.12) 0px 16px 32px 0px"></div><figcaption><b>md</b></figcaption></figure>
 <figure class="shadow-item"><div class="shadow-box" style="box-shadow:rgba(23, 23, 23, 0.08) 0px 15px 35px 0px"></div><figcaption><b>lg</b></figcaption></figure>
@@ -148,6 +191,10 @@ figcaption code{color:var(--muted);font-size:11px}
 <section><h2>Components</h2><div class="cmp-grid"><div class="cmp">
     <span class="cmp-label">button-primary · :hover #4032c8</span>
     <button onmouseover="this.style.background='#4032c8'" onmouseout="this.style.background='#533afd'" style="align-self:flex-start;background:#533afd;color:#ffffff;border:0;border-radius:6px;padding:12px calc(12px * 2);font:600 16px/1 sohne-var, 'SF Pro Display', sans-serif;height:48px;box-sizing:border-box;cursor:pointer">Primary action</button>
+  </div>
+<div class="cmp">
+    <span class="cmp-label">button-secondary</span>
+    <button style="align-self:flex-start;background:#e2e4ff;color:#533afd;border:0;border-radius:6px;padding:12px calc(12px * 2);font:600 16px/1 sohne-var, 'SF Pro Display', sans-serif;height:48px;box-sizing:border-box;cursor:pointer">Secondary action</button>
   </div>
 <div class="cmp">
       <span class="cmp-label">surface · input · body-text · border</span>
@@ -173,6 +220,11 @@ figcaption code{color:var(--muted);font-size:11px}
 <div class="cmp">
       <span class="cmp-label">badge</span>
       <span style="align-self:flex-start;background:#061b31;color:#ffffff;border-radius:9999px;padding:8px 12px;font:500 14px/1 sohne-var, 'SF Pro Display', sans-serif">Badge</span>
+    </div>
+<div class="cmp">
+      <span class="cmp-label">feedback messages</span>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="color:#d8351e;font:500 14px/1.5 sohne-var, 'SF Pro Display', sans-serif"><b>error</b> · Something went wrong — please try again.</div>
+<div style="color:#00b261;font:500 14px/1.5 sohne-var, 'SF Pro Display', sans-serif"><b>success</b> · Saved. Your changes are live.</div></div>
     </div></div></section></div>
 
 </main>

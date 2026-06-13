@@ -5,6 +5,8 @@ description: "Auto-extracted from https://posthog.com by DesignScan."
 colors:
   primary: "#eb9d2a"
   on-primary: "#111111"
+  secondary: "#cd8407"
+  on-secondary: "#23251d"
   background: "#ffffff"
   text: "#374151"
   accent-1: "#4d4f46"
@@ -14,33 +16,33 @@ colors:
   muted-surface: "#eeefe9"
 typography:
   headline-sm:
-    fontFamily: "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif"
+    fontFamily: "\"Open Runde\", sans-serif"
     fontSize: 24px
-    fontWeight: "700"
+    fontWeight: "800"
     lineHeight: 1.33
     letterSpacing: "-0.025em"
   title:
-    fontFamily: "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif"
+    fontFamily: "\"Open Runde\", sans-serif"
     fontSize: 21px
-    fontWeight: "700"
+    fontWeight: "800"
     lineHeight: 1.33
     letterSpacing: "-0.025em"
   title-18:
-    fontFamily: "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif"
+    fontFamily: "\"Open Runde\", sans-serif"
     fontSize: 18px
-    fontWeight: "700"
+    fontWeight: "800"
     lineHeight: 1.33
     letterSpacing: "-0.025em"
   body:
-    fontFamily: "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif"
+    fontFamily: "\"Open Runde\", sans-serif"
     fontSize: 15px
     fontWeight: "400"
-    lineHeight: 1.71
+    lineHeight: 1.5
   label:
-    fontFamily: "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif"
+    fontFamily: "\"Open Runde\", sans-serif"
     fontSize: 13px
     fontWeight: "400"
-    lineHeight: 1.71
+    lineHeight: 1.5
 rounded:
   xs: 2px
   sm: 4px
@@ -58,10 +60,24 @@ spacing:
 shadows:
   sm: "rgba(255, 255, 255, 0.4) 0px 0px 6px 2px"
   md: "rgba(0, 0, 0, 0.25) 0px 25px 50px -12px"
+breakpoints:
+  sm: 425px
+  md: 640px
+  lg: 768px
+  xl: 900px
+  2xl: 1024px
+  3xl: 1280px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.md}"
+    height: 30px
+  button-secondary:
+    backgroundColor: "{colors.secondary}"
+    textColor: "{colors.on-secondary}"
     typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
@@ -98,7 +114,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://posthog.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://posthog.com by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -106,6 +122,8 @@ Auto-extracted from https://posthog.com by DesignScan on 2026-06-11. These token
 
 - **primary (#eb9d2a):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#111111):** the readable foreground used on primary surfaces.
+- **secondary (#cd8407):** the secondary action button's fill, beside the primary CTA.
+- **on-secondary (#23251d):** the readable foreground on the secondary button.
 
 **Surfaces & text**
 
@@ -122,9 +140,11 @@ Auto-extracted from https://posthog.com by DesignScan on 2026-06-11. These token
 
 ## Typography
 
-Primary typeface: **IBM Plex Sans Variable**, with ui-monospace, Source Code Pro. Sizes range 13px–24px across 5 level(s); weights observed: 400, 500, 600, 700, 800.
+Primary typeface: **Open Runde**, with IBM Plex Sans Variable, ui-monospace. Sizes range 13px–24px across 5 level(s); weights observed: 400, 500, 600, 700, 800.
 
 ## Layout
+
+The page reshapes at 6 observed breakpoint(s): 425px, 640px, 768px, 900px, 1024px, 1280px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 32px — usable for padding, gaps, and margins.
 
@@ -145,6 +165,7 @@ Corner radii observed: 2px, 4px, 6px, 8px. Use the smaller values for inputs and
 
 - **Primary button:** filled with the primary color (`{colors.primary}`) and `{colors.on-primary}` text, rounded to `{rounded.md}`, set in `{typography.body}`, 30px tall as observed.
 - **Primary button (pressed, micro-interaction):** moves `translateY(-1.5px)` — the press physically reshapes the button, not just its color.
+- **Secondary button:** the second filled style observed beside the primary — `{colors.secondary}` background with `{colors.on-secondary}` text, for secondary actions (cancel, back, alternate CTA).
 - **Surface / card & input:** `{colors.background}` with `{colors.text}` foreground.
 - **Link:** `{colors.accent-1}` text for inline links.
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
@@ -161,9 +182,11 @@ Corner radii observed: 2px, 4px, 6px, 8px. Use the smaller values for inputs and
 Computed from this extraction — act on these before treating the tokens as final:
 
 - **Headings:** the `text` token (#374151) sits at 10.3:1 on `background` — fine for body copy, but it reads muted at display sizes. For large headings use `accent-2` (#111827, 17.7:1) to keep visual hierarchy. Reserve `text` for paragraph and UI copy.
-- **Fonts:** the brand face `IBM Plex Sans Variable` likely isn't installed locally. Use the full stack `"IBM Plex Sans Variable", "IBM Plex Sans", -apple-system, system-ui, "avenir next", avenir, "segoe ui", "helvetica neue", helvetica, Ubuntu, roboto, noto, arial, sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
+- **Fonts:** the brand face `Open Runde` likely isn't installed locally. Use the full stack `"Open Runde", sans-serif` verbatim — it falls back to `sans-serif`, so expect slightly different metrics; keep the declared weights and letterSpacing to stay on-brand.
 - **Primary actions:** `primary` (#eb9d2a) with `on-primary` (#111111) text is 8.4:1 (passes AA). Reserve `primary` for the single most important action per view.
+- **Secondary actions:** a second filled button (`secondary`, #cd8407) was observed beside the primary. Use it for cancel/back/alternate actions and keep `primary` for the one main action.
 - **Primary button hover:** observed on the live site, the button also moves (`transform: translateY(-3px)`) on `:hover` (its background color does not change). Reproduce this for fidelity.
 - **Links:** use `accent-1` (#4d4f46) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Layout:** write `@media (min-width: …)` rules at the observed boundaries (425px, 640px, 768px, 900px, 1024px, 1280px), not at a framework's defaults.

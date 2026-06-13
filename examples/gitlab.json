@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://gitlab.com",
   "title": "Finally, AI for the entire software lifecycle.",
-  "fetchedAt": "2026-06-11T09:25:14.408Z",
+  "fetchedAt": "2026-06-13T18:39:39.667Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -15,11 +15,11 @@
     "palette": [
       {
         "hex": "#ffffff",
-        "count": 129
+        "count": 130
       },
       {
         "hex": "#171321",
-        "count": 95
+        "count": 94
       },
       {
         "hex": "#74717a",
@@ -36,6 +36,10 @@
       {
         "hex": "#d1d0d3",
         "count": 3
+      },
+      {
+        "hex": "#7758c2",
+        "count": 2
       },
       {
         "hex": "#f2f1f5",
@@ -120,5 +124,16 @@
     "rgba(0, 0, 0, 0.08) 0px -4px 20px 0px",
     "rgba(0, 0, 0, 0.12) 0px 0px 24px 0px",
     "rgba(0, 0, 0, 0.06) 0px 1px 3px 0px"
-  ]
+  ],
+  "layout": {
+    "containerMaxWidthPx": 1170,
+    "breakpointsPx": [
+      547,
+      577,
+      769,
+      1026,
+      1200,
+      1400
+    ]
+  }
 }

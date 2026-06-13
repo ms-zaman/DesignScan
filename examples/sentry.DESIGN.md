@@ -71,6 +71,13 @@ shadows:
   md: "rgba(0, 0, 0, 0.08) 0px 2px 8px 0px"
   lg: "rgba(0, 0, 0, 0.15) 0px 2px 10px 0px inset"
   xl: "rgb(21, 15, 35) 0px 0px 8px 6px"
+breakpoints:
+  sm: 576px
+  md: 641px
+  lg: 768px
+  xl: 992px
+  2xl: 1024px
+  3xl: 1152px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -105,7 +112,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://sentry.io by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://sentry.io by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -130,6 +137,10 @@ Auto-extracted from https://sentry.io by DesignScan on 2026-06-11. These tokens 
 Primary typeface: **Rubik**, with Monaco, IBM Plex Mono. Sizes range 12px–88px across 8 level(s); weights observed: 400, 500, 600, 700.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1152px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 576px, 641px, 768px, 992px, 1024px, 1152px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 20px, 24px, 32px — usable for padding, gaps, and margins.
 
@@ -169,3 +180,5 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#ffffff) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Layout:** center page content in a container capped at `1152px`; write `@media (min-width: …)` rules at the observed boundaries (576px, 641px, 768px, 992px, 1024px, 1152px), not at a framework's defaults.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — breakpoints (`--breakpoint-sm: 576px`, `--breakpoint-md: 768px`, `--breakpoint-lg: 992px`, `--breakpoint-xl: 1152px`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

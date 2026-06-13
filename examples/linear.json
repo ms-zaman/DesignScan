@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://linear.app",
   "title": "Linear – The system for product development",
-  "fetchedAt": "2026-06-11T09:25:27.307Z",
+  "fetchedAt": "2026-06-13T18:39:51.429Z",
   "theme": "light",
   "colors": {
     "background": "#08090a",
@@ -15,15 +15,15 @@
     "palette": [
       {
         "hex": "#62666d",
-        "count": 166
+        "count": 165
       },
       {
         "hex": "#8a8f98",
-        "count": 122
+        "count": 119
       },
       {
         "hex": "#d0d6e0",
-        "count": 96
+        "count": 98
       },
       {
         "hex": "#e2e4e7",
@@ -155,5 +155,16 @@
       "fontSizePx": 13.3333,
       "heightPx": 64
     }
+  },
+  "layout": {
+    "containerMaxWidthPx": 1436,
+    "breakpointsPx": [
+      641,
+      701,
+      769,
+      929,
+      1025,
+      1281
+    ]
   }
 }

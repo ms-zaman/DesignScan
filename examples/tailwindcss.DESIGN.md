@@ -50,12 +50,11 @@ typography:
     lineHeight: 1.5
 rounded:
   xs: 4px
-  sm: 6px
-  md: 8px
-  lg: 12px
-  xl: 16px
-  2xl: 24px
-  3xl: 32px
+  sm: 8px
+  md: 12px
+  lg: 16px
+  xl: 24px
+  2xl: 32px
   full: 9999px
 spacing:
   xs: 4px
@@ -70,6 +69,13 @@ shadows:
   md: "oklab(0.999994 0.0000455678 0.0000200868 / 0.05) 0px 0px 0px 1px inset"
   lg: "oklab(0.999994 0.0000455678 0.0000200868 / 0.1) 0px 0px 0px 1px inset"
   xl: "oklab(0.999994 0.0000455678 0.0000200868 / 0.2) 0px 0px 0px 1px inset, oklab(0.129999 -0.00404751 -0.027702 / 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px"
+breakpoints:
+  sm: 320px
+  md: 640px
+  lg: 768px
+  xl: 1024px
+  2xl: 1280px
+  3xl: 1536px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -112,7 +118,7 @@ components:
 
 ## Overview
 
-Auto-extracted from https://tailwindcss.com by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://tailwindcss.com by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -140,6 +146,10 @@ Primary typeface: **inter**, with plexMono. Sizes range 13px–40px across 7 lev
 
 ## Layout
 
+Content sits in a horizontally centered container capped at **1440px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 320px, 640px, 768px, 1024px, 1280px, 1536px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
+
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 40px — usable for padding, gaps, and margins.
 
 ## Elevation & Depth
@@ -155,7 +165,7 @@ _Apply these as `box-shadow` — the smaller levels on resting cards and inputs,
 
 ## Shapes
 
-Corner radii observed: 4px, 6px, 8px, 12px, 16px, 24px, 32px. Use the smaller values for inputs and chips, larger for cards and surfaces.
+Corner radii observed: 4px, 8px, 12px, 16px, 24px, 32px. Use the smaller values for inputs and chips, larger for cards and surfaces.
 
 ## Components
 
@@ -180,4 +190,5 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#4a5565) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
-- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-sm: 4px`, `--radius-md: 6px`, `--radius-lg: 8px`, `--radius-xl: 12px`); spacing (`--spacing: 4px`); fonts (`--font-mono`, `--font-sans`, `--font-inter`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.
+- **Layout:** center page content in a container capped at `1440px`; write `@media (min-width: …)` rules at the observed boundaries (320px, 640px, 768px, 1024px, 1280px, 1536px), not at a framework's defaults.
+- **Declared tokens:** the site publishes its design scale as CSS custom properties — radii (`--radius-sm: 4px`, `--radius-lg: 8px`, `--radius-xl: 12px`, `--radius-2xl: 16px`); spacing (`--spacing: 4px`); breakpoints (`--breakpoint-sm: 640px`, `--breakpoint-md: 768px`, `--breakpoint-lg: 1024px`, `--breakpoint-xl: 1280px`); fonts (`--font-mono`, `--font-sans`, `--font-inter`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

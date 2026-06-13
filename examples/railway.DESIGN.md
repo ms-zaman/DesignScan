@@ -12,6 +12,7 @@ colors:
   on-accent-2: "#ffffff"
   border: "#33323e"
   muted-surface: "#1b2132"
+  info: "#180d43"
 typography:
   display:
     fontFamily: "Inter, -apple-system, system-ui, \"Segoe UI\", sans-serif, Roboto, Oxygen-Sans, Ubuntu, Cantarell, \"Helvetica Neue\""
@@ -72,6 +73,13 @@ shadows:
   md: "rgba(255, 255, 255, 0.2) 0px 0px 0px 1.5px inset"
   lg: "rgb(204, 204, 204) 0px 0px 2px 2px"
   xl: "rgba(65, 78, 166, 0.1) 0px -12px 127px 0px, rgba(65, 78, 166, 0.07) 0px -4.38px 46.357px 0px, rgba(65, 78, 166, 0.06) 0px -2.127px 22.506px 0px, rgba(65, 78, 166, 0.04) 0px -1.042px 11.033px 0px, rgba(65, 78, 166, 0.03) 0px -0.412px 4.362px 0px"
+breakpoints:
+  sm: 500px
+  md: 640px
+  lg: 768px
+  xl: 1024px
+  2xl: 1100px
+  3xl: 1280px
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
@@ -106,11 +114,14 @@ components:
     textColor: "{colors.text}"
     rounded: "{rounded.lg}"
     padding: "{spacing.lg}"
+  info-message:
+    textColor: "{colors.info}"
+    typography: "{typography.body}"
 ---
 
 ## Overview
 
-Auto-extracted from https://railway.app by DesignScan on 2026-06-11. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
+Auto-extracted from https://railway.app by DesignScan on 2026-06-13. These tokens reflect the computed styles observed on the live page — a high-fidelity starting point. Refine the rationale below before shipping.
 
 ## Colors
 
@@ -132,11 +143,19 @@ Auto-extracted from https://railway.app by DesignScan on 2026-06-11. These token
 - **accent-2 (#33323e):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
 
+**Feedback**
+
+- **info (#180d43):** the feedback color for informational notices.
+
 ## Typography
 
 Primary typeface: **Inter**, with JetBrains Mono, Helvetica. Sizes range 12px–40px across 8 level(s); weights observed: 400, 500, 600, 700, 800.
 
 ## Layout
+
+Content sits in a horizontally centered container capped at **1696px** — cap top-level page sections at this width rather than letting text run the full viewport.
+
+The page reshapes at 6 observed breakpoint(s): 500px, 640px, 768px, 1024px, 1100px, 1280px (see the `breakpoints` tokens in the front matter). Write `@media (min-width: …)` rules at these exact boundaries instead of a framework's defaults.
 
 Spacing follows an observed scale of 4px, 8px, 12px, 16px, 24px, 32px, 40px — usable for padding, gaps, and margins.
 
@@ -163,6 +182,7 @@ Corner radii observed: 6px, 8px, 10px, 16px. Use the smaller values for inputs a
 - **Badge / tag:** `{colors.accent-2}` background with `{colors.on-accent-2}` text.
 - **Divider:** a 1px rule in `{colors.border}` — also the hairline for card edges and input borders.
 - **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.
+- **Feedback messages:** `{colors.info}` for validation, alerts, and status text/icons (the site's declared semantic colors).
 
 ## Do's and Don'ts
 
@@ -178,4 +198,6 @@ Computed from this extraction — act on these before treating the tokens as fin
 - **Links:** use `accent-1` (#ffffff) for inline links, distinct from the `primary` button color.
 - **Shape:** stay on the `rounded` scale — small values for inputs/buttons, larger for cards, `full` only for pills and avatars. Don't introduce radii outside it.
 - **Spacing:** compose padding, gaps, and margins from the `spacing` scale (a 4px-based rhythm) rather than arbitrary pixel values.
+- **Status colors:** the site declares `info` (#180d43). Use these for validation, alerts, and status icons/text at full strength; for alert *backgrounds* tint them (~8–12% alpha) rather than filling with the solid color, and pair solid fills with a contrast-checked foreground.
+- **Layout:** center page content in a container capped at `1696px`; write `@media (min-width: …)` rules at the observed boundaries (500px, 640px, 768px, 1024px, 1100px, 1280px), not at a framework's defaults.
 - **Declared tokens:** the site publishes its design scale as CSS custom properties — fonts (`--font-inter`, `--font-ibm-plex-serif`, `--font-jetbrains-mono`) — and the page really uses these exact values. Treat them as the canonical scale and reuse the site's own variable names when you create tokens.

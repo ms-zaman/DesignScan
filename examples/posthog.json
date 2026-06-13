@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://posthog.com",
   "title": "PostHog – We make dev tools for product engineers",
-  "fetchedAt": "2026-06-11T09:26:58.750Z",
+  "fetchedAt": "2026-06-13T18:40:18.107Z",
   "theme": "light",
   "colors": {
     "background": "#ffffff",
@@ -12,26 +12,28 @@
     "mutedSurface": "#eeefe9",
     "primaryHover": null,
     "primaryActive": null,
+    "secondary": "#cd8407",
+    "onSecondary": "#23251d",
     "palette": [
       {
-        "hex": "#374151",
-        "count": 49
+        "hex": "#4d4f46",
+        "count": 65
       },
       {
-        "hex": "#4d4f46",
-        "count": 47
+        "hex": "#374151",
+        "count": 38
       },
       {
         "hex": "#111827",
         "count": 36
       },
       {
-        "hex": "#e1d7c2",
+        "hex": "#65675e",
         "count": 17
       },
       {
-        "hex": "#65675e",
-        "count": 16
+        "hex": "#e1d7c2",
+        "count": 17
       },
       {
         "hex": "#eeefe9",
@@ -39,10 +41,6 @@
       },
       {
         "hex": "#f54e00",
-        "count": 11
-      },
-      {
-        "hex": "#ffffff",
         "count": 10
       },
       {
@@ -50,16 +48,20 @@
         "count": 8
       },
       {
-        "hex": "#eb9d2a",
-        "count": 7
+        "hex": "#000000",
+        "count": 8
       },
       {
-        "hex": "#000000",
-        "count": 6
+        "hex": "#ffffff",
+        "count": 8
       },
       {
         "hex": "#e5e7e0",
-        "count": 5
+        "count": 7
+      },
+      {
+        "hex": "#eb9d2a",
+        "count": 7
       },
       {
         "hex": "#b6b7af",
@@ -70,22 +72,23 @@
         "count": 4
       },
       {
-        "hex": "#f7a501",
-        "count": 3
+        "hex": "#9ea096",
+        "count": 2
       },
       {
-        "hex": "#9ea096",
+        "hex": "#29dbbb",
         "count": 2
       }
     ]
   },
   "typography": {
     "families": [
+      "Open Runde",
       "IBM Plex Sans Variable",
       "ui-monospace",
       "Source Code Pro"
     ],
-    "fontStack": "\"IBM Plex Sans Variable\", \"IBM Plex Sans\", -apple-system, system-ui, \"avenir next\", avenir, \"segoe ui\", \"helvetica neue\", helvetica, Ubuntu, roboto, noto, arial, sans-serif",
+    "fontStack": "\"Open Runde\", sans-serif",
     "sizeScalePx": [
       13,
       15,
@@ -101,8 +104,8 @@
       800
     ],
     "lineHeightHeading": 1.33,
-    "lineHeightBody": 1.71,
-    "weightHeading": 700,
+    "lineHeightBody": 1.5,
+    "weightHeading": 800,
     "weightBody": 400,
     "letterSpacingHeadingEm": -0.025,
     "letterSpacingBodyEm": 0
@@ -138,5 +141,15 @@
       "fontSizePx": 15,
       "heightPx": 30
     }
+  },
+  "layout": {
+    "breakpointsPx": [
+      425,
+      640,
+      768,
+      900,
+      1024,
+      1280
+    ]
   }
 }

@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.5",
+  "schemaVersion": "1.8",
   "url": "https://vercel.com",
   "title": "Vercel: Build and deploy the best web experiences with the AI Cloud",
-  "fetchedAt": "2026-06-11T09:29:40.728Z",
+  "fetchedAt": "2026-06-13T18:43:47.405Z",
   "theme": "light",
   "colors": {
     "background": "#fafafa",
@@ -12,6 +12,10 @@
     "mutedSurface": null,
     "primaryHover": "#383838",
     "primaryActive": null,
+    "status": {
+      "error": "#ee0000",
+      "warning": "#f5a623"
+    },
     "palette": [
       {
         "hex": "#171717",
@@ -123,5 +127,16 @@
       "fontSizePx": 14,
       "heightPx": 32
     }
+  },
+  "layout": {
+    "containerMaxWidthPx": 1080,
+    "breakpointsPx": [
+      401,
+      601,
+      641,
+      769,
+      961,
+      1200
+    ]
   }
 }
