@@ -399,6 +399,24 @@ export function chroma(c: RGBA): number {
   return (Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b)) / 255;
 }
 
+// Hue angle in degrees [0,360): 0/360 red, 120 green, 240 blue. True greys
+// have no hue, so they return 0 (callers gate on chroma/saturation first).
+export function hue({ r, g, b }: RGBA): number {
+  const rr = r / 255;
+  const gg = g / 255;
+  const bb = b / 255;
+  const max = Math.max(rr, gg, bb);
+  const min = Math.min(rr, gg, bb);
+  const d = max - min;
+  if (d === 0) return 0;
+  let h: number;
+  if (max === rr) h = ((gg - bb) / d) % 6;
+  else if (max === gg) h = (bb - rr) / d + 2;
+  else h = (rr - gg) / d + 4;
+  h *= 60;
+  return h < 0 ? h + 360 : h;
+}
+
 export function isNeutral(c: RGBA): boolean {
   // HSL saturation blows up near white/black (its denominator -> 0), so an
   // almost-white cream like #faf9f5 reports a high "saturation" despite being

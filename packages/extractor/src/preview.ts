@@ -69,6 +69,10 @@ function colorsSection(roles: ColorRoles): string {
     ["on-accent-2", roles.onAccent2],
     ["border", roles.border],
     ["muted-surface", roles.mutedSurface],
+    ["error", roles.error],
+    ["success", roles.success],
+    ["warning", roles.warning],
+    ["info", roles.info],
   ];
   const cells = swatches
     .filter(([, hex]) => hex)
@@ -318,6 +322,34 @@ function componentsSection(
     parts.push(`<div class="cmp">
       <span class="cmp-label">badge</span>
       <span style="align-self:flex-start;background:${esc(roles.accent2)};color:${esc(roles.onAccent2)};border-radius:9999px;padding:${pSm} ${pMd};font:500 ${bodySize}/1 ${bodyFont}">Badge</span>
+    </div>`);
+  }
+
+  // feedback messages — the declared status colors as message text, the way a
+  // single saturated status color is actually used (validation/alert copy).
+  const statusMsgs: [string, string | null][] = [
+    ["error", roles.error],
+    ["success", roles.success],
+    ["warning", roles.warning],
+    ["info", roles.info],
+  ];
+  const SAMPLE_MSG: Record<string, string> = {
+    error: "Something went wrong — please try again.",
+    success: "Saved. Your changes are live.",
+    warning: "Heads up — this action can't be undone.",
+    info: "New: design tokens now include breakpoints.",
+  };
+  const present = statusMsgs.filter(([, hex]) => hex);
+  if (present.length) {
+    const rows = present
+      .map(
+        ([role, hex]) =>
+          `<div style="color:${esc(hex as string)};font:500 ${bodySize}/1.5 ${bodyFont}"><b>${role}</b> · ${esc(SAMPLE_MSG[role])}</div>`,
+      )
+      .join("\n");
+    parts.push(`<div class="cmp">
+      <span class="cmp-label">feedback messages</span>
+      <div style="display:flex;flex-direction:column;gap:6px">${rows}</div>
     </div>`);
   }
 

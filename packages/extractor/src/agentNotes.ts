@@ -153,6 +153,24 @@ export function agentNotes(
     );
   }
 
+  // 6b. Status colors — the site's declared feedback palette. Mined from its
+  // custom properties (and hue-verified), so the agent uses the brand's real
+  // error/success/etc. instead of generic Bootstrap red/green.
+  const status = profile.colors.status;
+  if (status) {
+    const named = (["error", "success", "warning", "info"] as const)
+      .filter((r) => status[r])
+      .map((r) => `\`${r}\` (${status[r]})`);
+    if (named.length) {
+      notes.push(
+        `- **Status colors:** the site declares ${named.join(", ")}. Use these ` +
+          `for validation, alerts, and status icons/text at full strength; for ` +
+          `alert *backgrounds* tint them (~8–12% alpha) rather than filling with ` +
+          `the solid color, and pair solid fills with a contrast-checked foreground.`,
+      );
+    }
+  }
+
   // 7. Layout — the page's real container cap and reshape grid, so the agent
   // builds responsive rules on the observed boundaries instead of whatever
   // its CSS framework defaults to.

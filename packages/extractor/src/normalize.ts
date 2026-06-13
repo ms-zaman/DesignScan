@@ -1,6 +1,7 @@
 import {
   chroma,
   gradientStops,
+  hue,
   isNeutral,
   luminance,
   parseColor,
@@ -1032,6 +1033,152 @@ function controlMetrics(
   return { ...(button ? { button } : {}), ...(input ? { input } : {}) };
 }
 
+// ---- semantic status colors --------------------------------------------------
+// The declaredPrimary lesson applied to feedback colors. Modern design systems
+// publish error/success/warning/info outright (--color-error,
+// --hds-color-core-success-500, supabase's --destructive-default), so we mine
+// the names instead of trying to reconstruct them statistically — which is
+// nearly impossible, since a marketing homepage rarely paints a validation
+// state at all. Three gates differ from declaredPrimary, each forced by what
+// status colors actually are:
+//   - numeric ramp steps are WELCOME (the colors SHIP as scales) — we pick the
+//     canonical ~500/default step, the opposite of the primary rule;
+//   - painted-corroboration is DROPPED (the homepage almost never shows an
+//     error), so the declaration is trusted on its own;
+//   - a per-role HUE gate replaces it as the safety net: an "error" that isn't
+//     red, a "success" that isn't green, is a mis-mined wash and is rejected.
+
+type StatusRole = "error" | "success" | "warning" | "info";
+
+// Hue bands (deg) each role's color must fall in. Disjoint by construction so
+// orange sits in warning, not error. Reds wrap 0, hence the two error ranges.
+const STATUS_ROLES: Record<
+  StatusRole,
+  { segs: string[]; bands: [number, number][] }
+> = {
+  error: {
+    segs: ["error", "danger", "destructive", "critical"],
+    bands: [
+      [0, 28],
+      [340, 360],
+    ],
+  },
+  warning: { segs: ["warning", "warn", "caution"], bands: [[28, 75]] },
+  success: { segs: ["success", "positive"], bands: [[75, 175]] },
+  info: { segs: ["info", "information", "informational"], bands: [[175, 265]] },
+};
+
+// Name segments that mark a *wash/state* variant rather than the role's solid
+// color: tints (muted/subtle/soft/light…), interaction states (hover/active…),
+// and the on-color foreground. "emphasis"/"default"/"solid"/"bg" are NOT here —
+// they name the full-strength token we want (GitHub's bgColor-success-emphasis).
+const STATUS_WASH = new Set([
+  "muted",
+  "subtle",
+  "soft",
+  "faint",
+  "light",
+  "lighter",
+  "lightest",
+  "pale",
+  "tint",
+  "wash",
+  "dim",
+  "ghost",
+  "disabled",
+  "hover",
+  "active",
+  "pressed",
+  "focus",
+  "visited",
+  "selected",
+  "secondary",
+  "inverse",
+  "contrast",
+  "on",
+  "alpha",
+  "transparent",
+  "translucent",
+  "gradient",
+  "scrim",
+  "overlay",
+  "backdrop",
+  "placeholder",
+  "shadow",
+  "ring",
+  "skeleton",
+  "hint",
+]);
+
+// Some systems store status colors as bare HSL channel triples
+// (supabase: `--destructive-default: 10.2deg 77.9% 53.9%`) meant for
+// `hsl(var(--x))`. parseColor can't read the fragment, so wrap it first.
+function coerceStatusColor(value: string): RGBA | null {
+  const c = parseColor(value);
+  if (c) return c;
+  const m = value.trim().match(/^([\d.]+)deg\s+([\d.]+%)\s+([\d.]+%)$/);
+  return m ? parseColor(`hsl(${m[1]} ${m[2]} ${m[3]})`) : null;
+}
+
+// How canonical a candidate name is (lower = stronger pick), in three tiers:
+//   0  explicit canonical marker — default/emphasis/base/solid. The most
+//      reliable "this is THE color".
+//   1  un-leveled semantic name — --color-error, --hds-color-icon-error.
+//   2+ a numeric ramp step, nearest 500 preferred. Ranked BELOW the other two
+//      because the "500" step is not universally the strong tone: supabase
+//      centers its ramp so --destructive-500 is a light salmon while
+//      --destructive-default is the real red. (Stripe's 500 *is* strong, so a
+//      numeric-only ramp still resolves correctly to its mid step.)
+function statusRank(segs: string[]): number {
+  if (segs.some((s) => ["default", "emphasis", "base", "solid"].includes(s)))
+    return 0;
+  const step = segs.map(Number).find((n) => Number.isFinite(n) && n >= 50);
+  if (step === undefined) return 1;
+  return 2 + Math.abs(step - 500) / 1000;
+}
+
+function pickStatusColors(
+  raw: RawObservations,
+): NonNullable<DesignProfile["colors"]["status"]> | undefined {
+  const props = raw.customProps;
+  if (!props) return undefined;
+
+  const inBand = (h: number, bands: [number, number][]) =>
+    bands.some(([lo, hi]) => h >= lo && h <= hi);
+
+  const out: Record<string, string> = {};
+  for (const [role, { segs: roleSegs, bands }] of Object.entries(
+    STATUS_ROLES,
+  ) as [StatusRole, (typeof STATUS_ROLES)[StatusRole]][]) {
+    let best: { name: string; hex: string; rank: number } | null = null;
+    for (const [name, value] of Object.entries(props)) {
+      const segs = nameSegments(name);
+      if (!segs.some((s) => roleSegs.includes(s))) continue;
+      if (segs.some((s) => STATUS_WASH.has(s))) continue;
+      const c = coerceStatusColor(value);
+      // Opaque-ish, genuinely colorful, and the right hue for the role — the
+      // sanity net that stands in for painted-corroboration.
+      if (!c || c.a < 0.85 || isNeutral(c) || saturation(c) < 0.3) continue;
+      if (!inBand(hue(c), bands)) continue;
+      const rank = statusRank(segs);
+      const hex = toHex(c);
+      // Lowest rank wins; ties to the shortest (canonical) name, then lexical.
+      if (
+        !best ||
+        rank < best.rank ||
+        (rank === best.rank &&
+          (name.length < best.name.length ||
+            (name.length === best.name.length && name < best.name)))
+      )
+        best = { name, hex, rank };
+    }
+    if (best) out[role] = best.hex;
+  }
+  return Object.keys(out).length
+    ? (out as DesignProfile["colors"]["status"])
+    : undefined;
+}
+
 // ---- layout -------------------------------------------------------------------
 
 // The reshape boundaries the page's @media rules gate on. extract already
@@ -1091,6 +1238,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
   const declared = mineDeclaredScales(raw);
   const controls = controlMetrics(raw, primary);
   const layout = buildLayout(raw);
+  const status = pickStatusColors(raw);
   return {
     schemaVersion: PROFILE_SCHEMA_VERSION,
     url,
@@ -1105,6 +1253,7 @@ export function normalize(url: string, raw: RawObservations): DesignProfile {
       mutedSurface: surfaces.mutedSurface,
       primaryHover: hover.color,
       primaryActive: active.color,
+      ...(status ? { status } : {}),
       palette: buildPalette(raw.colorCount).slice(0, 16),
     },
     typography: {

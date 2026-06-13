@@ -123,7 +123,7 @@ export interface InputSample {
 // Bump when the DesignProfile shape changes in a way downstream consumers
 // (generator, persisted JSON, public files) must notice. Semver-ish: major for
 // breaking, minor for additive. Keep in sync with the README.
-export const PROFILE_SCHEMA_VERSION = "1.6";
+export const PROFILE_SCHEMA_VERSION = "1.7";
 
 // Cleaned-up design profile — the structured token output.
 export interface DesignProfile {
@@ -150,6 +150,19 @@ export interface DesignProfile {
     primaryHover?: string | null;
     // Same for :active — observed by really pressing the button (schema 1.5).
     primaryActive?: string | null;
+    // Semantic feedback colors mined from the site's declared design system
+    // (--color-error, --hds-color-core-success-500, supabase's --destructive-*)
+    // and sanity-checked by hue. Unlike every other role these are trusted
+    // straight from the declaration even when the captured page never painted
+    // them — a homepage rarely shows an error/validation state, yet the token
+    // is still real design-system provenance. Each field is absent when the
+    // site declares no matching token. Optional (schema 1.7).
+    status?: {
+      error?: string;
+      success?: string;
+      warning?: string;
+      info?: string;
+    };
     palette: { hex: string; count: number }[];
   };
   typography: {

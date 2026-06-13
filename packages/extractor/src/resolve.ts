@@ -222,6 +222,12 @@ export interface ColorRoles {
   // raw border colors / background fills live): a hairline and a muted surface.
   border: string | null;
   mutedSurface: string | null;
+  // Semantic feedback colors mined from the site's declared design system
+  // (normalize.pickStatusColors). null when the site declares no such token.
+  error: string | null;
+  success: string | null;
+  warning: string | null;
+  info: string | null;
 }
 
 // Resolve a profile's palette into named roles. Primary falls back through the
@@ -279,6 +285,10 @@ export function resolveColorRoles(profile: DesignProfile): ColorRoles {
     onAccent2: accent2 ? onColor(accent2) : null,
     border: profile.colors.border ?? null,
     mutedSurface: profile.colors.mutedSurface ?? null,
+    error: profile.colors.status?.error ?? null,
+    success: profile.colors.status?.success ?? null,
+    warning: profile.colors.status?.warning ?? null,
+    info: profile.colors.status?.info ?? null,
   };
 }
 

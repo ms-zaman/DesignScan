@@ -546,3 +546,44 @@ describe("generate – layout & breakpoints", () => {
     expect(md).not.toContain("breakpoints:");
   });
 });
+
+describe("generate – status colors", () => {
+  const withStatus = (status: Record<string, string>) =>
+    profile({
+      colors: {
+        background: "#ffffff",
+        text: "#222222",
+        primary: "#1a73e8",
+        status,
+        palette: [{ hex: "#1a73e8", count: 9 }],
+      },
+    });
+
+  it("emits declared status colors as tokens + foreground message components", () => {
+    const md = generate(
+      withStatus({ error: "#d8351e", success: "#00b261", warning: "#f5a623" }),
+    );
+    const fm = frontMatter(md);
+    expect(fm).toMatch(/^\s{2}error: "#d8351e"$/m);
+    expect(fm).toMatch(/^\s{2}success: "#00b261"$/m);
+    expect(fm).toContain("error-message:");
+    expect(fm).toContain('textColor: "{colors.error}"');
+    expect(md).toContain("## Components");
+    expect(md).toContain("Feedback messages");
+  });
+
+  it("never leaves a status color as an orphan token (lint contract)", () => {
+    // Every color in the front matter must be referenced by some component,
+    // or @google/design.md warns. Each declared status color gets a *-message.
+    const md = generate(withStatus({ info: "#2563eb" }));
+    const fm = frontMatter(md);
+    expect(fm).toMatch(/^\s{2}info: "#2563eb"$/m);
+    expect(fm).toContain("info-message:");
+  });
+
+  it("omits the feedback block entirely when no status colors were declared", () => {
+    const md = generate(profile());
+    expect(md).not.toContain("-message:");
+    expect(md).not.toContain("Feedback messages");
+  });
+});

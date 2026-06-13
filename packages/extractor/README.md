@@ -17,7 +17,8 @@ URL
         then physically hovers the buttons to observe their :hover shift
          └─ normalize.ts clusters the raw CSS into a clean token profile:
             background / text / primary / primary-hover / border /
-            muted-surface colors, palette, font families, font-size scale,
+            muted-surface colors, the site's declared error/success/warning/
+            info status colors, palette, font families, font-size scale,
             spacing scale, radius scale, shadows, container max-width +
             the @media breakpoints the page really reshapes at
              └─ outputs a DesignProfile JSON

@@ -609,6 +609,100 @@ describe("normalize – declared primary (:root custom properties)", () => {
   });
 });
 
+describe("normalize – semantic status colors (declared)", () => {
+  const statusOf = (customProps: Record<string, string>) =>
+    normalize("u", raw({ customProps })).colors.status;
+
+  it("mines error/success/warning/info from semantically named vars", () => {
+    const s = statusOf({
+      "--color-error": "#d8351e",
+      "--color-success": "#00b261",
+      "--color-warning": "#f5a623",
+      "--color-info": "#2563eb",
+    });
+    expect(s).toEqual({
+      error: "#d8351e",
+      success: "#00b261",
+      warning: "#f5a623",
+      info: "#2563eb",
+    });
+  });
+
+  it("maps danger/positive/caution/informational aliases to roles", () => {
+    const s = statusOf({
+      "--danger": "#da3633",
+      "--positive": "#2ea043",
+      "--caution": "#e8a317",
+      "--informational": "#2563eb",
+    });
+    expect(s?.error).toBe("#da3633");
+    expect(s?.success).toBe("#2ea043");
+    expect(s?.warning).toBe("#e8a317");
+    expect(s?.info).toBe("#2563eb");
+  });
+
+  it("prefers a 'default'/'emphasis' marked token over an un-leveled alias", () => {
+    // destructive-default carries the canonical marker, so it outranks the
+    // plain --danger even though --danger is the shorter name.
+    const s = statusOf({
+      "--danger": "#da3633",
+      "--destructive-default": "#e5484d",
+    });
+    expect(s?.error).toBe("#e5484d");
+  });
+
+  it("prefers a 'default' marker over a numeric 500 on a light-centered ramp", () => {
+    // The supabase trap: --destructive-500 is a light salmon, --destructive-
+    // default is the strong red. A naive "500 is canonical" rule picks the
+    // tint; the marker tier must win.
+    const s = statusOf({
+      "--destructive-500": "#f3b0a2",
+      "--destructive-default": "#e54d2e",
+    });
+    expect(s?.error).toBe("#e54d2e");
+  });
+
+  it("picks the canonical ~500 ramp step over tints and inks", () => {
+    // Stripe HDS shape: numeric ramp, 500 is the strong mid-tone.
+    const s = statusOf({
+      "--hds-color-core-error-100": "#feb9ac",
+      "--hds-color-core-error-500": "#d8351e",
+      "--hds-color-core-error-600": "#a01400",
+    });
+    expect(s?.error).toBe("#d8351e");
+  });
+
+  it("rejects wash/state variants (muted, subtle, hover, disabled)", () => {
+    const s = statusOf({
+      "--color-success-muted": "#0d3024",
+      "--color-success-subtle": "#b6f2c7",
+      "--button-danger-bgColor-hover": "#ffffff33",
+    });
+    expect(s).toBeUndefined();
+  });
+
+  it("rejects a mislabeled var whose hue is wrong for the role", () => {
+    // A "success" that is actually red is a mis-mined token — the hue gate
+    // (the painted-corroboration stand-in) drops it.
+    const s = statusOf({ "--color-success": "#d8351e" });
+    expect(s).toBeUndefined();
+  });
+
+  it("coerces bare HSL channel fragments (supabase's --destructive-default)", () => {
+    const s = statusOf({
+      "--destructive-default": "10.2deg 77.9% 53.9%",
+      "--warning-default": "30.3deg 80.3% 47.8%",
+    });
+    expect(s?.error).toBe("#e54d2e"); // hsl(10.2 77.9% 53.9%)
+    expect(s?.warning).toBe("#dc7b18"); // hsl(30.3 80.3% 47.8%)
+  });
+
+  it("is absent when the site declares no status tokens", () => {
+    expect(statusOf({ "--color-primary": "#533afd" })).toBeUndefined();
+    expect(normalize("u", raw()).colors.status).toBeUndefined();
+  });
+});
+
 describe("normalize – surfaces (border & muted-surface)", () => {
   it("splits subtle near-background fills into a hairline border + muted fill", () => {
     const p = normalize(

@@ -304,3 +304,40 @@ describe("layout (container + breakpoints) in both emitters", () => {
     expect(doc.container).toBeUndefined();
   });
 });
+
+describe("status colors in both emitters", () => {
+  const profile = {
+    schemaVersion: "1.7",
+    url: "https://example.com",
+    title: "Example",
+    fetchedAt: "2026-06-13T00:00:00.000Z",
+    theme: "light" as const,
+    colors: {
+      background: "#ffffff",
+      text: "#222222",
+      primary: "#1a73e8",
+      status: { error: "#d8351e", success: "#00b261", info: "#2563eb" },
+      palette: [{ hex: "#1a73e8", count: 9 }],
+    },
+    typography: { families: ["Inter"], sizeScalePx: [16], weights: [400] },
+    spacingScalePx: [8],
+    radiusScalePx: [4],
+    shadows: [],
+  };
+
+  it("css emits --color-error/-success/-info", () => {
+    const css = cssVars(profile);
+    expect(css).toContain("--color-error: #d8351e;");
+    expect(css).toContain("--color-success: #00b261;");
+    expect(css).toContain("--color-info: #2563eb;");
+    expect(css).not.toContain("--color-warning"); // not declared
+  });
+
+  it("w3c puts them in the color group as resolved roles", () => {
+    const doc = JSON.parse(w3cTokens(profile));
+    expect(doc.color.error.$value).toBe("#d8351e");
+    expect(doc.color.success.$value).toBe("#00b261");
+    expect(doc.color.info.$value).toBe("#2563eb");
+    expect(doc.color.warning).toBeUndefined();
+  });
+});

@@ -64,6 +64,10 @@ function colorEntries(roles: ColorRoles): [string, string][] {
     ["on-accent-2", roles.onAccent2],
     ["border", roles.border],
     ["muted-surface", roles.mutedSurface],
+    ["error", roles.error],
+    ["success", roles.success],
+    ["warning", roles.warning],
+    ["info", roles.info],
   ];
   return entries.filter((e): e is [string, string] => e[1] !== null);
 }

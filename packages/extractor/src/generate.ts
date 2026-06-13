@@ -69,6 +69,10 @@ function buildColorsAndComponents(
     onAccent2,
     border,
     mutedSurface,
+    error,
+    success,
+    warning,
+    info,
   } = resolveColorRoles(profile);
 
   const pick = (entries: [string, string][], preferred: string, idx: number) =>
@@ -197,6 +201,24 @@ function buildColorsAndComponents(
     if (spacingLg) lines.push(`    padding: "{spacing.${spacingLg}}"`);
   }
 
+  // Status / feedback colors — declared by the site, sanity-checked by hue.
+  // Emitted as foreground-only message components (the most common honest use
+  // of a single saturated status color: validation text, icons, borders); a
+  // light fill would need a tint we don't extract. textColor + typography
+  // references the token once, so it's never an orphan.
+  for (const [role, hex] of [
+    ["error", error],
+    ["success", success],
+    ["warning", warning],
+    ["info", info],
+  ] as const) {
+    if (!hex) continue;
+    lines.push(`  ${cn(`${role}-message`)}:`);
+    lines.push(`    textColor: "${ref(role)}"`);
+    use(role);
+    if (bodyLevel) lines.push(`    typography: "{typography.${bodyLevel}}"`);
+  }
+
   const candidates: [string, string | null][] = [
     ["primary", primary],
     ["on-primary", onPrimary],
@@ -209,6 +231,10 @@ function buildColorsAndComponents(
     ["on-accent-2", onAccent2],
     ["border", border],
     ["muted-surface", mutedSurface],
+    ["error", error],
+    ["success", success],
+    ["warning", warning],
+    ["info", info],
   ];
   const colors = candidates
     .filter(([name, hex]) => hex && used.has(name))
@@ -230,6 +256,11 @@ const COLOR_LABEL: Record<string, string> = {
   "on-accent-2": "the readable foreground on the secondary accent",
   border: "the hairline color for dividers, card edges, and input borders",
   "muted-surface": "a subtle secondary surface fill for panels and sections",
+  error:
+    "the feedback color for errors, destructive actions, and invalid input",
+  success: "the feedback color for success and confirmation states",
+  warning: "the feedback color for warnings and caution states",
+  info: "the feedback color for informational notices",
 };
 
 // `dark`, when supplied, is a second profile captured under
@@ -521,6 +552,15 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   if (cmap["muted-surface"]) {
     body.push(
       "- **Muted surface:** `{colors.muted-surface}` for subtle secondary panels and sections.",
+    );
+  }
+  const statusBullets = (["error", "success", "warning", "info"] as const)
+    .filter((r) => cmap[r])
+    .map((r) => `\`{colors.${r}}\``);
+  if (statusBullets.length) {
+    body.push(
+      `- **Feedback messages:** ${statusBullets.join(", ")} for validation, ` +
+        "alerts, and status text/icons (the site's declared semantic colors).",
     );
   }
   if (darkBlock) {
