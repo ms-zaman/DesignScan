@@ -82,10 +82,13 @@ function card(entry: GalleryEntry): string {
   const bg = c.background ?? "#f3efe7";
   const ink = c.text ?? onColor(bg);
   const primary = c.primary ?? ink;
+  // Both chips are filled — secondary is a button *fill*, not a text color, so
+  // a light tint (e.g. Stripe's #e2e4ff) must sit behind contrast-picked text,
+  // not be used as faint outline text that vanishes on a light specimen.
   const chips = [
     `<span class="chip" style="background:${esc(primary)};color:${onColor(primary)}">Primary</span>`,
     c.secondary
-      ? `<span class="chip ghost" style="color:${esc(c.secondary)}">Secondary</span>`
+      ? `<span class="chip" style="background:${esc(c.secondary)};color:${onColor(c.secondary)}">Secondary</span>`
       : "",
   ].join("");
   const hexes = [hexChip(c.primary), hexChip(c.background), hexChip(c.text)]
@@ -214,7 +217,6 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .spec .spec-btns{display:flex;gap:8px;margin-top:18px}
 .spec .chip{font:600 12px/1 'Inter',system-ui,sans-serif;padding:8px 13px;border-radius:8px;white-space:nowrap}
-.spec .chip.ghost{background:transparent;border:1px solid currentColor}
 .meta{padding:15px 18px 6px;display:flex;flex-direction:column;gap:7px}
 .meta .m-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .meta strong{font-size:15.5px;letter-spacing:-.01em}
