@@ -122,15 +122,23 @@ Auto-extracted from https://netlify.com by DesignScan on 2026-06-11. These token
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#2e51ed):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#ffffff):** the base surface color behind most content.
 - **text (#353a3e):** the primary foreground / body-text color.
+- **border (#e9ebed):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#f6f6f7):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#181a1c):** a supporting accent (used for links).
 - **accent-2 (#89ddff):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
-- **border (#e9ebed):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#f6f6f7):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

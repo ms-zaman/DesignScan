@@ -121,15 +121,23 @@ Auto-extracted from https://gitlab.com by DesignScan on 2026-06-11. These tokens
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#7759c2):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#ffffff):** the base surface color behind most content.
 - **text (#171321):** the primary foreground / body-text color.
+- **border (#e8e7eb):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#ebeaec):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#74717a):** a supporting accent (used for links).
 - **accent-2 (#1f1c2e):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
-- **border (#e8e7eb):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#ebeaec):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

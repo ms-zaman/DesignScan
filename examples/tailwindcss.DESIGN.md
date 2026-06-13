@@ -116,15 +116,23 @@ Auto-extracted from https://tailwindcss.com by DesignScan on 2026-06-11. These t
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#f6339a):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#111111):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#ffffff):** the base surface color behind most content.
 - **text (#030712):** the primary foreground / body-text color.
+- **border (#ddd6ff):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#fefce8):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#4a5565):** a supporting accent (used for links).
 - **accent-2 (#90a1b9):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
-- **border (#ddd6ff):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#fefce8):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

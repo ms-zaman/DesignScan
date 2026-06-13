@@ -119,15 +119,23 @@ Auto-extracted from https://linear.app by DesignScan on 2026-06-11. These tokens
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#5e6ad2):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#08090a):** the base surface color behind most content.
 - **text (#d0d6e0):** the primary foreground / body-text color.
+- **border (#23252a):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#0f1011):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#62666d):** a supporting accent (used for links).
 - **accent-2 (#8a8f98):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
-- **border (#23252a):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#0f1011):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

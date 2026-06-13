@@ -114,15 +114,23 @@ Auto-extracted from https://railway.app by DesignScan on 2026-06-11. These token
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#180d43):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#13111c):** the base surface color behind most content.
 - **text (#f7f7f8):** the primary foreground / body-text color.
+- **border (#33323e):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#1b2132):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#ffffff):** a supporting accent (used for links).
 - **accent-2 (#33323e):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
-- **border (#33323e):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#1b2132):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

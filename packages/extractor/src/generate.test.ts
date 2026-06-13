@@ -587,3 +587,49 @@ describe("generate – status colors", () => {
     expect(md).not.toContain("Feedback messages");
   });
 });
+
+describe("generate – Colors prose grouping", () => {
+  function colorsSection(md: string): string {
+    const m = md.match(/## Colors\n([\s\S]*?)\n## /);
+    return m ? m[1] : "";
+  }
+
+  it("groups the color bullets under role headings, in order", () => {
+    const md = generate(
+      profile({
+        colors: {
+          background: "#ffffff",
+          text: "#222222",
+          primary: "#1a73e8",
+          status: { error: "#d8351e" },
+          palette: [
+            { hex: "#1a73e8", count: 9 },
+            { hex: "#ff5722", count: 4 },
+          ],
+        },
+      }),
+    );
+    const sec = colorsSection(md);
+    expect(sec).toContain("**Brand & actions**");
+    expect(sec).toContain("**Surfaces & text**");
+    expect(sec).toContain("**Feedback**");
+    // headings precede their bullets and keep the canonical order
+    expect(sec.indexOf("**Brand & actions**")).toBeLessThan(
+      sec.indexOf("**Surfaces & text**"),
+    );
+    expect(sec.indexOf("**Surfaces & text**")).toBeLessThan(
+      sec.indexOf("**Feedback**"),
+    );
+    // the error bullet sits in the Feedback group (after its heading)
+    expect(sec.indexOf("**Feedback**")).toBeLessThan(sec.indexOf("- **error"));
+    // every color still carries its bullet
+    expect(sec).toContain("- **primary (#1a73e8):**");
+    expect(sec).toContain("- **error (#d8351e):**");
+  });
+
+  it("omits a group entirely when none of its colors are present", () => {
+    // No status colors → no Feedback heading.
+    const md = generate(profile());
+    expect(colorsSection(md)).not.toContain("**Feedback**");
+  });
+});

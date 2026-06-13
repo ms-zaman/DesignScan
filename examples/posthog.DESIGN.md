@@ -102,15 +102,23 @@ Auto-extracted from https://posthog.com by DesignScan on 2026-06-11. These token
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#eb9d2a):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#111111):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#ffffff):** the base surface color behind most content.
 - **text (#374151):** the primary foreground / body-text color.
+- **border (#bfc1b7):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#eeefe9):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#4d4f46):** a supporting accent (used for links).
 - **accent-2 (#111827):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
-- **border (#bfc1b7):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#eeefe9):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

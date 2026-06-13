@@ -104,14 +104,22 @@ Auto-extracted from https://supabase.com by DesignScan on 2026-06-11. These toke
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#72e3ad):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#111111):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#fcfcfc):** the base surface color behind most content.
 - **text (#707070):** the primary foreground / body-text color.
+- **border (#dfdfdf):** the hairline color for dividers, card edges, and input borders.
+
+**Accents**
+
 - **accent-1 (#171717):** a supporting accent (used for links).
 - **accent-2 (#000000):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#ffffff):** the readable foreground on the secondary accent.
-- **border (#dfdfdf):** the hairline color for dividers, card edges, and input borders.
 
 ## Typography
 

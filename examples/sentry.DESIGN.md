@@ -109,10 +109,18 @@ Auto-extracted from https://sentry.io by DesignScan on 2026-06-11. These tokens 
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#79628c):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
+
+**Surfaces & text**
+
 - **background (#1f1633):** the base surface color behind most content.
 - **text (#d4d4d4):** the primary foreground / body-text color.
+
+**Accents**
+
 - **accent-1 (#ffffff):** a supporting accent (used for links).
 - **accent-2 (#569cd6):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.

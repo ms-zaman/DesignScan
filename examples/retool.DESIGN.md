@@ -134,16 +134,24 @@ Auto-extracted from https://retool.com by DesignScan on 2026-06-11. These tokens
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#518dd2):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#111111):** the readable foreground used on primary surfaces.
 - **primary-hover (#4b81bf):** the primary button background as observed on hover.
+
+**Surfaces & text**
+
 - **background (#151515):** the base surface color behind most content.
 - **text (#e9ebdf):** the primary foreground / body-text color.
+- **border (#433e38):** the hairline color for dividers, card edges, and input borders.
+- **muted-surface (#242424):** a subtle secondary surface fill for panels and sections.
+
+**Accents**
+
 - **accent-1 (#cbccc4):** a supporting accent (used for links).
 - **accent-2 (#f7f8f4):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.
-- **border (#433e38):** the hairline color for dividers, card edges, and input borders.
-- **muted-surface (#242424):** a subtle secondary surface fill for panels and sections.
 
 ## Typography
 

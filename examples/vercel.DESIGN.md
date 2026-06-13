@@ -99,11 +99,19 @@ Auto-extracted from https://vercel.com by DesignScan on 2026-06-11. These tokens
 
 ## Colors
 
+**Brand & actions**
+
 - **primary (#171717):** the dominant brand/accent color, used for primary actions.
 - **on-primary (#ffffff):** the readable foreground used on primary surfaces.
 - **primary-hover (#383838):** the primary button background as observed on hover.
+
+**Surfaces & text**
+
 - **background (#fafafa):** the base surface color behind most content.
 - **text (#4d4d4d):** the primary foreground / body-text color.
+
+**Accents**
+
 - **accent-1 (#666666):** a supporting accent (used for links).
 - **accent-2 (#8f8f8f):** a secondary accent (used for badges/tags).
 - **on-accent-2 (#111111):** the readable foreground on the secondary accent.

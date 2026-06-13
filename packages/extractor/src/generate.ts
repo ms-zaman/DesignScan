@@ -263,6 +263,19 @@ const COLOR_LABEL: Record<string, string> = {
   info: "the feedback color for informational notices",
 };
 
+// Ordered role buckets for the Colors prose, so it reads as a system rather
+// than a flat list. Names map to the unsuffixed color tokens; the dark theme
+// keeps its own separate block below.
+const COLOR_GROUPS: [string, string[]][] = [
+  [
+    "Brand & actions",
+    ["primary", "on-primary", "primary-hover", "primary-active"],
+  ],
+  ["Surfaces & text", ["background", "text", "border", "muted-surface"]],
+  ["Accents", ["accent-1", "accent-2", "on-accent-2"]],
+  ["Feedback", ["error", "success", "warning", "info"]],
+];
+
 // `dark`, when supplied, is a second profile captured under
 // `prefers-color-scheme: dark`. Both themes are merged into ONE spec-valid file:
 // shared typography/spacing/rounded scales, light colors + `*-dark` colors, and
@@ -379,10 +392,40 @@ export function generate(profile: DesignProfile, dark?: DesignProfile): string {
   body.push("");
   body.push("## Colors");
   body.push("");
-  for (const [name, hex] of colors) {
-    const label = COLOR_LABEL[name] ?? "a supporting palette color";
-    body.push(`- **${name} (${hex}):** ${label}.`);
+  // Group the bullets by role so the section reads as a system, not a flat
+  // dump — especially now that brand-state and feedback colors swell the list.
+  // Bold lead-in lines (not ## headings) keep everything inside the one Colors
+  // section the spec's section-order requires. Any future token not mapped to
+  // a group falls into "Other" so nothing is silently dropped.
+  const byName = new Map(colors);
+  const grouped = new Set<string>();
+  for (const [groupLabel, names] of COLOR_GROUPS) {
+    const present = names.filter((n) => byName.has(n));
+    if (!present.length) continue;
+    body.push(`**${groupLabel}**`);
+    body.push("");
+    for (const name of present) {
+      grouped.add(name);
+      body.push(
+        `- **${name} (${byName.get(name)}):** ${COLOR_LABEL[name] ?? "a supporting palette color"}.`,
+      );
+    }
+    body.push("");
   }
+  const ungrouped = colors.filter(([name]) => !grouped.has(name));
+  if (ungrouped.length) {
+    body.push("**Other**");
+    body.push("");
+    for (const [name, hex] of ungrouped) {
+      body.push(
+        `- **${name} (${hex}):** ${COLOR_LABEL[name] ?? "a supporting palette color"}.`,
+      );
+    }
+    body.push("");
+  }
+  // Trim the trailing blank the loop leaves so spacing matches the rest of the
+  // body (the dark block / next section re-adds its own).
+  if (body[body.length - 1] === "") body.pop();
   if (darkBlock) {
     const gateLabel: Record<string, string> = {
       "class-dark": '`<html class="dark">`',
