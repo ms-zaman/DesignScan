@@ -1,2 +1,10 @@
 packages:
   - "packages/*"
+
+# Link the in-repo engine into the short-name shim even though it declares a
+# plain semver range (>=0.4.0 <1) rather than workspace:* — we publish with
+# `npm publish`, which would NOT rewrite a workspace: protocol, so the shim
+# must carry a real range for consumers. This lets the monorepo resolve that
+# range to the local build, so the lockfile stays valid before the matching
+# engine version is on npm; the published package.json keeps the semver range.
+linkWorkspacePackages: true
