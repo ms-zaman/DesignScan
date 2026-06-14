@@ -306,9 +306,26 @@ export function cssVars(profile: DesignProfile, dark?: DesignProfile): string {
     );
   }
   const breakpoints = breakpointEntries(profile);
-  const takenBp = declaredNames(breakpoints, false);
-  for (const e of breakpoints) {
-    lines.push(`  ${cssScaleName(e, "breakpoint", takenBp)}: ${e.value};`);
+  if (breakpoints.length) {
+    const takenBp = declaredNames(breakpoints, false);
+    const named = breakpoints.map((e) => ({
+      name: cssScaleName(e, "breakpoint", takenBp),
+      value: e.value,
+    }));
+    // The vars are exposed for JS (getComputedStyle) and as documentation, but
+    // an @media prelude can't read var() — so hand the consumer the actually
+    // usable min-width rules as a comment they can paste verbatim. (No nested
+    // `*/` inside the block — CSS comments don't nest.)
+    lines.push(
+      "  /* Breakpoints — @media can't read var(); copy these min-width rules:",
+      ...named.map(
+        (n) => `       @media (min-width: ${n.value}) { }   ${n.name}`,
+      ),
+      "  */",
+    );
+    for (const n of named) {
+      lines.push(`  ${n.name}: ${n.value};`);
+    }
   }
 
   // Cleaned box-shadow values, usable directly: box-shadow: var(--shadow-sm).

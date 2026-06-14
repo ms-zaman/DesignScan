@@ -284,6 +284,10 @@ describe("layout (container + breakpoints) in both emitters", () => {
     expect(css).toContain("--screen-md: 900px;"); // site's own name, verbatim
     expect(css).toContain("--breakpoint-lg: 1200px;");
     expect(css).not.toContain("--breakpoint-md:"); // replaced by the declared name
+    // @media can't read var() — the sheet must hand over paste-ready min-width
+    // rules so the breakpoint tokens are usable where breakpoints are needed.
+    expect(css).toContain("@media (min-width: 600px) { }   --breakpoint-sm");
+    expect(css).toContain("@media (min-width: 900px) { }   --screen-md");
   });
 
   it("w3c: a breakpoint dimension group + a container max-width token", () => {
